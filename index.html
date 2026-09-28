@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harmonizer</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="description" content="Harmonizer: sketch a vocal line, add chords, and generate SATB parts, right in your browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+  .land { max-width: 900px; margin: 0 auto; padding: 56px 20px 72px; }
+  .land h1 { font-family: var(--font-display); font-size: 2.8rem; color: #fff; margin: 0 0 8px; }
+  .land .lede { color: var(--text-dim); font-size: 1.15rem; line-height: 1.6; max-width: 62ch; margin: 0 0 28px; }
+  .land p, .land li { color: var(--text-dim); line-height: 1.65; }
+  .land ul { margin: 0 0 24px 22px; max-width: 70ch; }
+  .land li { margin-bottom: 6px; }
+  .land b { color: var(--text); font-weight: 600; }
+  .land a { color: var(--cyan); }
+  .btns { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 36px; }
+  .btn { display: inline-block; padding: 12px 20px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg-raised);
+         color: var(--text) !important; text-decoration: none; font-weight: 600; }
+  .btn.primary { background: var(--violet, #b28dff); border-color: var(--violet, #b28dff); color: #120b22 !important; }
+  .btn:hover { border-color: var(--cyan); }
+  .shot { margin: 0 0 36px; }
+  .shot img { width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--line); display: block; }
+  .land h2 { font-family: var(--font-display); font-size: 1.4rem; color: #fff; margin: 32px 0 12px; }
+  .foot { color: var(--text-faint); font-size: .85rem; margin-top: 40px; }
+</style>
+</head>
+<body>
+<main class="land">
+  <h1>Harmonizer</h1>
+  <p class="lede">A workbench for roughing out vocal arrangements. Sketch a melody, place chords above it, and let Harmonizer generate SATB parts underneath. Then play it back on a real piano sound and edit any note until it sounds right.</p>
+  <div class="btns">
+    <a class="btn primary" href="app/harmonizer.html">Launch Harmonizer &rarr;</a>
+    <a class="btn" href="quickstart.html">Quickstart</a>
+    <a class="btn" href="guide.html">User guide</a>
+    <a class="btn" href="https://github.com/dffmonolith/harmonizer">Source on GitHub</a>
+  </div>
+  <figure class="shot"><img src="docs/screenshots/harmonizer-1-coolin.png" alt="Barber's The Coolin open in Harmonizer on four staves"></figure>
+
+  <h2>What it does</h2>
+  <ul>
+    <li><b>Note entry</b>: click or drag on the staff, or type a compact text notation. Lyrics support up to six verses.</li>
+    <li><b>Generate parts</b>: fills in the other voices with real part-writing rules, in Close harmony, Traditional/hymn or Open/wide style. (<a href="docs/harmonizer-partwriting-guide.pdf">How it reasons</a>)</li>
+    <li><b>Choral notation</b>: fermatas, breaths, tempo changes, dynamics, rehearsal letters, repeats and endings. All of them affect playback.</li>
+    <li><b>Import</b>: MusicXML (including .mxl from MuseScore, Finale or Sibelius) and MIDI.</li>
+    <li><b>Export</b>: .json, .musicxml, .mid, .wav, print/PDF, and rehearsal tracks with one WAV per voice.</li>
+    <li><b>Practice</b>: loop, practice speed, and jumping to a rehearsal letter in the play window.</li>
+  </ul>
+  <p>Everything runs in your browser. There's nothing to install, and your songs are saved in this browser as you work.</p>
+
+  <p class="foot">MIT License &copy; dffmonolith &middot; Piano: Salamander Grand Piano by Alexander Holm, CC BY 3.0 &middot; Bravura glyphs, SIL OFL 1.1</p>
+</main>
+</body>
+</html>

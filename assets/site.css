@@ -1,0 +1,406 @@
+@charset "utf-8";
+/* ==========================================================================
+   DFF // LOCAL LAB — site-wide design system
+   Dark base, near-cyan (code/interactive) + violet (photography/decorative)
+   accents, with a rare amber wink borrowed from Blink's own palette.
+   ========================================================================== */
+
+/* ---- Tokens ------------------------------------------------------------ */
+:root {
+  /* Surfaces */
+  --bg:          #0b0d10;
+  --bg-raised:   #14171b;
+  --bg-inset:    #191d22;
+  --line:        #262b31;
+  --line-soft:   #1b1f24;
+
+  /* Text */
+  --text:        #e7e9ec;
+  --text-dim:    #9aa3ac;
+  --text-faint:  #666e77;
+
+  /* Accents */
+  --cyan:        #4dadff;   /* code / links / interactive */
+  --cyan-bright: #80c5ff;
+  --violet:      #b28dff;   /* photography / decorative / active state */
+  --violet-dim:  #8a63d1;
+  --amber:       #e8a317;   /* rare — favorites / highlights, echoes Blink */
+
+  /* Type scale */
+  --font-display: 'Space Grotesk', 'Arial Black', sans-serif;
+  --font-body:    'Inter', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --font-mono:    'IBM Plex Mono', 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Spacing scale */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px; --sp-9: 96px;
+
+  --radius: 6px;
+  --measure: 68ch;
+}
+
+/* ---- Reset --------------------------------------------------------------*/
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { color-scheme: dark; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+img { display: block; max-width: 100%; }
+a { color: var(--cyan); text-decoration: none; }
+a:hover { color: var(--cyan-bright); text-decoration: underline; }
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--violet); outline-offset: 2px; border-radius: 3px;
+}
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.01em; color: #fff; }
+code, .mono { font-family: var(--font-mono); }
+
+.wrap { max-width: 1100px; margin: 0 auto; padding: 0 var(--sp-5); }
+.eyebrow {
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--violet); display: block; margin-bottom: var(--sp-2);
+}
+
+/* ---- Site header / nav ---------------------------------------------------
+   Every page includes the slim nav bar. The home page additionally renders
+   a tall hero block (filmstrip + headline) above it — set by giving <body>
+   the class "is-home". The nav bar markup itself never changes shape.
+--------------------------------------------------------------------------- */
+.site-nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(11, 13, 16, 0.86);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.site-nav__row {
+  max-width: 1100px; margin: 0 auto; padding: var(--sp-3) var(--sp-5);
+  display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4);
+}
+.site-nav__brand-group { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.site-nav__brand {
+  font-family: var(--font-display); font-weight: 700; font-size: 18px;
+  color: #fff; letter-spacing: -0.01em; white-space: nowrap;
+}
+.site-nav__brand span { color: var(--violet); }
+/* Home-page tagline, folded up from the old hero__intro copy block — the
+   nav partial markup is identical on every page, this just stays hidden
+   unless <body> carries "is-home". */
+.site-nav__tagline {
+  display: none; margin: 0; color: var(--text-dim); font-size: 13px;
+  line-height: 1.4; max-width: 56ch;
+}
+body.is-home .site-nav__tagline { display: block; }
+.site-nav__links { display: flex; align-items: center; gap: var(--sp-2); font-size: 14px; }
+/* Lozenge (pill) nav links — replaces the old underline treatment. Same
+   rgba(violet) tint used for the resting/hover/active states of both the
+   plain links and the Projects dropdown trigger just below, so the whole
+   row reads as one consistent set of pills. */
+.site-nav__links a {
+  display: inline-block; color: var(--text-dim); border: 1px solid transparent;
+  border-radius: 999px; padding: 6px 14px; transition: background-color .15s, border-color .15s, color .15s;
+}
+.site-nav__links a:hover, .site-nav__links a:focus-visible {
+  color: var(--text); text-decoration: none;
+  background: rgba(178, 141, 255, 0.12); border-color: rgba(178, 141, 255, 0.4);
+}
+.site-nav__links a.is-active {
+  color: var(--text); text-decoration: none;
+  background: rgba(178, 141, 255, 0.18); border-color: var(--violet);
+}
+
+/* Projects dropdown — same in-place-menu language as Blink's own UI */
+.nav-dropdown { position: relative; }
+.nav-dropdown__btn {
+  background: none; color: var(--text-dim); font: inherit; cursor: pointer;
+  border: 1px solid transparent; border-radius: 999px; padding: 6px 14px;
+  transition: background-color .15s, border-color .15s, color .15s;
+}
+.nav-dropdown:hover .nav-dropdown__btn,
+.nav-dropdown__btn:focus-visible {
+  color: var(--text);
+  background: rgba(178, 141, 255, 0.12); border-color: rgba(178, 141, 255, 0.4);
+}
+.nav-dropdown__menu {
+  display: none; position: absolute; top: calc(100% + 12px); left: 50%;
+  transform: translateX(-50%); min-width: 240px; background: var(--bg-raised);
+  border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5); padding: var(--sp-2); z-index: 60;
+}
+/* Invisible bridge over the 12px gap above — without this, moving the
+   pointer from the button down into the menu crosses a dead zone where
+   nothing is hovered, and :hover turns off before you can reach a link
+   (Blink's own dropdown avoids this by having no gap at all; this keeps
+   our visual spacing but closes the same hole). */
+.nav-dropdown__menu::before {
+  content: ""; position: absolute; top: -12px; left: 0; right: 0; height: 12px;
+}
+.nav-dropdown:hover .nav-dropdown__menu,
+.nav-dropdown:focus-within .nav-dropdown__menu { display: block; }
+.nav-dropdown__menu a {
+  display: flex; justify-content: space-between; gap: var(--sp-3);
+  color: var(--text); padding: var(--sp-2) var(--sp-3); border-radius: 4px; font-size: 13px;
+}
+.nav-dropdown__menu a:hover { background: var(--bg-inset); text-decoration: none; color: var(--cyan-bright); }
+.nav-dropdown__menu .tag { color: var(--text-faint); font-family: var(--font-mono); font-size: 11px; }
+
+/* ---- Hero / filmstrip (home page only) ----------------------------------*/
+.hero { border-bottom: 1px solid var(--line); background: var(--bg-inset); }
+.hero__intro { max-width: 1100px; margin: 0 auto; padding: var(--sp-8) var(--sp-5) var(--sp-6); }
+.hero__intro h1 {
+  font-size: clamp(2.1rem, 4.5vw, 3.2rem); line-height: 1.05; max-width: 18ch;
+}
+.hero__intro h1 em { font-style: normal; color: var(--cyan); }
+.hero__intro p { color: var(--text-dim); font-size: 1.05rem; max-width: 52ch; margin-top: var(--sp-4); }
+
+.filmstrip { position: relative; overflow: hidden; background: #050607; padding: var(--sp-4) 0; }
+.filmstrip::before, .filmstrip::after {
+  content: ""; position: absolute; top: 0; bottom: 0; width: 80px; z-index: 3; pointer-events: none;
+}
+.filmstrip::before { left: 0; background: linear-gradient(90deg, #050607, transparent); }
+.filmstrip::after  { right: 0; background: linear-gradient(270deg, #050607, transparent); }
+.filmstrip__sprockets {
+  height: 8px;
+  background-image: repeating-linear-gradient(90deg, var(--line) 0 10px, transparent 10px 26px);
+  opacity: .6;
+}
+.filmstrip__track {
+  display: flex; gap: var(--sp-2); width: max-content;
+  animation: filmstrip-scroll 70s linear infinite;
+  padding: var(--sp-3) 0;
+}
+/* Pause-on-hover is a mouse-only nicety. Touchscreens (iPad included) have
+   no real hover — WebKit simulates a "sticky" hover on tap that only clears
+   on a later tap elsewhere, so without this guard, the very first touch
+   near the filmstrip on a phone/tablet paused the animation for good. */
+@media (hover: hover) and (pointer: fine) {
+  .filmstrip:hover .filmstrip__track { animation-play-state: paused; }
+}
+@keyframes filmstrip-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) {
+  .filmstrip__track { animation: none; }
+}
+.frame {
+  flex: 0 0 auto; width: 220px; border: 1px solid var(--line);
+  background: var(--bg-raised); border-radius: 2px; overflow: hidden;
+}
+.frame__img { width: 220px; height: 150px; object-fit: cover; display: block; }
+.frame__placeholder {
+  width: 220px; height: 150px; display: flex; align-items: flex-end; padding: var(--sp-2);
+  font-family: var(--font-mono); font-size: 10px; color: rgba(255,255,255,.75);
+  text-transform: uppercase; letter-spacing: .06em;
+}
+.frame__label {
+  font-family: var(--font-mono); font-size: 10px; color: var(--text-faint);
+  padding: 4px 8px; display: flex; justify-content: space-between; letter-spacing: .04em;
+  gap: var(--sp-2);
+}
+.frame__label span:last-child {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px;
+}
+
+/* Per-tag placeholder duotones — swapped for real photography over time */
+.ph-flower     { background: linear-gradient(135deg, #5c1f4e, #b28dff); }
+.ph-landscape  { background: linear-gradient(135deg, #0d2b3e, #4dadff); }
+.ph-abstract   { background: linear-gradient(135deg, #3a1256, #e8a317); }
+.ph-waterfall  { background: linear-gradient(135deg, #063542, #7fd6d1); }
+.ph-bird       { background: linear-gradient(135deg, #4a2600, #e8a317); }
+
+/* ---- Project grid (home + "Other") --------------------------------------*/
+.section { padding: var(--sp-8) 0; }
+.section__head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--sp-6); gap: var(--sp-4); flex-wrap: wrap; }
+.section__head h2 { font-size: 1.5rem; }
+.section__head p { color: var(--text-dim); font-size: .95rem; }
+
+.project-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--sp-5); }
+.project-card {
+  display: flex; flex-direction: column; background: var(--bg-raised);
+  border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
+  transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease;
+}
+/* No lift/bounce — just the violet outline plus a dark-purple wash and a
+   modest resting shadow (sized for a static card, not a floating one). */
+.project-card:hover { border-color: var(--violet-dim); background-color: #201a33; box-shadow: 0 4px 16px rgba(0,0,0,0.35); }
+.project-card__media { aspect-ratio: 16/10; overflow: hidden; }
+/* Scoped to the actual photo elements only (img or the placeholder tile) —
+   NOT a bare ">*" wildcard, because .status-chip ("In progress") is also a
+   direct child of this box for is-wip cards, and inheriting width/height:
+   100% turned its border-radius:999px into a giant oval across the photo. */
+.project-card__media img, .project-card__media .frame__placeholder { width: 100%; height: 100%; }
+.project-card__media img { object-fit: cover; display: block; }
+.project-card__media .frame__placeholder { align-items: flex-end; }
+.project-card__body { padding: var(--sp-4) var(--sp-4) var(--sp-5); flex: 1; display: flex; flex-direction: column; }
+.project-card__tag { font-family: var(--font-mono); font-size: 11px; color: var(--cyan); letter-spacing: .06em; text-transform: uppercase; margin-bottom: var(--sp-2); }
+.project-card__title { font-size: 1.15rem; color: #fff; margin-bottom: var(--sp-2); }
+.project-card__desc { color: var(--text-dim); font-size: .92rem; flex: 1; }
+.project-card__link {
+  display: block; padding: var(--sp-4); text-align: center; font-family: var(--font-mono);
+  font-size: 12px; letter-spacing: .05em; text-transform: uppercase; color: var(--text);
+  border-top: 1px solid var(--line); background: var(--bg-inset);
+}
+.project-card:hover .project-card__link { color: var(--cyan-bright); }
+.project-card.is-wip .project-card__media { position: relative; }
+
+/* Curated app-screenshot slideshow (home cards) — five projects (Blink,
+   Setlist, Cards, iTunes, Palette Tweaker) show real screenshots of the app
+   instead of decorative ambient photography; see assets/js/project-screenshots.js
+   and nav.js's projectCard(). A pure-CSS crossfade: every stacked <img>
+   shares one keyframe animation (chosen by screenshot count below), offset
+   by animation-delay (set inline per image) so exactly one is fully visible
+   at a time — each image gets a 6s slot (3s held + 1.5s crossfade in/out).
+   object-fit:contain rather than the cover-crop the rest of the site's
+   photography uses — these are real UI, and cropping risks hiding the
+   chrome/buttons that are the whole point of showing a screenshot. */
+.project-card__media.is-slideshow { position: relative; background: var(--bg-inset); }
+.project-card__media.is-slideshow img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
+  opacity: 0; animation-timing-function: ease-in-out; animation-iteration-count: infinite;
+}
+@keyframes card-slide-2 { 0%, 100% { opacity: 0; } 12.5% { opacity: 1; } 37.5% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes card-slide-3 { 0%, 100% { opacity: 0; } 8.33% { opacity: 1; } 25% { opacity: 1; } 33.33% { opacity: 0; } }
+@keyframes card-slide-4 { 0%, 100% { opacity: 0; } 6.25% { opacity: 1; } 18.75% { opacity: 1; } 25% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .project-card__media.is-slideshow img { animation: none; opacity: 0; }
+  .project-card__media.is-slideshow img:first-child { opacity: 1; }
+}
+
+.status-chip {
+  position: absolute; top: var(--sp-2); right: var(--sp-2); font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: .05em; text-transform: uppercase; padding: 3px 8px;
+  border-radius: 999px; background: rgba(11,13,16,.75); border: 1px solid var(--line); color: var(--amber);
+}
+
+/* ---- Project detail pages -------------------------------------------------*/
+.proj-hero { border-bottom: 1px solid var(--line); }
+.proj-hero__media { aspect-ratio: 21/8; overflow: hidden; }
+.proj-hero__media > * { width: 100%; height: 100%; }
+.proj-hero__media img { object-fit: cover; display: block; }
+
+/* Project-page hero when showing a real screenshot (see project-screenshots.js
+   and the per-project inline script below each page's nav.js include) rather
+   than decorative ambient photography. The 21/8 banner is far wider than any
+   screenshot (most app UI is closer to 4/3–16/9, and Setlist's are portrait),
+   so a plain cover-crop would slice off real interface — instead, a blurred
+   scaled-up copy of the SAME image fills the banner as a backdrop, with a
+   sharp, fully-visible (contain) copy of the screenshot on top. */
+.proj-hero__media.is-screenshot { position: relative; background: var(--bg-inset); }
+.proj-hero__media.is-screenshot .proj-hero__backdrop {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  filter: blur(28px) brightness(.5) saturate(1.15); transform: scale(1.15);
+}
+.proj-hero__media.is-screenshot .proj-hero__shot {
+  position: relative; width: 100%; height: 100%; object-fit: contain;
+  box-shadow: 0 20px 60px rgba(0,0,0,.55);
+}
+.proj-hero__body { max-width: 1100px; margin: 0 auto; padding: var(--sp-6) var(--sp-5) var(--sp-7); }
+.proj-hero__body h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
+.proj-meta {
+  display: flex; flex-wrap: wrap; gap: var(--sp-5); margin: var(--sp-4) 0 var(--sp-5);
+  font-family: var(--font-mono); font-size: 12px; color: var(--text-faint);
+  text-transform: uppercase; letter-spacing: .05em;
+}
+.proj-meta strong { color: var(--text-dim); font-weight: 600; }
+.proj-launch {
+  display: inline-block; background: var(--cyan); color: #05141f; font-weight: 700;
+  padding: var(--sp-3) var(--sp-6); border-radius: var(--radius); font-size: .95rem;
+}
+.proj-launch:hover { background: var(--cyan-bright); text-decoration: none; }
+
+.prose { max-width: var(--measure); margin: 0 auto; padding: var(--sp-7) var(--sp-5); }
+.prose p { margin-bottom: var(--sp-4); color: var(--text-dim); }
+.prose h2 { font-size: 1.4rem; margin: var(--sp-6) 0 var(--sp-3); color: #fff; }
+.prose a { color: var(--cyan); }
+.prose h3 {
+  font-family: var(--font-mono); font-size: .8rem; font-weight: 500; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--violet); margin: var(--sp-5) 0 var(--sp-2);
+}
+.prose dl { margin: 0 0 var(--sp-4); border-left: 1px solid var(--line); padding-left: var(--sp-4); }
+.prose dt { color: var(--text); font-weight: 600; margin-top: var(--sp-2); }
+.prose dd { margin: 0 0 var(--sp-2); color: var(--text-dim); }
+
+.photo-grid {
+  max-width: 1100px; margin: 0 auto var(--sp-8); padding: 0 var(--sp-5);
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--sp-3);
+}
+.photo-grid figure { border-radius: 2px; overflow: hidden; border: 1px solid var(--line); }
+.photo-grid figure > * { width: 100%; height: 100%; aspect-ratio: 1; }
+.photo-grid figure img { object-fit: cover; display: block; }
+.photo-grid .span-2 { grid-column: span 2; }
+.photo-grid .span-3 { grid-column: span 3; }
+.photo-grid .span-4 { grid-column: span 4; }
+@media (max-width: 720px) { .photo-grid { grid-template-columns: repeat(2, 1fr); } .photo-grid .span-3, .photo-grid .span-4 { grid-column: span 2; } }
+
+/* ---- Lightbox (site-wide photo viewer) ------------------------------------
+   Same interaction language as Blink's own modal: arrow keys, Esc, click
+   outside to close. Any photo tile with .lightboxable gets a hover affordance.
+--------------------------------------------------------------------------- */
+.lightboxable { cursor: zoom-in; }
+.lightboxable:hover { outline: 2px solid var(--violet-dim); outline-offset: -2px; }
+
+.lightbox-overlay {
+  display: none; position: fixed; inset: 0; z-index: 2000;
+  background: rgba(5, 6, 7, 0.92); align-items: center; justify-content: center;
+  padding: var(--sp-5);
+}
+.lightbox-overlay.visible { display: flex; }
+.lightbox-box {
+  position: relative; width: 100%; max-width: 1100px; max-height: 88vh;
+  display: flex; flex-direction: column; align-items: center;
+}
+.lightbox-image-wrap { max-width: 100%; max-height: 76vh; display: flex; align-items: center; justify-content: center; }
+.lightbox-image-wrap img { max-width: 100%; max-height: 76vh; width: auto; height: auto; border: 1px solid var(--line); box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+.lightbox-placeholder {
+  width: min(80vw, 640px); height: min(60vh, 420px); display: flex; align-items: flex-end;
+  padding: var(--sp-4); font-family: var(--font-mono); font-size: 13px; color: rgba(255,255,255,.85);
+  text-transform: uppercase; letter-spacing: .05em; border: 1px solid var(--line);
+}
+.lightbox-caption { color: var(--text-dim); font-family: var(--font-mono); font-size: 12px; margin-top: var(--sp-4); text-transform: uppercase; letter-spacing: .04em; }
+.lightbox-close {
+  position: absolute; top: -44px; right: 0; background: none; border: 1px solid var(--line);
+  color: var(--text); font-size: 20px; line-height: 1; width: 36px; height: 36px; border-radius: 50%;
+  cursor: pointer;
+}
+.lightbox-close:hover { border-color: var(--violet); color: var(--violet); }
+.lightbox-nav {
+  position: absolute; top: 50%; transform: translateY(-50%); background: rgba(20,23,27,.8);
+  border: 1px solid var(--line); color: var(--text); width: 44px; height: 44px; border-radius: 50%;
+  cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;
+}
+.lightbox-nav:hover { border-color: var(--cyan); color: var(--cyan-bright); }
+.lightbox-prev { left: -8px; }
+.lightbox-next { right: -8px; }
+@media (max-width: 720px) {
+  .lightbox-prev { left: 4px; } .lightbox-next { right: 4px; }
+  .lightbox-close { top: 4px; right: 4px; background: rgba(5,6,7,.7); }
+}
+
+/* ---- Footer ---------------------------------------------------------------*/
+.site-footer { border-top: 1px solid var(--line); background: var(--bg-inset); margin-top: var(--sp-8); }
+.site-footer__row {
+  max-width: 1100px; margin: 0 auto; padding: var(--sp-6) var(--sp-5);
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--sp-3);
+  font-size: 13px; color: var(--text-faint);
+}
+.site-footer a { color: var(--text-dim); }
+.site-footer a:hover { color: var(--cyan); }
+
+/* ---- Buttons ---------------------------------------------------------------*/
+.btn-outline {
+  display: inline-block; border: 1px solid var(--line); color: var(--text);
+  padding: var(--sp-2) var(--sp-5); border-radius: var(--radius); font-size: .9rem;
+}
+.btn-outline:hover { border-color: var(--violet); color: var(--violet); text-decoration: none; }
+
+@media (max-width: 640px) {
+  .site-nav__links { gap: var(--sp-1); font-size: 13px; }
+  .site-nav__links a, .nav-dropdown__btn { padding: 5px 10px; }
+  body.is-home .site-nav__tagline { display: none; }
+  .hero__intro { padding: var(--sp-7) var(--sp-4) var(--sp-5); }
+}

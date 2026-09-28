@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harmonizer Quickstart — DFF</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="description" content="Quickstart for Harmonizer 2.28: write a melody, chord it and generate parts in the style you want; or open a MusicXML or MIDI song, test it and change it; then make rehearsal tracks for your singers.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+  .guide { max-width: 860px; margin: 0 auto; padding: var(--sp-7) var(--sp-5) var(--sp-8); }
+  .guide h1 { font-family: var(--font-display); font-size: 2.2rem; color: #fff; margin-bottom: var(--sp-2); }
+  .guide .lede { color: var(--text-dim); font-size: 1.05rem; margin-bottom: var(--sp-5); max-width: 62ch; }
+  .guide h2 { font-family: var(--font-display); font-size: 1.5rem; color: #fff; margin: var(--sp-7) 0 var(--sp-3); padding-top: var(--sp-4); border-top: 1px solid var(--line); }
+  .guide h3 { font-size: 1.05rem; color: var(--cyan-bright); margin: var(--sp-5) 0 var(--sp-2); }
+  .guide p, .guide li { color: var(--text-dim); line-height: 1.65; }
+  .guide p { margin-bottom: var(--sp-3); max-width: 72ch; }
+  .guide ul, .guide ol { margin: 0 0 var(--sp-4) var(--sp-5); max-width: 72ch; }
+  .guide li { margin-bottom: 6px; }
+  .guide a { color: var(--cyan); }
+  .guide b, .guide strong { color: var(--text); font-weight: 600; }
+  .guide code { font-family: var(--font-mono); font-size: .88em; background: var(--bg-inset); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--amber); }
+  .guide kbd { font-family: var(--font-mono); font-size: .82em; background: var(--bg-raised); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 1px 6px; color: var(--text); white-space: nowrap; }
+  .toc { background: var(--bg-raised); border: 1px solid var(--line); border-radius: var(--radius); padding: var(--sp-4) var(--sp-5); margin-bottom: var(--sp-5); }
+  .toc h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--text-faint); border: 0; margin: 0 0 var(--sp-2); padding: 0; font-family: var(--font-body); }
+  .toc ol { columns: 2; column-gap: var(--sp-6); margin: 0 0 0 var(--sp-4); }
+  .toc li { margin-bottom: 4px; break-inside: avoid; }
+  .note { background: var(--bg-raised); border-left: 3px solid var(--violet-dim); border-radius: 0 var(--radius) var(--radius) 0; padding: var(--sp-3) var(--sp-4); margin: var(--sp-4) 0; max-width: 72ch; }
+  .note p { margin: 0; }
+  .note.tip { border-left-color: var(--cyan); }
+  .note.warn { border-left-color: var(--amber); }
+  .tbl-wrap { overflow-x: auto; margin: var(--sp-3) 0 var(--sp-5); }
+  .shot { margin: var(--sp-4) 0 var(--sp-5); }
+  .shot img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+  .shot figcaption { color: var(--text-dim); font-size: .9rem; margin-top: var(--sp-2); max-width: 72ch; }
+  .guide table { border-collapse: collapse; width: 100%; font-size: .93rem; }
+  .guide th { text-align: left; color: var(--text-faint); font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; padding: 6px 12px 6px 0; border-bottom: 1px solid var(--line); }
+  .guide td { padding: 8px 12px 8px 0; border-bottom: 1px solid var(--line-soft); color: var(--text-dim); vertical-align: top; }
+  .guide td:first-child { color: var(--text); white-space: nowrap; }
+  .steps { counter-reset: s; list-style: none; margin-left: 0; }
+  .steps > li { counter-increment: s; position: relative; padding-left: 2.4rem; margin-bottom: var(--sp-3); }
+  .steps > li::before { content: counter(s); position: absolute; left: 0; top: 1px; width: 1.7rem; height: 1.7rem; border-radius: 50%; background: var(--violet-dim); color: #fff; font-weight: 600; font-size: .85rem; display: flex; align-items: center; justify-content: center; }
+  @media (max-width: 640px) { .toc ol { columns: 1; } .guide td:first-child { white-space: normal; } }
+  .gh-nav { max-width: 860px; margin: 0 auto; padding: 18px 20px 0; font-size: .92rem; color: var(--text-faint); }
+  .gh-nav a { color: var(--cyan); text-decoration: none; }
+  .gh-nav a:hover { text-decoration: underline; }
+</style>
+</head>
+<body data-nav="projects">
+
+<nav class="gh-nav"><a href="index.html">Harmonizer</a> &middot; <a href="app/harmonizer.html">Launch the app</a> &middot; <a href="quickstart.html">Quickstart</a> &middot; <a href="guide.html">User guide</a> &middot; <a href="https://github.com/dffmonolith/harmonizer">GitHub</a></nav>
+
+<main>
+<article class="guide">
+
+  <span class="eyebrow">Harmonizer &middot; Quickstart &middot; v2.28</span>
+  <h1>Harmonizer Quickstart</h1>
+  <p class="lede">Harmonizer helps you sketch, test and teach vocal arrangements. This page gets you productive fast with the two ways most people work &mdash; writing a song from scratch, or starting from a MusicXML or MIDI file you already have &mdash; and then handing your singers rehearsal tracks. For every detail, see the <a href="guide.html">full user guide</a>.</p>
+  <p><a href="app/harmonizer.html" target="dff-app-harmonizer">Launch Harmonizer &rarr;</a> &nbsp;&middot;&nbsp; <a href="guide.html">User guide</a> &nbsp;&middot;&nbsp; <a href="index.html">About the project</a></p>
+
+  <nav class="toc" aria-label="Contents">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#basics">Seven things to know first</a></li>
+      <li><a href="#wf1">Workflow 1: melody, chords, parts</a></li>
+      <li><a href="#wf2">Workflow 2: start from a MusicXML or MIDI song</a></li>
+      <li><a href="#singers">Getting it to your singers</a></li>
+      <li><a href="#tips">Handy extras</a></li>
+      <li><a href="#cheat">Cheat sheet</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="basics">Seven things to know first</h2>
+  <ol>
+    <li><b>Everything autosaves</b> in your browser. There is no save button for that &mdash; but do keep a backup: <b>&#9881; Settings &rarr; Export library</b> saves every song in one file. If saving ever fails, an amber warning appears at the bottom of the screen.</li>
+    <li><b>The tools fold away.</b> <b>Note entry</b>, <b>Chords</b> and <b>Staves</b> are strips above the score; click one to open it. The panels for the selected note, lyrics and text slide out from the icon rail on the right.</li>
+    <li><b>One stave holds the melody</b> (the top one, unless you move it with the <b>Melody</b> button). The others are blank and waiting for <b>Generate parts</b>, filled by a previous Generate parts run, or ticked <b>Own rhythm</b> and edited freely like the melody &mdash; that last kind is yours alone; Generate parts never touches it.</li>
+    <li><b>It always sounds like a grand piano</b>, never a choir. Press <kbd>Space</kbd> or <b>Play</b> and a large play window opens showing the score.</li>
+    <li><b>Chords sit in the lane above the top stave.</b> They drive Generate parts, and can also be worked out from the notes you already have.</li>
+    <li><b>Undo is there</b> (<kbd>Ctrl</kbd>+<kbd>Z</kbd>), and <b>Copy</b> beside the Song menu makes a duplicate to experiment on.</li>
+    <li><b>Want to look around first?</b> <b>Examples &#9662;</b> in the header opens a choral piece to explore &mdash; and on a first visit Harmonizer offers them straight away.</li>
+  </ol>
+
+  <h2 id="wf1">Workflow 1: create a melody, chord it, then write parts</h2>
+
+  <h3>Step 1 &mdash; Set up the song</h3>
+  <ul>
+    <li>Press <b>New</b> for a blank song. Give it a <b>Title</b>, and choose the <b>Key</b>, <b>Time</b> signature and <b>Tempo</b> it starts in. (Changes later in the song come in Step 5.)</li>
+  </ul>
+
+  <h3>Step 2 &mdash; Enter the melody</h3>
+  <p>Use whichever way suits you; they mix freely.</p>
+  <ul>
+    <li><b>Click the staff.</b> Open <b>Note entry</b>, pick a duration (whole, half, quarter, eighth, sixteenth), add <b>&bull; Dot</b> or <b>3 Triplet</b> if needed, then click where the note should go. Click a note to select it, then drag it up or down (with a mouse, pen or finger) or press <kbd>&uarr;</kbd> / <kbd>&darr;</kbd> to change its pitch; <kbd>&larr;</kbd> / <kbd>&rarr;</kbd> step along the notes.</li>
+    <li><b>Type it.</b> Open <b>Text</b> in the icon rail and write notes as letter + octave + duration in <b>Melody text</b>, then press <b>Apply text &rarr; melody</b>. For example <code>G4q A4q B4q C5h</code> (<code>q</code> quarter, <code>h</code> half, <code>e</code> eighth, <code>s</code> sixteenth, <code>w</code> whole, <code>.</code> dotted, <code>~</code> tie, <code>R</code> rest, <code>#</code>/<code>b</code>/<code>n</code> accidentals, <code>/word</code> for a lyric).</li>
+    <li>Press <kbd>Space</kbd> to hear it. Fix anything that sounds wrong.</li>
+  </ul>
+  <p><b>Lyrics:</b> click the first note, press <kbd>Enter</kbd> and type the words &mdash; <kbd>Space</kbd> moves to the next note, <kbd>-</kbd> splits a word (<code>Twin-kle</code>), <kbd>_</kbd> holds a syllable over the next note. Or paste a whole verse into <b>Lyrics</b> in the icon rail and press <b>Fill from start</b>. Up to six verses; pick the verse beside the Lyric box.</p>
+
+  <h3>Step 3 &mdash; Add chords</h3>
+  <p>Open <b>Chords</b> and choose one of:</p>
+  <ul>
+    <li><b>Suggest chords</b> &mdash; a quick diatonic guess, one chord per measure, from the key and melody.</li>
+    <li><b>Type them</b> &mdash; in the <b>Chords</b> panel of the icon rail enter one chord per measure, such as <code>C G Am F</code>, and press <b>Apply text &rarr; one chord per measure</b>.</li>
+    <li><b>Click them in</b> &mdash; pick a root and quality, then click in the chord lane above the staff where the chord should start. Click a chord to select and change or delete it.</li>
+  </ul>
+  <p>Leave <b>Play chords</b> on to hear them under the melody. Chords are a draft: change any that don't suit, because the parts are built from them.</p>
+
+  <h3>Step 4 &mdash; Write the parts</h3>
+  <ol class="steps">
+    <li>Set <b>Staves</b> in the header: 4 gives SATB (Soprano, Alto, Tenor, Bass), 3 gives SAB. Up to 8 staves are available, and you can change any stave's voice and clef in the <b>Staves</b> section.</li>
+    <li>Open <b>Staves</b> and pick a <b>style</b> in the menu beside <b>Generate parts</b>:
+      <ul>
+        <li><b>Close harmony</b> &mdash; contemporary a cappella, voices close together (the default).</li>
+        <li><b>Traditional (hymn)</b> &mdash; textbook four-part writing, no parallel fifths or octaves.</li>
+        <li><b>Open (wide)</b> &mdash; the voices spread out, with a lower tenor and bass.</li>
+      </ul>
+    </li>
+    <li>Press <b>Generate parts</b>. Every eligible stave gets a draft in that style, each voice holding (tied) through repeated or ornamental melody notes rather than restriking every beat. Not sure which style? Press <b>Copy</b>, and generate the copy in another style to compare.</li>
+    <li>Press Play. In the play window use the <b>Hear</b> buttons to listen to voices alone or together (click to include or exclude, <kbd>Shift</kbd>-click to hear only one).</li>
+    <li>Edit by hand: click a generated note and drag or nudge its pitch &mdash; this locks it (look for the &#128274;), so it survives the next Generate parts while the rest of the stave is rebuilt around it. Unlock it from the inspector, or lock/unlock a whole stave with the buttons in the Staves section.</li>
+    <li>To give a voice its own moving rhythm entirely by hand, tick <b>Own rhythm</b> on that stave, then click its staff to add notes. Once you've written into it, it's yours and Generate parts leaves it alone. Untick it to hand the stave back (it asks first).</li>
+  </ol>
+  <div class="note warn"><p><b>Generate parts is a rough draft,</b> not a voice-leading expert. It replaces every eligible stave's harmony on each run, keeping only the notes you've locked, so do your chord work first.</p></div>
+  <p>When a melody note doesn't fit well under the current chord, Generate parts proposes a different one instead of forcing an awkward voicing &mdash; a button appears next to it (e.g. <i>Beat 4: C &rarr; F&sharp;7</i>); click to apply and regenerate, or ignore it.</p>
+
+  <figure class="shot"><img src="docs/screenshots/harmonizer-2-generate.png" alt="Old Hundredth: the melody with lyrics and a chord on each half note, the Staves section open with Generate parts set to Traditional (hymn), and the generated alto and tenor below." width="1440" height="960" loading="lazy"><figcaption>Old Hundredth after Generate parts in the Traditional (hymn) style: one chord per half note in the lane, the tune with its words, and the alto and tenor written for it (the bass is just below).</figcaption></figure>
+
+  <h3>Step 5 &mdash; Key, tempo and time changes (if the song has any)</h3>
+  <ol class="steps">
+    <li>Click a note in the measure where the change happens.</li>
+    <li>Open <b>Selected</b> in the icon rail and scroll to <b>Key, tempo, time &amp; rehearsal marks</b>.</li>
+    <li>Pick the new key, type the new tempo, and/or set a new time signature, then press <b>Apply</b>. The change is drawn on the score, heard on playback and listed in the panel, with a &#10005; to remove it.</li>
+  </ol>
+  <p>Existing notes keep their pitches when you add a key change; new notes you enter follow the new key.</p>
+
+  <h3>Step 6 &mdash; Add the expression</h3>
+  <p>Open <b>Note entry</b>: the <b>Marks</b> row under the duration buttons works on the selected note(s), and everything you add is heard on Play.</p>
+  <ul>
+    <li><b>Tempo &#9662;</b> &mdash; a tempo word on the first note (Andante, Allegro&hellip;), <i>rit.</i> over the last few notes of a phrase, <i>a tempo</i> where it picks up again.</li>
+    <li><b>Fermata</b> (or <kbd>F</kbd>), <b>breath mark</b> and <b>caesura</b> for the shape of each phrase.</li>
+    <li><b><i>mf</i> &#9662;</b> for dynamics and the <b>&lt;</b> / <b>&gt;</b> hairpins over a selected run; accent, staccato, tenuto, marcato and slur beside them.</li>
+    <li>Tick <b>All voices</b> to put a mark on every stave at once &mdash; the quick way to write <i>pp</i> or a fermata for the whole choir.</li>
+    <li><b>A</b> puts a rehearsal letter at the start of the measure, and <b>Text&hellip;</b> writes &ldquo;hum&rdquo;, &ldquo;solo&rdquo; or &ldquo;div.&rdquo; above the stave.</li>
+    <li><b>Repeat &#9662;</b> adds repeats, 1st/2nd endings, D.C./D.S., Fine and Coda to the selected measures &mdash; Play follows them.</li>
+  </ul>
+  <p><b>Words:</b> click the first note, press <kbd>Enter</kbd> and type &mdash; <kbd>Space</kbd> moves to the next note, <kbd>-</kbd> splits a word (<code>Twin-kle</code>), <kbd>_</kbd> holds a syllable over the next note. For another verse pick <b>v2</b> beside the Lyric box. Once the parts are written, <b>Lyrics &rsaquo; Copy lyrics to the other staves</b> gives every voice the words.</p>
+  <p>Tip: add dynamics and fermatas to the melody <i>before</i> <b>Generate parts</b> &mdash; the voices it writes copy them.</p>
+
+  <figure class="shot"><img src="docs/screenshots/harmonizer-3-marks.png" alt="The Marks row above Old Hundredth, with fermatas on every stave at the line ends, rehearsal letters A and B, and a crescendo into forte." width="1440" height="960" loading="lazy"><figcaption>Fermatas on every voice (All voices ticked), rehearsal letters, and a crescendo into <i>f</i>, all written from the Marks row. Play follows every one of them.</figcaption></figure>
+
+  <h3>Step 7 &mdash; Refine and keep it</h3>
+  <ul>
+    <li>Changed a voice a lot? Press <b>Chords from voices</b> to have Harmonizer read what the staves now sing and rewrite the chord symbols beat by beat.</li>
+    <li>Want another key? <b>Transpose to</b> (in the header) moves everything &mdash; notes, chords and key changes on all staves &mdash; to another key of the same mode.</li>
+    <li>Finish with <b>Save &rarr; as .musicxml</b> (for notation software), <b>Save &rarr; as .mid</b> (for rehearsal apps and DAWs), and/or <b>Save &rarr; as .json</b> (a full Harmonizer backup of this song). See also <a href="#singers">Getting it to your singers</a>.</li>
+  </ul>
+
+  <h2 id="wf2">Workflow 2: start from a MusicXML or MIDI song, then test it and make changes</h2>
+
+  <h3>Step 1 &mdash; Import</h3>
+  <ol class="steps">
+    <li>Press <b>Open&hellip;</b> and choose a <code>.mxl</code>, <code>.musicxml</code> or <code>.xml</code> file (from MuseScore, Finale, Sibelius and similar) or a <code>.mid</code> MIDI file. It always opens as a <b>new song</b>, so nothing you already have is overwritten.</li>
+    <li>If the file has more than one line of music, a chooser lists them. Pick which is the <b>melody</b> (its lyrics and chord symbols become the song's) and tick the others to bring in as further staves (up to eight). A stave that holds two lines &mdash; a divisi, a second voice, a piano part &mdash; is offered as separate lines (&ldquo;Alto &ndash; upper&rdquo;, &ldquo;Alto &ndash; lower&rdquo;, &ldquo;voice 2&rdquo;). With <b>Keep divisi on one stave</b> ticked (the default), a lower line comes in on its upper line's stave, two notes on a stem where the part divides, instead of a stave of its own.</li>
+    <li>Leave <b>Keep each voice's own rhythm</b> ticked so inner voices keep their own moving notes (and their dynamics, slurs and other marks). Untick it only if you want every voice squeezed onto the melody's rhythm.</li>
+    <li>Press <b>Import</b>. The status line reports what came across &mdash; including any key and tempo changes &mdash; and anything simplified.</li>
+    <li>Click <b>Import report</b> in the status bar to compare what the file held (notes, lyrics, dynamics, slurs, fermatas&hellip;) with what's now in the song, and to see anything Harmonizer doesn't model (trills, tremolos and so on). If anything came up short, the report opens by itself.</li>
+  </ol>
+  <div class="note tip"><p><b>Whatever instrument the file uses, it plays as piano.</b> The file's instrument names are kept as labels on each stave (and written back out on export), but Harmonizer's own sound is always grand piano.</p></div>
+
+  <figure class="shot"><img src="docs/screenshots/harmonizer-5-import.png" alt="The import dialog for Barber&rsquo;s The Coolin, listing Soprano, Alto upper and lower, Tenor, Bass upper and lower, with the lower lines marked as divisi on their upper staves." width="1440" height="960" loading="lazy"><figcaption>Opening Barber&rsquo;s <i>The Coolin</i> from a MIDI file. The second alto and bass lines come in as divisi, so the song opens on four staves:</figcaption></figure>
+  <figure class="shot"><img src="docs/screenshots/harmonizer-1-coolin.png" alt="The Coolin on four staves; where the altos divide, two noteheads share one stem." width="1440" height="960" loading="lazy"><figcaption>&hellip; with the altos&rsquo; two notes on one stem only where the part divides.</figcaption></figure>
+
+  <h3>Step 2 &mdash; Make a working copy</h3>
+  <p>Press <b>Copy</b> beside the Song menu right away and do your experiments on the copy. The imported song stays untouched as your base version, and you can switch between them in the Song menu.</p>
+
+  <h3>Step 3 &mdash; Test it by ear</h3>
+  <ul>
+    <li>Press <kbd>Space</kbd>. The play window shows the score and follows the music, through any tempo changes. When it stops, use <b>&#9664; &#9654;</b> to page through, or <b>&#9198; &#9197;</b> to jump to the beginning or end (Play then starts from there), then <b>Play</b> again. Selecting a note first makes playback start from there.</li>
+    <li>Use the <b>Hear</b> buttons to check one voice on its own, or leave out a voice to judge the balance of the rest. <kbd>Esc</kbd> closes the window.</li>
+    <li>Working on a tricky passage? Select a note in it and press <b>Loop</b> (or <kbd>L</kbd>) to repeat its measure &mdash; or select across several measures to loop them all &mdash; and drag <b>Speed</b> down to hear it slower without changing pitch. If the song has rehearsal letters, <b>Section</b> jumps to one (and Loop repeats that section). Repeats and D.C./D.S. are followed; untick <b>Repeats</b> to play straight through.</li>
+    <li>If the harmony is unclear, press <b>Chords from voices</b> to see chord symbols worked out from all the staves (every beat, half measure or measure).</li>
+  </ul>
+
+  <figure class="shot"><img src="docs/screenshots/harmonizer-4-play.png" alt="The play window mid-playback, with the current measure shaded, a playhead line, the Hear buttons, Loop, Repeats, Section and Speed." width="1440" height="960" loading="lazy"><figcaption>The play window: choose the voices you hear, loop a passage or a section, and set the speed.</figcaption></figure>
+
+  <h3>Step 4 &mdash; Make changes</h3>
+  <ul>
+    <li><b>Change pitches:</b> click a note and drag it or press <kbd>&uarr;</kbd> / <kbd>&darr;</kbd> (with <kbd>Shift</kbd> for an octave-ish jump). The inspector in the Selected panel sets the exact letter, octave and accidental.</li>
+    <li><b>Change rhythm, or add or remove notes:</b> on the melody, or on any stave with <b>Own rhythm</b> ticked, use the duration buttons, <b>&bull; Dot</b>, <b>&#8256; Tie</b>, <b>+ Note before / after</b>, <b>Insert rest</b> and <b>Delete</b>, or click the staff to add a note.</li>
+    <li><b>Edit lyrics:</b> select a note and press <kbd>Enter</kbd> to type from there (<kbd>Space</kbd> moves on), or use <b>Load verse</b> / <b>Fill from selected note</b> in the Lyrics panel. <b>Copy lyrics to the other staves</b> gives every voice the words.</li>
+    <li><b>Add marks and repeats:</b> the Marks row in Note entry adds dynamics, fermatas, rit., articulations and rehearsal letters, and <b>Repeat &#9662;</b> adds repeats, endings and D.C./D.S. (see <a href="#wf1">Workflow 1, Step 6</a>).</li>
+    <li><b>Divisi:</b> in Staves, <b>&darr; Combine with&hellip;</b> folds the stave below onto this one (two notes on a stem where they differ) and <b>Split divisi</b> separates them again. To split a part for a few notes, select them and use <b>Divisi &rsaquo; + 3rd below</b> in Selected.</li>
+    <li><b>Change chords:</b> click a chord in the lane to change or delete it, or click a blank spot to add one.</li>
+    <li><b>Change the key:</b> use <b>Transpose to</b> for the whole song. (The plain <b>Key</b> menu only relabels the opening key without moving any notes.) For a key change part-way through, see Step 5 of Workflow 1.</li>
+    <li><b>Re-voice the harmony:</b> after fixing the chords, untick <b>Own rhythm</b> on a stave, choose a style, and press <b>Generate parts</b> to have it rewritten. That discards the stave's own notes, so do it on your copy.</li>
+    <li>Made a mess? <kbd>Ctrl</kbd>+<kbd>Z</kbd>.</li>
+  </ul>
+
+  <h3>Step 5 &mdash; Save your result</h3>
+  <ul>
+    <li><b>Save &rarr; as .musicxml</b> writes your changed version for other notation software.</li>
+    <li><b>Save &rarr; as .mid</b> writes a MIDI file, one track per voice, with its tempo, key and time changes, dynamics and lyrics, and the repeats written out as they're played.</li>
+    <li><b>Save &rarr; as .json</b> keeps a complete Harmonizer backup of the song that reopens exactly as you left it.</li>
+  </ul>
+  <div class="note warn"><p><b>What import simplifies.</b> Rhythms shorter than a sixteenth are folded into a neighbouring note, and triplets other than simple 3:2 ones aren't kept. From MIDI, rhythms are rounded to the nearest sixteenth, so triplets and freely played timing come out approximate. Lyrics (every verse), dynamics, articulations, repeats and tempo marks come across and can be edited; grace notes are shown but can't be. From MIDI, dynamics are read from note velocities, fermatas from brief tempo drops, and markers become rehearsal marks. The <b>Import report</b> lists anything that didn't come across. Keep your original file as the master, and use Harmonizer to test and sketch changes.</p></div>
+
+  <h2 id="singers">Getting it to your singers</h2>
+  <ol class="steps">
+    <li>Open the <b>Save &#9662;</b> menu and choose <b>Rehearsal tracks&hellip;</b> (the last item).</li>
+    <li>Tick the voices you want tracks for, and whether to add a full mix.</li>
+    <li>Choose how loud the <b>other voices</b> are (from half volume down to silent), a <b>speed</b> (a slow set at 75% is good for learning notes), and optionally <b>left ear / right ear</b> to put each singer's part in one ear.</li>
+    <li>Press <b>Make tracks (.zip)</b>. One .zip downloads, with a file per voice named after the song &mdash; <code>My-Song - Alto.wav</code> and so on &mdash; ready to share.</li>
+  </ol>
+  <p>The tracks follow everything Play does: tempo marks, fermatas, dynamics, and the repeats. Divisi notes are in their voice's track; use <b>Split divisi</b> first if Alto 1 and Alto 2 each need a track of their own.</p>
+  <figure class="shot"><img src="docs/screenshots/harmonizer-6-rehearsal.png" alt="The Rehearsal tracks dialog with voice checkboxes, a full mix option, how loud the other voices are, speed, a left/right ear option and chord accompaniment." width="1440" height="960" loading="lazy"><figcaption>The Rehearsal tracks dialog.</figcaption></figure>
+
+  <p>For singers who use a rehearsal app, send the <b>Save &rarr; as .mid</b> file too: many of them let each singer turn their own part up.</p>
+
+  <h2 id="tips">Handy extras</h2>
+  <ul>
+    <li><kbd>Space</kbd> plays, pauses and resumes: pause, then press it again to carry on from the same spot &mdash; or click a note in the play window first to resume from there. <b>Stop</b> starts over. In the play window, <kbd>&larr;</kbd> <kbd>&rarr;</kbd> page, <kbd>Home</kbd> / <kbd>End</kbd> jump, <kbd>L</kbd> loops, <kbd>[</kbd> <kbd>]</kbd> change the speed, and <kbd>Esc</kbd> closes.</li>
+    <li><b>Many staves?</b> If some are scrolled out of view, a small badge at the top or bottom of the score names them. Click it to scroll.</li>
+    <li><b>Settings</b> (the gear) switches the score between black-on-white and dark, turns barlines on or off, holds the library backup, and controls two checks: <b>Range warnings</b> (notes outside a voice's comfortable range turn orange &mdash; on by default) and <b>Mark parallel fifths &amp; octaves</b> (dashed red lines, labelled 5 or 8).</li>
+    <li><b>Multi-select:</b> <kbd>Shift</kbd>-click for a range, <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>-click to add or remove one note.</li>
+    <li><b>On a tablet</b> you can tap to select and drag notes with a finger.</li>
+    <li><b>Help</b> in the app header gives a shorter in-app summary of everything above.</li>
+  </ul>
+
+  <h2 id="cheat">Cheat sheet</h2>
+  <div class="tbl-wrap"><table>
+    <tr><th>I want to&hellip;</th><th>Do this</th></tr>
+    <tr><td>Start a new song</td><td><b>New</b></td></tr>
+    <tr><td>Enter notes</td><td>Click the staff, or type in Melody text and <b>Apply text &rarr; melody</b></td></tr>
+    <tr><td>Undo a mistake</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> (redo: <kbd>Ctrl</kbd>+<kbd>Y</kbd>)</td></tr>
+    <tr><td>Hear it</td><td><kbd>Space</kbd> / <b>Play</b>; <b>Hear</b> buttons choose voices</td></tr>
+    <tr><td>Pause and pick up again</td><td><kbd>Space</kbd> to pause, <kbd>Space</kbd> to resume (click a note first to resume there)</td></tr>
+    <tr><td>Drill a passage</td><td>Select it, <b>Loop</b>, and lower <b>Speed</b> &mdash; or pick a rehearsal letter in <b>Section</b> and Loop that</td></tr>
+    <tr><td>Add a fermata, rit., dynamic or hairpin</td><td>Select the note(s) &rarr; the <b>Marks</b> row in Note entry (<b>All voices</b> for every stave)</td></tr>
+    <tr><td>Mark rehearsal letters</td><td>Select a note in the measure &rarr; <b>A</b> in the Marks row</td></tr>
+    <tr><td>Repeats, endings, D.C. / D.S.</td><td>Select the measures &rarr; <b>Repeat &#9662;</b> in the Marks row</td></tr>
+    <tr><td>Type lyrics</td><td>Select a note, <kbd>Enter</kbd>, type; <kbd>Space</kbd> next, <kbd>-</kbd> split, <kbd>_</kbd> hold</td></tr>
+    <tr><td>Give every voice the words</td><td>Lyrics &rsaquo; <b>Copy lyrics to the other staves</b></td></tr>
+    <tr><td>Put Alto 1 and 2 on one stave</td><td>Staves &rsaquo; <b>&darr; Combine with Alto II</b> (and <b>Split divisi</b> to separate them); on import, leave <b>Keep divisi on one stave</b> ticked</td></tr>
+    <tr><td>Split a part for a few notes</td><td>Select the notes &rarr; Selected &rsaquo; Divisi &rsaquo; <b>+ 3rd below</b></td></tr>
+    <tr><td>Add chords</td><td><b>Suggest chords</b>, type them, or click the chord lane</td></tr>
+    <tr><td>Write parts</td><td>Set <b>Staves</b>, pick a style, <b>Generate parts</b></td></tr>
+    <tr><td>Protect a hand-edited note from Generate parts</td><td>Automatic &mdash; or lock/unlock it yourself</td></tr>
+    <tr><td>Give a voice its own rhythm, off-limits to Generate parts</td><td>Tick <b>Own rhythm</b> on its stave</td></tr>
+    <tr><td>Change key or tempo part-way through</td><td>Select a note there &rarr; Selected panel &rarr; <b>Key, tempo, time &amp; rehearsal marks</b></td></tr>
+    <tr><td>Check ranges and parallels</td><td>Orange notes are out of range; &#9881; Settings &rarr; <b>Mark parallel fifths &amp; octaves</b></td></tr>
+    <tr><td>Name the chords from the voices</td><td><b>Chords from voices</b></td></tr>
+    <tr><td>Move the whole song to another key</td><td><b>Transpose to</b></td></tr>
+    <tr><td>Try a variation safely</td><td><b>Copy</b> beside the Song menu</td></tr>
+    <tr><td>Bring in a score</td><td><b>Open&hellip;</b> a MusicXML or MIDI file</td></tr>
+    <tr><td>Make learning tracks</td><td><b>Save &#9662; &rarr; Rehearsal tracks&hellip;</b></td></tr>
+    <tr><td>Take it elsewhere</td><td><b>Save &rarr; as .musicxml</b> or <b>Save &rarr; as .mid</b></td></tr>
+    <tr><td>Back up everything</td><td>&#9881; Settings &rarr; <b>Export library</b></td></tr>
+  </table></div>
+
+</article>
+</main>
+
+
+<!-- Pager: floating buttons for moving up and down the page by section (top, previous, next, end). -->
+<nav class="doc-pager" id="docPager" data-headings=".guide h2, .guide h3" aria-label="Move through this page">
+  <button type="button" data-go="top" title="Back to the top" aria-label="Back to the top">&#10514;</button>
+  <button type="button" data-go="prev" title="Previous section" aria-label="Previous section">&#9650;</button>
+  <button type="button" data-go="next" title="Next section" aria-label="Next section">&#9660;</button>
+  <button type="button" data-go="end" title="To the end" aria-label="To the end">&#10515;</button>
+</nav>
+<style>
+  .guide h2, .guide h3 { scroll-margin-top: 84px; }
+  .doc-pager { position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 60;
+    display: flex; flex-direction: column; gap: 6px; }
+  .doc-pager button { width: 42px; height: 42px; border-radius: 10px; border: 1px solid var(--line, #2a2f36);
+    background: var(--bg-raised, #14171b); color: var(--text, #e6e6e6); font-size: 17px; line-height: 1; cursor: pointer;
+    box-shadow: 0 6px 18px -8px rgba(0,0,0,.6); opacity: .88; transition: opacity .15s, border-color .15s, color .15s; }
+  .doc-pager button:hover { opacity: 1; border-color: var(--violet, #b28dff); color: var(--violet, #b28dff); }
+  .doc-pager button:focus-visible { outline: 2px solid var(--violet, #b28dff); outline-offset: 2px; }
+  .doc-pager button:disabled { opacity: .3; cursor: default; border-color: var(--line, #2a2f36); color: var(--text, #e6e6e6); }
+  @media (max-width: 640px) { .doc-pager { right: 10px; } .doc-pager button { width: 38px; height: 38px; } }
+  @media print { .doc-pager { display: none; } }
+</style>
+<script>
+(function(){
+  var pager = document.getElementById('docPager');
+  if (!pager) return;
+  var sel = pager.getAttribute('data-headings') || document.body.getAttribute('data-pager') || '.guide h2';
+  function heads(){ return Array.prototype.slice.call(document.querySelectorAll(sel)); }
+  var OFFSET = 90;   // below the sticky site header
+  function current(){
+    var hs = heads(), idx = -1;
+    for (var i = 0; i < hs.length; i++){ if (hs[i].getBoundingClientRect().top - OFFSET <= 2) idx = i; else break; }
+    return { hs: hs, idx: idx };
+  }
+  function go(where){
+    var c = current(), reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var behavior = reduce ? 'auto' : 'smooth';
+    if (where === 'top') return window.scrollTo({ top: 0, behavior: behavior });
+    if (where === 'end') return window.scrollTo({ top: document.documentElement.scrollHeight, behavior: behavior });
+    var target = null;
+    if (where === 'next') target = c.hs[c.idx + 1];
+    else {
+      // "previous": back to the start of this section, or the one before if already at its start
+      var here = c.hs[c.idx];
+      if (here && here.getBoundingClientRect().top < OFFSET - 12) target = here; else target = c.hs[c.idx - 1];
+      if (!target) return window.scrollTo({ top: 0, behavior: behavior });
+    }
+    if (target) target.scrollIntoView({ behavior: behavior, block: 'start' });
+  }
+  function label(h){ return h ? h.textContent.replace(/\s+/g, ' ').trim() : ''; }
+  function sync(){
+    var c = current(), atTop = window.scrollY < 4, atEnd = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+    var b = pager.querySelectorAll('button');
+    b[0].disabled = atTop; b[1].disabled = atTop;
+    b[2].disabled = atEnd || !c.hs[c.idx + 1]; b[3].disabled = atEnd;
+    var nx = c.hs[c.idx + 1], pv = c.hs[c.idx] && c.hs[c.idx].getBoundingClientRect().top < OFFSET - 12 ? c.hs[c.idx] : c.hs[c.idx - 1];
+    b[2].title = nx ? 'Next: ' + label(nx) : 'Next section';
+    b[1].title = pv ? 'Back to: ' + label(pv) : 'Back to the top';
+  }
+  pager.addEventListener('click', function(e){ var t = e.target.closest('button'); if (t) go(t.getAttribute('data-go')); });
+  window.addEventListener('scroll', function(){ window.requestAnimationFrame(sync); }, { passive: true });
+  window.addEventListener('resize', sync);
+  sync();
+})();
+</script>
+</body>
+</html>

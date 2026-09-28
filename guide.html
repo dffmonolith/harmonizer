@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harmonizer User Guide — DFF</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="description" content="Complete user guide for Harmonizer 2.26: melodies, chords and lyrics, generating SATB parts in three styles, key and tempo changes, expressive marks (dynamics, fermatas, rit., articulations, rehearsal letters), repeats and D.C./D.S., lyrics in several verses, playback, loop and practice speed, rehearsal tracks, MusicXML and MIDI import and export.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+  .guide { max-width: 860px; margin: 0 auto; padding: var(--sp-7) var(--sp-5) var(--sp-8); }
+  .guide h1 { font-family: var(--font-display); font-size: 2.2rem; color: #fff; margin-bottom: var(--sp-2); }
+  .guide .lede { color: var(--text-dim); font-size: 1.05rem; margin-bottom: var(--sp-5); max-width: 62ch; }
+  .guide h2 { font-family: var(--font-display); font-size: 1.5rem; color: #fff; margin: var(--sp-7) 0 var(--sp-3); padding-top: var(--sp-4); border-top: 1px solid var(--line); }
+  .guide h3 { font-size: 1.05rem; color: var(--cyan-bright); margin: var(--sp-5) 0 var(--sp-2); }
+  .guide p, .guide li { color: var(--text-dim); line-height: 1.65; }
+  .guide p { margin-bottom: var(--sp-3); max-width: 72ch; }
+  .guide ul, .guide ol { margin: 0 0 var(--sp-4) var(--sp-5); max-width: 72ch; }
+  .guide li { margin-bottom: 6px; }
+  .guide a { color: var(--cyan); }
+  .guide b, .guide strong { color: var(--text); font-weight: 600; }
+  .guide code { font-family: var(--font-mono); font-size: .88em; background: var(--bg-inset); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--amber); }
+  .guide kbd { font-family: var(--font-mono); font-size: .82em; background: var(--bg-raised); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 1px 6px; color: var(--text); white-space: nowrap; }
+  .toc { background: var(--bg-raised); border: 1px solid var(--line); border-radius: var(--radius); padding: var(--sp-4) var(--sp-5); margin-bottom: var(--sp-5); }
+  .toc h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--text-faint); border: 0; margin: 0 0 var(--sp-2); padding: 0; font-family: var(--font-body); }
+  .toc ol { columns: 2; column-gap: var(--sp-6); margin: 0 0 0 var(--sp-4); }
+  .toc li { margin-bottom: 4px; break-inside: avoid; }
+  .note { background: var(--bg-raised); border-left: 3px solid var(--violet-dim); border-radius: 0 var(--radius) var(--radius) 0; padding: var(--sp-3) var(--sp-4); margin: var(--sp-4) 0; max-width: 72ch; }
+  .note p { margin: 0; }
+  .note.tip { border-left-color: var(--cyan); }
+  .note.warn { border-left-color: var(--amber); }
+  .tbl-wrap { overflow-x: auto; margin: var(--sp-3) 0 var(--sp-5); }
+  .guide table { border-collapse: collapse; width: 100%; font-size: .93rem; }
+  .guide th { text-align: left; color: var(--text-faint); font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; padding: 6px 12px 6px 0; border-bottom: 1px solid var(--line); }
+  .guide td { padding: 8px 12px 8px 0; border-bottom: 1px solid var(--line-soft); color: var(--text-dim); vertical-align: top; }
+  .guide td:first-child { color: var(--text); white-space: nowrap; }
+  .guide table.marks-tbl { table-layout: fixed; }
+  .shot { margin: var(--sp-4) 0 var(--sp-5); }
+  .shot img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+  .shot figcaption { color: var(--text-dim); font-size: .9rem; margin-top: var(--sp-2); max-width: 72ch; }
+  .guide table.marks-tbl td:first-child { white-space: normal; }
+  @media (max-width: 640px) { .toc ol { columns: 1; } .guide td:first-child { white-space: normal; } }
+  .gh-nav { max-width: 860px; margin: 0 auto; padding: 18px 20px 0; font-size: .92rem; color: var(--text-faint); }
+  .gh-nav a { color: var(--cyan); text-decoration: none; }
+  .gh-nav a:hover { text-decoration: underline; }
+</style>
+</head>
+<body data-nav="projects">
+
+<nav class="gh-nav"><a href="index.html">Harmonizer</a> &middot; <a href="app/harmonizer.html">Launch the app</a> &middot; <a href="quickstart.html">Quickstart</a> &middot; <a href="guide.html">User guide</a> &middot; <a href="https://github.com/dffmonolith/harmonizer">GitHub</a></nav>
+
+<main>
+<article class="guide">
+
+  <span class="eyebrow">Harmonizer &middot; v2.31</span>
+  <h1>Harmonizer User Guide</h1>
+  <p class="lede">Harmonizer is a workbench for roughing out vocal arrangements: enter a melody, put chords under it, generate a draft harmony in the style you want, listen to it on a real piano sound, and edit until it works. It also makes rehearsal tracks for your singers and moves music in and out as MusicXML and MIDI. This guide covers everything it does.</p>
+  <p><a href="app/harmonizer.html" target="dff-app-harmonizer">Launch Harmonizer &rarr;</a> &nbsp;&middot;&nbsp; <a href="quickstart.html">Quickstart</a> &nbsp;&middot;&nbsp; <a href="index.html">About the project</a></p>
+
+  <nav class="toc" aria-label="Contents">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#start">Getting started</a></li>
+      <li><a href="#screen">The screen at a glance</a></li>
+      <li><a href="#header">The header controls</a></li>
+      <li><a href="#melody">Entering a melody</a></li>
+      <li><a href="#editing">Selecting and editing notes</a></li>
+      <li><a href="#undo">Undo and redo</a></li>
+      <li><a href="#text">Typing melodies as text</a></li>
+      <li><a href="#lyrics">Lyrics</a></li>
+      <li><a href="#chords">Chords</a></li>
+      <li><a href="#staves">Staves, parts, clefs and instruments</a></li>
+      <li><a href="#generate">Generating the other parts</a></li>
+      <li><a href="#changes">Key, tempo and time changes</a></li>
+      <li><a href="#marks">Expressive marks</a></li>
+      <li><a href="#repeats">Repeats, endings, D.C. and D.S.</a></li>
+      <li><a href="#play">Playback, loop and practice speed</a></li>
+      <li><a href="#rehearsal">Rehearsal tracks</a></li>
+      <li><a href="#score">The score display and Settings</a></li>
+      <li><a href="#import">Importing a MusicXML score</a></li>
+      <li><a href="#midi">Importing a MIDI file</a></li>
+      <li><a href="#save">Saving, songs, backup and export</a></li>
+      <li><a href="#keys">Keyboard and mouse reference</a></li>
+      <li><a href="#limits">What Harmonizer doesn't do</a></li>
+      <li><a href="#trouble">Troubleshooting</a></li>
+      <li><a href="#new">What's new</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="start">1. Getting started</h2>
+  <p>Open Harmonizer from the project page (or the <b>Launch Harmonizer</b> link above). It opens in its own browser tab. There is nothing to install and no account: everything runs in your browser, and your work is saved in that browser automatically.</p>
+  <p>There are two ways in. Start from a melody (or a blank page), put chords under it and let <b>Generate parts</b> write the other voices; or open a MIDI or MusicXML file you already have (or one of the <a href="#examples">Examples</a>) and edit it. A minimal first session of the first kind looks like this:</p>
+  <ol>
+    <li>Choose a <b>Key</b>, <b>Time</b> signature and <b>Tempo</b> in the header.</li>
+    <li>Open <b>Note entry</b>, pick a duration (say, quarter note) and click on the staff to drop notes. Or open the <b>Text</b> panel on the right, type a melody into <b>Melody text</b> and press <b>Apply text &rarr; melody</b>.</li>
+    <li>Press <kbd>Space</kbd> (or <b>Play</b>) to hear it.</li>
+    <li>Open <b>Chords</b> and press <b>Suggest chords</b> for a starting harmony. Set <b>Staves</b> to 4, open <b>Staves</b>, choose a style and press <b>Generate parts</b>.</li>
+    <li>Edit any note you don't like. Then keep it: it autosaves, and <b>Save &rarr; as .musicxml</b>, <b>Save &rarr; as .mid</b> or <b>Save &rarr; Rehearsal tracks&hellip;</b> take it wherever it needs to go.</li>
+  </ol>
+  <div class="note tip"><p><b>Piano sound.</b> Playback loads a piano sample file (<code>harmonizer-piano-samples.json</code>, about 7&nbsp;MB) that sits next to the app. The first Play can take a moment while it loads; after that it is instant.</p></div>
+
+  <h2 id="screen">2. The screen at a glance</h2>
+  <p>From top to bottom and left to right:</p>
+  <ul>
+    <li><b>Header</b>, in two panels &mdash; <b>Current song</b> (the Song menu with Copy and Delete, title and composer, then key, transpose, number of staves, time signature and tempo) and <b>Commands</b>, grouped as <b>Playback</b> (Play, Stop), <b>Edit</b> (Undo, Redo), <b>App</b> (Settings, Help) and <b>Songs &amp; files</b> (New, Open, Examples, Save, Print). On a wide screen the two panels sit side by side; on a narrower one the Commands panel moves underneath.</li>
+    <li><b>Three collapsible tool sections</b>, closed by default so the staves get the room: <b>Note entry</b> (durations and note buttons, and the <b>Marks</b> row for expressive marks and repeats), <b>Chords</b> (the chord palette, Suggest chords, Chords from voices, Clear chords, Play chords) and <b>Staves</b> (<b>Generate parts</b> and its style menu, then one line of controls per stave, including Combine and Split divisi). Click a strip to open or close it (hovering over one says which); the strip itself shows a short summary (the current duration, how many chords, how many staves).</li>
+    <li><b>The song's title and composer</b>, just above the score (the play window shows them too), so you always know which song you're in.</li>
+    <li><b>The score</b> &mdash; a chord lane across the top, then one stave per vocal part.</li>
+    <li><b>Icon rail</b> (far right) &mdash; <b>Selected</b> (the note and chord inspectors, and the list of key, tempo, time, rehearsal and repeat marks), <b>Lyrics</b>, <b>Text</b> (melody text), <b>Chords</b> (chord text) and <b>About</b>. Click an icon to slide its panel out over the score; click it again, or the &times;, to put it away.</li>
+    <li><b>Status bar</b> (bottom) &mdash; the most recent message, an &ldquo;Autosaved&rdquo; indicator (or an amber warning if saving failed; see <a href="#save">Saving</a>), and a note count.</li>
+  </ul>
+
+  <figure class="shot"><img src="docs/screenshots/harmonizer-2-generate.png" alt="Harmonizer with Old Hundredth open: the header, the Staves section open with Generate parts, and four staves with a chord lane above and lyrics under the melody." width="1440" height="960" loading="lazy"><figcaption>The screen with the Staves section open: Generate parts and its style menu, one line of controls per stave, and the score below with the chord lane on top.</figcaption></figure>
+
+  <h2 id="header">3. The header controls</h2>
+  <p>The <b>Current song</b> panel holds everything that describes the song you are in; the <b>Commands</b> panel holds the buttons, in captioned groups. The table follows the same order.</p>
+  <div class="tbl-wrap"><table>
+    <tr><th>Control</th><th>What it does</th></tr>
+    <tr><td>Song</td><td>Switches between the songs stored in this browser. <b>Copy</b> duplicates the current song; the trash button deletes it (after a confirmation). See <a href="#save">Saving, songs, backup and export</a>.</td></tr>
+    <tr><td>Title, Composer / arranger</td><td>Metadata, written into MusicXML and MIDI exports and used to name exported files.</td></tr>
+    <tr><td>Key</td><td>The <i>opening</i> key signature (major and minor keys, up to seven sharps or flats). A note with no explicit accidental takes the key signature's default. Changing this menu relabels the key without moving notes; to move the music, use Transpose to. For a key change part-way through, see <a href="#changes">Key, tempo and time changes</a>.</td></tr>
+    <tr><td>Transpose to</td><td>Moves the whole song to another key of the same mode. See <a href="#save">Transposing</a>.</td></tr>
+    <tr><td>Staves</td><td>How many staves to show, 1&ndash;8. 4 = SATB, 3 = SAB; 5&ndash;8 add Baritone and second Soprano, Alto and Tenor parts.</td></tr>
+    <tr><td>Time</td><td>The opening time signature. Numerator 1&ndash;32, denominator 2, 4, 8 or 16. Barlines follow from it.</td></tr>
+    <tr><td>Tempo</td><td>The opening tempo, in beats per minute (20&ndash;300).</td></tr>
+    <tr><td>Play / Stop</td><td>Start and stop playback. <kbd>Space</kbd> does the same.</td></tr>
+    <tr><td>Undo / Redo</td><td>Step back and forward through your edits. See <a href="#undo">Undo and redo</a>.</td></tr>
+    <tr><td>&#9881; (Settings)</td><td>Black on white, Barlines, Range warnings, parallel fifths/octaves marks, and the song library backup. See <a href="#score">Settings</a>.</td></tr>
+    <tr><td>? Help</td><td>Opens the built-in quick-start, which links to the Quickstart and this guide.</td></tr>
+    <tr><td>New</td><td>Starts a fresh song without losing the current one.</td></tr>
+    <tr><td>Examples &#9662;</td><td>Opens one of the example arrangements that come with Harmonizer, as a new song. See <a href="#examples">Examples</a>.</td></tr>
+    <tr><td>Open&hellip;</td><td>Opens a saved <code>.json</code> song or library backup, or imports a MusicXML (<code>.musicxml</code>, <code>.xml</code>, <code>.mxl</code>) or MIDI (<code>.mid</code>) file as a new song.</td></tr>
+    <tr><td>Save &#9662;</td><td>A menu: <b>as .json</b> (a file Harmonizer reopens exactly), <b>as .musicxml</b> (for MuseScore, Finale, Sibelius and similar), <b>as .mid</b> (a Standard MIDI File for rehearsal apps, DAWs and notation software) or <b>as .wav</b> (what you'd hear on Play, as audio), and last, <b>Rehearsal tracks&hellip;</b> (see the next row). Arrow keys move through the menu; <kbd>Esc</kbd> closes it.</td></tr>
+    <tr><td>Save &#9662; &rarr; Rehearsal tracks&hellip;</td><td>Makes one part-learning track per voice, bundled in a .zip. See <a href="#rehearsal">Rehearsal tracks</a>.</td></tr>
+    <tr><td>Print / PDF</td><td>Prints the score, or saves it as a PDF from the browser's print dialog.</td></tr>
+  </table></div>
+
+  <h2 id="melody">4. Entering a melody</h2>
+  <h3>Clicking notes onto the staff</h3>
+  <p>Open <b>Note entry</b>, choose a duration &mdash; whole, half, quarter, eighth or sixteenth &mdash; then click on the staff. A note of that duration appears at the pitch you clicked, after the selected note (or at the end if nothing is selected). Clicking the staff adds notes to the <b>melody stave</b> and to any stave with <b>Own rhythm</b> ticked (see <a href="#staves">Staves</a>).</p>
+  <p>Two modifiers apply to the next note(s) you add:</p>
+  <ul>
+    <li><b>&bull; Dot</b> &mdash; lengthens the note by half again (a dotted quarter is 1&frac12; beats).</li>
+    <li><b>3 Triplet</b> &mdash; makes simple 3:2 triplets: three notes in the time of two. The button counts down the notes left in the group.</li>
+  </ul>
+  <p>A new note takes the key signature in force where it lands, so after a key change to D major a note clicked onto the F line is an F&sharp;.</p>
+
+  <h3>The note-entry buttons</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Button</th><th>What it does</th></tr>
+    <tr><td>+ Note before / + Note after</td><td>Inserts a new note next to the selected one, starting from its pitch. With nothing selected, adds at the start or end of the melody.</td></tr>
+    <tr><td>Insert rest</td><td>Inserts a rest of the current duration in the same way.</td></tr>
+    <tr><td>Delete</td><td>Removes the selected note (the <kbd>Delete</kbd> key does the same).</td></tr>
+    <tr><td>Clear notes</td><td>Wipes the whole melody &mdash; and the chords, which are positioned relative to it. Asks first.</td></tr>
+  </table></div>
+  <p>These work on the stave of the selected note: the melody, or any stave with its own rhythm.</p>
+  <p>Below them, the <b>Marks</b> row adds tempo words, rit./accel., fermatas, breaths, dynamics, hairpins, articulations, slurs, rehearsal letters and text &mdash; see <a href="#marks">Expressive marks</a>.</p>
+
+  <h2 id="editing">5. Selecting and editing notes</h2>
+  <h3>Selecting</h3>
+  <ul>
+    <li><b>Click</b> (or tap) a note to select it. It turns violet and its details appear in the <b>Selected</b> panel.</li>
+    <li><b>Shift-click</b> extends the selection to a contiguous range on the same stave, from the last note you clicked.</li>
+    <li><b>Ctrl-click</b> (<b>Cmd-click</b> on a Mac) adds or removes a single note, on any stave, without disturbing the rest of the selection.</li>
+    <li><kbd>&larr;</kbd> / <kbd>&rarr;</kbd> move the selection along the stave.</li>
+  </ul>
+  <h3>Changing pitch</h3>
+  <ul>
+    <li><b>Drag</b> a notehead straight up or down with the mouse, a pen, or a finger on a tablet. The note snaps to staff positions; dragging on a note never scrolls the score. A whole drag undoes as one step.</li>
+    <li><kbd>&uarr;</kbd> / <kbd>&darr;</kbd> nudge the selection one staff step. With <kbd>Shift</kbd> held, the step is seven (roughly an octave).</li>
+    <li><kbd>Ctrl</kbd>+<kbd>&uarr;</kbd> / <kbd>&darr;</kbd> (<kbd>Cmd</kbd> on a Mac) move the selection a full octave.</li>
+    <li>Nudging and octave moves apply to <em>every</em> selected note at once, and follow the key in force at each note.</li>
+  </ul>
+  <h3>The note inspector</h3>
+  <p>With a single melody (or own-rhythm) note selected, the <b>Selected</b> panel offers precise control:</p>
+  <ul>
+    <li>Letter and octave, typed or chosen directly.</li>
+    <li><b>&flat; &natural; &sharp;</b> buttons to set the accidental, and <b>8va &uarr; / &darr;</b> to shift an octave.</li>
+    <li>Duration buttons (<b>W H Q E S</b>), <b>&bull; Dot</b>, and <b>&#8256; Tie</b>, which joins the note to the next one.</li>
+    <li>For a triplet note, an <b>Un-triplet whole group</b> button.</li>
+    <li><b>Divisi</b>: add a second note on the same stem (<b>+ 3rd below</b> / <b>+ 3rd above</b>), then set its letter, octave and accidental, <b>&#8645; Swap</b> it with the main note, or remove it. See <a href="#staves">Divisi on one stave</a>.</li>
+    <li>A <b>Lyric</b> box with a <b>v1&ndash;v6</b> verse menu (type straight through the song from here; see <a href="#lyrics">Lyrics</a>), a <b>Text above</b> box for words like &ldquo;hum&rdquo; or &ldquo;solo&rdquo;, and a line listing the note's marks with <b>Clear marks</b>.</li>
+    <li><b>Delete note</b>.</li>
+  </ul>
+  <p>Selecting a note on a generated stave gives a smaller inspector with the pitch controls, plus a <b>&#128275; Lock this note</b> / <b>&#128274; Locked &mdash; click to unlock</b> toggle (see <a href="#generate">Generating the other parts</a>). Selecting several notes gives the bulk operations: octave up/down, <b>Divisi</b> (+ 3rd below, + 3rd above, Remove, on every selected note), <b>Lock selected</b> / <b>Unlock selected</b>, and &mdash; when exactly two notes on different staves are selected &mdash; <b>Swap pitches</b> (<kbd>Ctrl</kbd>+<kbd>X</kbd>).</p>
+  <h3>Accidentals</h3>
+  <p>A sharp, flat or natural is drawn next to a note whenever it differs from what the key signature in force at that note implies &mdash; on every such note, even if an earlier note in the same measure already had it. So in D major an F&sharp; shows nothing, while an F natural shows a &natural; sign.</p>
+
+  <h2 id="undo">6. Undo and redo</h2>
+  <p><b>Undo</b> / <b>Redo</b> in the header, or <kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> also works; <kbd>Cmd</kbd> on a Mac). Undo covers note and chord edits, Generate parts, Suggest chords, Transpose, key/tempo/time changes, and text edits such as the title or a lyric &mdash; each typing session undoes as one step, not one per keystroke. Up to 100 steps are kept. Switching to another song, or starting a New one, starts that song's undo history fresh.</p>
+
+  <h2 id="text">7. Typing melodies as text</h2>
+  <p>The <b>Melody text</b> box in the <b>Text</b> panel is a compact shorthand that is often faster than clicking. Type or paste, then press <b>Apply text &rarr; melody</b>. <b>Regenerate text from melody</b> writes the current melody back out as text, handy for copying or for bulk edits.</p>
+  <p>Each note is:</p>
+  <p><code>letter</code> + optional accidental + octave + duration + optional dot + optional <code>~</code> + optional <code>/lyric</code></p>
+  <div class="tbl-wrap"><table>
+    <tr><th>Part</th><th>Values</th></tr>
+    <tr><td>Letter</td><td><code>A</code>&ndash;<code>G</code></td></tr>
+    <tr><td>Accidental</td><td><code>#</code> sharp, <code>b</code> flat, <code>n</code> natural. Omit it to use the default of the key signature in force at that point in the song.</td></tr>
+    <tr><td>Octave</td><td><code>0</code>&ndash;<code>8</code>, with middle C = C4. Omit to repeat the previous note's octave.</td></tr>
+    <tr><td>Duration</td><td><code>w</code> whole, <code>h</code> half, <code>q</code> quarter, <code>e</code> eighth, <code>s</code> sixteenth. Omit to repeat the previous duration.</td></tr>
+    <tr><td>Dot</td><td><code>.</code> after the duration.</td></tr>
+    <tr><td>Tie</td><td><code>~</code> after a note ties it to the next: <code>A4q~ A4e</code>.</td></tr>
+    <tr><td>Lyric</td><td><code>/</code> followed by the syllable.</td></tr>
+    <tr><td>Rest</td><td><code>Rq</code>, <code>Rh.</code> and so on.</td></tr>
+    <tr><td>Triplet</td><td>Three notes in parentheses followed by <code>3</code>: <code>(C4e D4e E4e)3</code>.</td></tr>
+  </table></div>
+  <p>Example: <code>C4q/Twin C4q/kle G4q/lit G4q/tle A4h./how G4e F4e/der F4h/</code></p>
+  <div class="note warn"><p>Applying text replaces the whole melody, so any generated harmony is cleared (there is no reliable note-by-note correspondence between the old and new melody). Run <b>Generate parts</b> again afterwards.</p></div>
+
+  <h2 id="lyrics">8. Lyrics</h2>
+  <p>Every stave can carry lyrics &mdash; up to six verses, one line under the stave for each, numbered <i>1.</i>, <i>2.</i>&hellip; when there's more than one. Syllables are centred under their notes, a hyphen is drawn between the syllables of a word, and a line (an extender) runs under a syllable that's held over several notes.</p>
+  <h3>Typing note by note</h3>
+  <p>Click a note and press <kbd>Enter</kbd> (or click in the <b>Lyric</b> box in the Selected panel). Then just type the words:</p>
+  <ul>
+    <li><kbd>Space</kbd> or <kbd>Tab</kbd> moves on to the next note (rests are skipped); <kbd>Shift</kbd>+<kbd>Space</kbd> or <kbd>Shift</kbd>+<kbd>Tab</kbd> goes back.</li>
+    <li><kbd>-</kbd> ends a syllable in the middle of a word and moves on: <code>Twin-kle</code> puts <i>Twin</i> and <i>kle</i> on two notes, with a hyphen between.</li>
+    <li><kbd>_</kbd> holds the syllable over the next note (a melisma) and moves on; press it again to hold over another. Tied notes hold their syllable without it.</li>
+    <li><kbd>Enter</kbd> finishes. The whole run of typing is one step for Undo.</li>
+  </ul>
+  <p>The small <b>v1&ndash;v6</b> menu beside the Lyric box chooses the verse you're typing; that verse's line is shown darker on the score.</p>
+  <h3>Filling a whole verse at once</h3>
+  <p>In the <b>Lyrics</b> panel, choose the <b>Verse</b>, type or paste the words in the box &mdash; <code>Twin-kle twin-kle lit-tle star, how I won-der what you are__</code> &mdash; and press <b>Fill from start</b> (or <b>Fill from selected note</b> to carry on from where you are). Hyphens split words into syllables; an underscore holds a syllable over one more note, either on its own (<code>_</code>) or at the end of a word (<code>are__</code> holds <i>are</i> over two more). <b>Load verse</b> puts the stave's existing words for that verse in the box so you can edit them as text; <b>Clear verse</b> removes them. The buttons work on the selected note's stave, or the melody.</p>
+  <h3>Words for every voice</h3>
+  <p><b>Copy lyrics to the other staves</b> copies every verse from the selected stave (or the melody) to every other stave that has its own notes, beat for beat: a note that starts with a syllable gets it, and a note that starts in the middle of one gets a hold. It replaces what those staves had, so use it once the parts are written (Undo puts it back).</p>
+  <p>Lyrics also go in and out: <code>/lyric</code> in the melody text (verse 1), MusicXML import and export (every verse, with hyphenation and extenders), and MIDI (verse 1, as lyric events).</p>
+
+  <h2 id="chords">9. Chords</h2>
+  <h3>Placing chords</h3>
+  <p>The <b>chord lane</b> runs across the top of the score. Open <b>Chords</b>, set the chord you want &mdash; a <b>root</b> (C, C&sharp;/D&flat;, and so on) and a <b>quality</b> &mdash; then click in the lane at the beat where it should start. Clicks snap to the nearest beat. A chord <b>holds until the next chord</b>, so clicking partway through an existing chord's span shortens it and begins a new one at that point. Click close to an existing chord's marker to select it instead.</p>
+  <p>Qualities available: major, minor, diminished, augmented, dominant 7th, major 7th, minor 7th, diminished 7th, sus2 and sus4. There is at most one chord per beat.</p>
+  <h3>Editing chords</h3>
+  <p>A selected chord appears under <b>Selected chord</b> in the Selected panel, where you can change its root or quality or press <b>Delete chord</b>.</p>
+  <h3>Suggest chords</h3>
+  <p><b>Suggest chords</b> makes a diatonic guess &mdash; one chord per measure &mdash; from the melody notes in each measure and the key in force there (so it follows key changes). Treat it as a first draft. If chords already exist you're asked before they are replaced. <b>Clear chords</b> removes all of them.</p>
+  <h3>Chords from voices</h3>
+  <p><b>Chords from voices</b> analyses the notes the staves actually sing &mdash; the melody plus every stave that has its own rhythm or generated notes &mdash; and names the chord for each window, then merges repeats. The menu beside the button sets the window: <b>every beat</b> (a dotted quarter in 6/8, 9/8 and 12/8), <b>half measure</b>, or <b>every measure</b>. Longer notes count more than passing notes, the lowest voice is favoured as the root, and chords that fit the key in force get a slight preference; it can name major, minor, seventh, diminished, augmented and sus chords. If a window has no notes the previous chord simply carries on. If chords already exist you are asked before they are replaced. It works best once the other staves are written; on a single melody it is little better than Suggest chords.</p>
+  <h3>Typing chords</h3>
+  <p>The <b>Chords</b> panel takes one symbol per measure: <code>C G7 Am Fmaj7</code>. Symbols are a root (<code>A</code>&ndash;<code>G</code> with optional <code>#</code> or <code>b</code>) plus an optional quality &mdash; <code>m</code>, <code>dim</code>, <code>aug</code>, <code>7</code>, <code>maj7</code>, <code>m7</code>, <code>dim7</code>, <code>sus2</code>, <code>sus4</code>; blank means major. Press <b>Apply text &rarr; one chord per measure</b>; this replaces all chords.</p>
+  <h3>Hearing them</h3>
+  <p>Chords are played under the voices. Untick <b>Play chords</b> in the Chords section to hear the vocal lines alone; the choice is remembered in this browser.</p>
+
+  <h2 id="staves">10. Staves, parts, clefs and instruments</h2>
+  <p>The <b>Staves</b> control shows one to eight staves. Four defaults to <b>SATB</b> &mdash; Soprano and Alto on treble clef, Tenor on the treble clef marked &ldquo;8&rdquo;, and Bass on bass clef. Three defaults to <b>SAB</b>; five to eight add Baritone, Soprano&nbsp;II, Alto&nbsp;II and Tenor&nbsp;II.</p>
+  <p>Open the <b>Staves</b> section to see <b>Generate parts</b> on top and, below it, one line per stave, with the controls lined up in columns. The melody stave's line is highlighted, and a stave written by Generate parts carries a small <i>generated</i> tag:</p>
+  <ul>
+    <li><b>Part</b> &mdash; Descant, Soprano, Soprano&nbsp;II, Alto, Alto&nbsp;II, Tenor, Tenor&nbsp;II, Baritone, Bass, Bass&nbsp;II. Changes the stave's label and its range and role in harmony generation.</li>
+    <li><b>Clef</b> &mdash; Treble, Bass, or Tenor. Tenor is a treble clef with a small 8 beneath it: the music sounds an octave lower than written, the standard way to notate a tenor line. Playback and every export honour this.</li>
+    <li><b>Instrument</b> &mdash; a label for the stave (Piano by default, or whatever an imported file named it, such as &ldquo;Choir Aahs&rdquo;). It is written into MusicXML and MIDI exports, where it also picks the General MIDI sound. Harmonizer's own playback is always grand piano.</li>
+    <li><b>Melody</b> (radio button) &mdash; chooses which stave holds the tune. Move it off the top line and the notes are shifted by octave to suit that voice; treat that as a rough starting point. Generated harmony is cleared, as it was written for the old arrangement.</li>
+    <li><b>Own rhythm</b> (checkbox, non-melody staves) &mdash; the stave has a rhythm of its own, edited exactly like the melody: click its staff to add notes, and insert, delete, tie, dot or re-time them. Generate parts writes its harmony this way too, so the box switches on by itself for every stave it fills. Once <em>you've</em> written a note into a stave you ticked by hand, that stave is your own composed line and Generate parts leaves it alone. Unticking the box discards the stave's notes (it asks first).</li>
+    <li><b>Play</b> (checkbox) &mdash; whether that stave is heard. Untick it to mute a part without losing it.</li>
+    <li><b>Lock all / Unlock all</b> (generated staves) &mdash; lock or free every note on the stave at once (see <a href="#generate">Locking</a>).</li>
+    <li><b>&darr; Combine with &hellip;</b> (Divisi column) &mdash; puts the stave below onto this one. Where the two sing the same note it's written once; where they differ it's two notes on one stem (divisi); where one holds while the other moves, the held note is split into tied notes so both fit on the stem. The stave below goes away. It refuses (and names the measures) only where triplets in one line don't line up with the other. If one of the two was the melody, the combined stave is.</li>
+    <li><b>Split divisi</b> &mdash; the reverse: the second notes move to a new stave just below (Alto&nbsp;II under Alto, say), with the unison notes on both &mdash; useful for separate rehearsal tracks. Split then Combine gives you back exactly what you had.</li>
+  </ul>
+  <h3>Divisi on one stave</h3>
+  <p>A note can carry a second note on the same stem. Select a note and use <b>Divisi</b> in the Selected panel: <b>+ 3rd below</b> or <b>+ 3rd above</b> adds one, then set its letter, octave and accidental there; <b>&#8645; Swap</b> exchanges it with the main note (the one dragging and the arrow keys move), and <b>&#10005;</b> removes it. With several notes selected, the same buttons add or remove a divisi on all of them. Divisi notes are drawn with their own accidentals, dots, ledger lines and ties (seconds sit either side of the stem), play on their stave's sound and in its rehearsal track, move with Transpose and the octave keys, count in <b>Chords from voices</b>, and are checked by <b>Mark parallel fifths &amp; octaves</b> as a line of their own. MusicXML writes them as chords on one stem; MIDI plays both notes.</p>
+  <figure class="shot"><img src="docs/screenshots/harmonizer-1-coolin.png" alt="Barber&rsquo;s The Coolin on four staves; where the altos divide, two noteheads share one stem, with ties above and below." width="1440" height="960" loading="lazy"><figcaption>Barber&rsquo;s <i>The Coolin</i>: the second alto line is carried as divisi on the Alto stave, two notes on one stem only where the part divides.</figcaption></figure>
+
+  <p>Notes on every stave line up on a shared time grid, and barlines run through all staves. Reducing the stave count removes the extra parts; if that would remove the melody stave, the melody moves to a remaining one.</p>
+
+  <h2 id="generate">11. Generating the other parts</h2>
+  <p>With more than one stave and at least one chord placed, a <b>Generate parts</b> button appears at the start of the Staves section, with a <b>style</b> menu beside it. It fills every eligible non-melody stave with a draft worked out from the melody and the chords beneath it: a bass line planned first, sensible voice ranges, doubling rules, and a search across the whole passage (not just chord by chord) for smooth voice leading. Parallel octaves are always avoided; how the rest is weighed depends on the style. The tune can be on any stave: voices placed above it stay above it, and the bass stays below it with room for the voices in between. The full rule set, with every weight, is in the <a href="docs/harmonizer-partwriting-guide-2.31.pdf">Partwriting Guide</a> (PDF).</p>
+  <h3>Styles</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Style</th><th>Character</th></tr>
+    <tr><td>Close harmony</td><td>The default. Contemporary a cappella in the vein of Gjeilo, Lauridsen and Whitacre: close spacing, doubled thirds welcome, parallel fifths and planing between upper voices tolerated.</td></tr>
+    <tr><td>Traditional (hymn)</td><td>Textbook four-part writing: no parallel fifths or octaves, hidden fifths and octaves in the outer voices discouraged, complete triads with the root doubled rather than the third, soprano&ndash;alto and alto&ndash;tenor within an octave, smooth inner voices, leading tones and sevenths resolved properly, and more contrary motion against the melody.</td></tr>
+    <tr><td>Open (wide)</td><td>Open-position voicing: the upper voices spread a fifth to a tenth apart, the tenor and bass sit lower to make room, fewer unisons, and fifths and octaves treated fairly strictly.</td></tr>
+  </table></div>
+  <p>The style is saved with the song. Pick one and press <b>Generate parts</b>; to compare, make a <b>Copy</b> of the song and generate each copy in a different style. Locked notes are kept whichever style you use.</p>
+  <div class="note"><p>This is a starting draft, not a substitute for a real voice-leading pass by ear. Expect the occasional awkward leap or unresolved leading tone. Turning on <b>Mark parallel fifths &amp; octaves</b> in Settings shows you any parallels in the result (Close harmony tolerates parallel fifths on purpose), and <b>Range warnings</b> point out notes a voice would strain for &mdash; handy after you've dragged notes around by hand.</p></div>
+  <p><b>Which staves it fills.</b> A stave is eligible if it's blank &mdash; including one you've ticked <b>Own rhythm</b> on but haven't written into yet &mdash; or if its current content is itself a previous Generate parts result. A hand-built Own rhythm stave is skipped entirely. To hand one back, untick <b>Own rhythm</b> (this discards its notes, and asks first).</p>
+  <h3>How it reads the music</h3>
+  <p>Generate parts doesn't write note by note from left to right. It reads the whole piece first, then chooses each voice's line for the whole passage at once.</p>
+  <ul>
+    <li><b>Phrases and cadences.</b> A phrase ends at a rest, at a note held well beyond the tune's usual length, or where a tonic chord arrives on a downbeat from its dominant or subdominant and is held (a phrase is at least about a measure long). At each cadence the bass wants the root, the chords are filled out completely, leading tones and sevenths are made to resolve, and a Picardy third in the melody is honoured. The chord before the cadence prefers root position too.</li>
+    <li><b>Secondary dominants.</b> A dominant seventh, or a major chord that doesn't belong to the key, falling a fifth to the next chord is heard as that chord's V: a D7 going to G in C major is V7 of G, so its F&sharp; is treated as a leading tone that rises to G, and its C as a seventh that falls.</li>
+    <li><b>The local key.</b> Measure by measure, Harmonizer compares the notes and chords around it with every major and minor key (the Krumhansl&ndash;Schmuckler method), strongly preferring the key signature in force. A different key has to last three measures or more before it counts, so a stray accidental never &ldquo;modulates&rdquo;, but a real passage in the dominant or the relative minor is treated as being in that key &mdash; its V chord gets a proper leading tone &mdash; even with no key change written. This only guides the part-writing; it never changes the key signatures on the score.</li>
+    <li><b>Three notes at a time.</b> Each voice is judged over three notes in a row, not just two: after a leap of a fourth or more it prefers to step back the other way, and two leaps the same way that together pass an octave (or outline a tritone) are avoided. In Traditional and Open styles, the upper voices also avoid moving in lockstep (all by the same interval) twice running; in Close harmony that planing is left alone, since it's part of the style.</li>
+    <li><b>Suspensions.</b> Where a chord change lasts into the next melody note, a voice may hold its note over from the chord before (it prints as a tie), let it clash for a moment, then resolve it down by step into the chord &mdash; a 4&ndash;3 (the fourth above the root falling to the third) or a 9&ndash;8. They're only written when properly prepared and resolved, never against their own resolution in another voice, and mostly at cadences: Close harmony uses them most, Traditional mainly for the cadential 4&ndash;3. When the <i>melody</i> itself has a suspension, the other voices keep off its resolution note.</li>
+  </ul>
+  <p>After a run, the status line reports what it heard: how many cadences, suspensions and secondary dominants, and any key areas outside the key signature (&ldquo;heard G major in mm.&nbsp;9&ndash;16&rdquo;).</p>
+  <h3>Independent rhythm</h3>
+  <p>Generated voices keep their own rhythm rather than striking a fresh note on every melody note: an inner voice holds &mdash; tied &mdash; through repeated or purely ornamental melody notes, and only moves when the underlying harmony genuinely changes.</p>
+  <h3>Locking</h3>
+  <p>Hand-edit any note on a generated stave &mdash; drag it, nudge it, change it in the inspector &mdash; and it locks automatically: a <b>&#128274;</b> appears, and the next Generate parts keeps that note exactly as written while it rebuilds everything else around it. Unlock a note from its own inspector (click the lock), lock or unlock several selected notes at once with <b>Lock selected</b> / <b>Unlock selected</b>, or use <b>Lock all</b> / <b>Unlock all</b> for a whole stave.</p>
+  <h3>Chord suggestions</h3>
+  <p>When a melody note doesn't sit well in any reasonable voicing of the chord you've given it, Generate parts proposes a replacement chord at that beat instead of forcing an awkward harmony. Suggestions appear as small buttons next to Generate parts (for example, <i>Beat 4: C &rarr; F&sharp;7</i>); click one to apply that chord and regenerate, or ignore it if the melody note was intentional.</p>
+  <ul>
+    <li>Generated notes are drawn slightly dimmed to show where they came from, but they are fully editable: click, drag, nudge, change accidental, swap between staves, or shift an octave &mdash; any of which locks the note.</li>
+    <li>Running Generate parts again replaces the harmony, except for locked notes.</li>
+    <li>Changing the melody, the chords, or a stave's Part or Clef clears stale harmony (locks included) so you know to regenerate.</li>
+    <li>Harmony follows key changes: leading tones and dominant chords are judged against the key in force at each note, and generated notes are spelled in that key.</li>
+  </ul>
+
+  <h2 id="changes">12. Key, tempo and time changes</h2>
+  <p>The header sets the song's <i>opening</i> key, tempo and time signature. To change any of them part-way through:</p>
+  <ol>
+    <li>Select a note (or a chord) anywhere in the measure where the change should happen.</li>
+    <li>Open the <b>Selected</b> panel and find <b>Key, tempo, time &amp; rehearsal marks</b>. It names the measure and shows the key and tempo in force there.</li>
+    <li>Pick a new <b>Key</b>, type a new <b>Tempo</b>, and/or set a new <b>Time</b> signature &mdash; any combination &mdash; and press <b>Apply at m.&nbsp;<i>n</i></b>.</li>
+  </ol>
+  <p>Changes always start at the beginning of the measure. A change in the very first measure is refused with a pointer to the header, which owns the opening values. Choosing the key or tempo that is already in force removes the change instead of adding a redundant one. Below the controls, every change in the song is listed in order (&ldquo;m.&nbsp;9: Key &rarr; D major&rdquo;), each with a &#10005; to remove it; <b>Remove all here</b> clears every change at the selected measure.</p>
+  <ul>
+    <li><b>On the score.</b> The new key signature is drawn on every stave; when the new key has no sharps or flats, naturals cancel the old signature. A tempo change appears as &ldquo;&#9833; = 72&rdquo; above the top stave; a time-signature change on the melody stave.</li>
+    <li><b>Existing notes keep their pitches.</b> Adding a key change doesn't rewrite what you've written: an F that was natural stays natural, and now shows a &natural; sign. New notes, arrow-key nudges, drags, and letters typed in Melody text without an accidental follow the key in force where they land. If you want the music itself to move to the new key, write it that way (or transpose the whole song).</li>
+    <li><b>Everything follows them.</b> Playback and the playhead, loop, saved .wav audio and rehearsal tracks speed up and slow down at tempo changes; Suggest chords, Chords from voices and Generate parts use the local key; MusicXML and MIDI exports write the changes; imports keep them; Transpose moves key changes along with everything else.</li>
+  </ul>
+
+  <h2 id="marks">13. Expressive marks</h2>
+  <p>The <b>Marks</b> row, under the duration buttons in <b>Note entry</b>, adds the markings a choral score needs &mdash; and Harmonizer <i>plays</i> them, so you hear the ritardando, the held fermata and the hairpin while you arrange. Every button works on the <b>selected note(s)</b>: click a note (or <kbd>Shift</kbd>-click a run of them), then click the mark. Press the same button again to take it off; <b>Clear marks</b> removes everything from the selection. The buttons light up to show what the selected note already has.</p>
+  <div class="tbl-wrap"><table class="marks-tbl"><colgroup><col style="width:26%"><col style="width:37%"><col style="width:37%"></colgroup>
+    <tr><th>Mark</th><th>How to add it</th><th>What playback does</th></tr>
+    <tr><td><b>Tempo word</b> (Largo, Adagio, Andante, Moderato, Allegretto, Allegro, Vivace, Presto)</td><td><b>Tempo &#9662;</b> with a note selected. On the first note it sets the opening word and tempo (the header's Tempo changes to match); later on, it's a tempo change with the word.</td><td>Sets the word's usual metronome mark (Allegro &#9833;&nbsp;=&nbsp;132, and so on). Fine-tune the number in the header or in <i>Key, tempo, time &amp; rehearsal marks</i>.</td></tr>
+    <tr><td><b>rit.</b>, <b>rall.</b>, <b>poco rit.</b>, <b>molto rit.</b>, <b>accel.</b></td><td><b>Tempo &#9662;</b> with the notes it should cover selected. With a single note selected it runs to the end of that measure.</td><td>Slows smoothly to about 70% (poco rit. 85%, molto rit. 55%) or speeds up to about 130% by the end, and stays there until the next tempo mark.</td></tr>
+    <tr><td><b>a tempo</b>, <b>Tempo I</b></td><td><b>Tempo &#9662;</b> on the note where the tempo comes back.</td><td>a tempo returns to the tempo before the last rit./accel.; Tempo I returns to the opening tempo.</td></tr>
+    <tr><td><b>Fermata</b></td><td>The fermata button (an arc with a dot), or press <kbd>F</kbd>. Works on rests too.</td><td>Everyone holds that moment about 1.75&times; as long, then there's a short breath before going on &mdash; a fermata on any stave holds all of them.</td></tr>
+    <tr><td><b>Breath mark</b> (,) and <b>caesura</b> (//)</td><td>The two buttons after the fermata; the mark goes <i>after</i> the selected note.</td><td>The note lets go on time and a short gap follows (a caesura's gap is a full beat).</td></tr>
+    <tr><td><b>Dynamics</b> (pp, p, mp, mf, f, ff, sfz, fp)</td><td>The <b><i>mf</i> &#9662;</b> menu; <i>Remove dynamic</i> takes one off.</td><td>Sets the volume from there on (sfz is one note only; fp is loud, then soft). Until the first dynamic, a stave plays at its usual level.</td></tr>
+    <tr><td><b>Crescendo / diminuendo</b> hairpins</td><td>The &lt; and &gt; buttons, over a selected run of notes.</td><td>The volume ramps to the dynamic just after the hairpin, or one step louder/softer if there isn't one.</td></tr>
+    <tr><td><b>Accent</b>, <b>staccato</b>, <b>tenuto</b>, <b>marcato</b></td><td>The four articulation buttons.</td><td>Accent and marcato are louder (marcato also a little detached); staccato is short; tenuto is full length and slightly leaned on.</td></tr>
+    <tr><td><b>Slur</b></td><td>The arc button, over two or more selected notes.</td><td>&mdash; (shown and exported)</td></tr>
+    <tr><td><b>Rehearsal letter</b></td><td>The <b>A</b> button, with any note in the measure selected. Letters run A, B, C&hellip; in order and renumber themselves when you add or remove one; give one a name of its own (&ldquo;Coda&rdquo;, &ldquo;Verse 2&rdquo;) in <i>Key, tempo, time &amp; rehearsal marks</i>.</td><td>In the play window, <b>Section</b> jumps to it and Loop can repeat it (see <a href="#play">Playback</a>).</td></tr>
+    <tr><td><b>Text</b> above the stave (&ldquo;hum&rdquo;, &ldquo;solo&rdquo;, &ldquo;div.&rdquo;, &ldquo;legato&rdquo;)</td><td><b>Text&hellip;</b> opens the Selected panel with its <b>Text above</b> box ready to type in. Works on rests too.</td><td>&mdash;</td></tr>
+  </table></div>
+  <ul>
+    <li><b>One stave or all of them.</b> A mark goes on the selected stave only. Tick <b>All voices</b> (at the end of the row) to put it on every stave at the same beat &mdash; the quick way to write <i>pp</i>, a fermata or an accent for the whole choir. Tempo marks and rehearsal letters always belong to the whole song.</li>
+    <li><b>Marks move with their notes.</b> A dynamic, fermata or hairpin belongs to its note, so inserting or deleting notes earlier doesn't strand it. Tempo marks and rehearsal letters are tied to their place in the song, like key and tempo changes.</li>
+    <li><b>Staves that follow the melody's rhythm</b> share the melody's notes, so a mark put on one of them goes on the melody note (the status line says so), and those staves play the melody's dynamics. <b>Generate parts</b> copies the melody's dynamics, hairpins, fermatas, articulations and breath marks into the voices it writes.</li>
+    <li><b>The list.</b> <i>Key, tempo, time &amp; rehearsal marks</i> in the Selected panel lists every tempo word, rit./accel., a tempo and rehearsal letter with the key, tempo and time changes, each with a &#10005; to remove it; rehearsal letters have a box to rename them. <b>Remove tempo marks here</b> in the Tempo menu clears the tempo words, rit./accel. and a tempo on the selected notes.</li>
+    <li><b>Everywhere else.</b> Loop, practice speed, <b>Save .wav</b> and rehearsal tracks all follow the marks. <b>Save .musicxml</b> writes them all; <b>Save .mid</b> writes dynamics and accents as note velocities, staccato as shorter notes, and rit./accel. and fermatas as tempo changes (MIDI has no way to store a breath).</li>
+  </ul>
+
+  <figure class="shot"><img src="docs/screenshots/harmonizer-3-marks.png" alt="Old Hundredth with fermatas on every stave at the line ends, rehearsal letters A and B, a crescendo hairpin into forte, and the Marks row above the score." width="1440" height="960" loading="lazy"><figcaption>The Marks row above the score, and some of what it writes: fermatas on every voice (with All voices ticked), rehearsal letters, and a crescendo into <i>f</i>.</figcaption></figure>
+
+  <h2 id="repeats">14. Repeats, endings, D.C. and D.S.</h2>
+  <p>The <b>Repeat &#9662;</b> menu in the Marks row works on whole measures &mdash; from the measure holding the first selected note to the one holding the last:</p>
+  <ul>
+    <li><b>Repeat these measures</b> puts a start repeat <b>|:</b> at the first measure and an end repeat <b>:|</b> after the last. <b>Start repeat</b> and <b>End repeat</b> add (or remove) just one. An end repeat with no start goes back to the beginning.</li>
+    <li><b>1st ending</b>, <b>2nd ending</b>, <b>3rd ending</b> and <b>1st &amp; 2nd ending</b> put a bracket over the selected measures. Put the end repeat at the end of the 1st ending, as usual.</li>
+    <li><b>D.C.</b>, <b>D.S.</b>, <b>D.C./D.S. al Fine</b> and <b>al Coda</b> go at the end of the measure; <b>Segno</b> and <b>Coda</b> at the start of theirs; <b>Fine</b> and <b>To Coda</b> at the end. The status line reminds you if a jump is missing its Segno, Fine or Coda.</li>
+    <li><b>Remove repeats &amp; jumps here</b> clears them from the selected measures. They're also listed in <i>Key, tempo, time &amp; rehearsal marks</i> in the Selected panel, each with a &#10005; &mdash; and an end repeat has a box for how many times the passage is played (3 or more is written above the barline as &ldquo;3&times;&rdquo;).</li>
+  </ul>
+  <p><b>What playback does.</b> Play follows the repeats and jumps in performance order, with the playhead going back where the music goes back. The usual conventions apply: after a D.C. or D.S. the repeats aren't taken again and the last ending is played, and a D.C./D.S. is taken once. The play window has a <b>Repeats</b> switch to play straight through as written instead. <b>Loop</b> always plays its passage as written. <b>Save .wav</b>, rehearsal tracks and <b>Save .mid</b> are performances too (following the Repeats switch); <b>Save .musicxml</b> writes the score as written, with its repeat barlines, endings and D.C./D.S. marks, and MusicXML import reads them back.</p>
+
+  <h2 id="play">15. Playback, loop and practice speed</h2>
+  <p>Press <b>Play</b> or <kbd>Space</kbd>. Sound comes from Salamander Grand Piano samples across the full keyboard, so extreme high and low notes sound correctly rather than being clipped to a vocal range.</p>
+  <ul>
+    <li><b>Where it starts.</b> From the selected note if one is selected; otherwise from the selected chord; otherwise from the first measure that contains a note, skipping any leading rests.</li>
+    <li><b>The play window.</b> Pressing Play opens the score in a centered window that uses as much of the screen as it can. The editing layout is untouched behind it and returns when you press <b>Close</b> or <kbd>Esc</kbd>.</li>
+    <li><b>While playing.</b> The current measure is shaded across every stave, a thin line follows the beat (through any tempo changes), playing notes light up, and the score scrolls to keep the playhead in view.</li>
+    <li><b>Pause and resume.</b> <kbd>Space</kbd> is a toggle. Press it while playing to pause: the playhead stays parked where the music stopped, the status bar names the measure, and the Play button becomes <b>Resume</b>. Press <kbd>Space</kbd> (or Resume) again to carry on from exactly that spot. To resume from somewhere else, click a note in the play window while paused &mdash; in the play window a click only chooses a starting point, it never edits &mdash; and playback continues from that note instead. With Loop on, resuming stays inside the loop.</li>
+    <li><b>Stop</b> forgets the paused spot, so the next Play starts the usual way (from the selected note, or the beginning). Editing the music, switching songs, or reaching the end also clears it; closing the play window doesn't.</li>
+    <li><b>When stopped or paused.</b> The window stays open. <b>&#9664;</b> / <b>&#9654;</b> (or <kbd>&larr;</kbd> / <kbd>&rarr;</kbd>) page through the score, and <b>&#9198;</b> / <b>&#9197;</b> (or <kbd>Home</kbd> / <kbd>End</kbd>) jump to the beginning or end &mdash; and move the play position there too: after &#9198;, <b>Play</b> starts from the top (even if you had paused somewhere, or selected a note earlier); after &#9197;, it plays the last measure. Paging with &#9664; / &#9654; only moves the view. Clicking a note afterwards still makes playback start from that note.</li>
+    <li><b>Choosing what you hear.</b> The play window's <b>Hear</b> row has one button per stave plus <b>Chords</b>: click to include or exclude, <kbd>Shift</kbd>-click a stave to hear only that one, or press <b>All</b>. These mirror each stave's <b>Play</b> checkbox and the <b>Play chords</b> switch.</li>
+  </ul>
+  <figure class="shot"><img src="docs/screenshots/harmonizer-4-play.png" alt="The play window during playback: the score full width, the current measure shaded and a playhead line, with the Hear buttons, Loop, Repeats, Section and Speed above." width="1440" height="960" loading="lazy"><figcaption>The play window. The Hear buttons choose the voices; Loop, Repeats, Section and Speed sit underneath.</figcaption></figure>
+  <h3>Loop</h3>
+  <p><b>Loop</b> (or <kbd>L</kbd>) in the play window repeats a passage until you stop it. Select one note to loop its measure, or select notes across several measures &mdash; on any stave &mdash; to loop all of them; with nothing selected it loops the whole song. The loop always covers whole measures, and the measures it will play (&ldquo;Looping mm.&nbsp;5&ndash;8&rdquo;) are shown beside the button. Turn Loop off and playback stops at the end of the current pass. A loop plays its passage as written, without repeats or jumps.</p>
+  <h3>Sections (rehearsal letters)</h3>
+  <p>When the song has <a href="#marks">rehearsal letters</a>, the play window shows a <b>Section</b> menu beside Loop. Pick a letter and the play position moves there (if the music is playing, it carries on from there). With <b>Loop</b> on and no note selected, Play repeats just that section, up to the next letter (&ldquo;Looping section B (mm.&nbsp;17&ndash;24)&rdquo;) &mdash; the way a rehearsal actually runs. Selecting notes takes priority over the section, as before; &#9198;/&#9197; clear it.</p>
+  <h3>Practice speed</h3>
+  <p>The <b>Speed</b> slider in the play window slows playback down to 40% or speeds it up to 150% without changing pitch, and shows the resulting tempo (&ldquo;80% &middot; 77 bpm&rdquo;). <kbd>[</kbd> and <kbd>]</kbd> nudge it by 5%. A new speed takes effect the next time Play starts, or on the next pass of a loop. It is remembered in this browser, applies to every song, and never changes the song's written tempo.</p>
+  <h3>Saving the audio</h3>
+  <p><b>Save &rarr; as .wav</b> renders the whole song, start to finish, through the same piano samples, with the staves and chords currently switched on, and downloads it as a standard, lossless .wav file. (There is no MP3 export: browsers don't include an MP3 encoder. Any audio program converts a .wav.)</p>
+
+  <h2 id="rehearsal">16. Rehearsal tracks</h2>
+  <p><b>Rehearsal tracks&hellip;</b>, the last item in the <b>Save &#9662;</b> menu, makes part-learning tracks for your singers: one audio file per voice, with that voice at full volume and the others underneath it. The dialog offers:</p>
+  <ul>
+    <li><b>Voices</b> &mdash; a checkbox for every stave with notes (all ticked to start), plus <b>Also include a full mix</b> with all voices equal.</li>
+    <li><b>Other voices</b> &mdash; Medium (half volume), Quiet, Very quiet, or Silent (the voice alone).</li>
+    <li><b>Speed</b> &mdash; 50% to 125%; a slow set for note-bashing and a full-speed set for later.</li>
+    <li><b>Left ear / right ear</b> &mdash; the voice in the left ear and everything else in the right, the classic learning-track layout. Stereo files are twice the size of the default mono ones.</li>
+    <li><b>Include the chord accompaniment</b>.</li>
+  </ul>
+  <p>Press <b>Make tracks (.zip)</b>. Each track is rendered in turn (progress is shown) and all of them download together in one .zip named after the song, with files like <code>My-Song - Alto.wav</code> (and <code>&hellip; 80pct.wav</code> for a slowed set). The tracks are performances: tempo changes, rit. and accel., fermatas, breaths and dynamics are followed, repeats and D.C./D.S. are played out (unless the play window's <b>Repeats</b> switch is off), and a stave's divisi notes are in that voice's track (use <b>Split divisi</b> first if Alto 1 and Alto 2 need a track each).</p>
+  <figure class="shot"><img src="docs/screenshots/harmonizer-6-rehearsal.png" alt="The Rehearsal tracks dialog with voice checkboxes, a full mix option, how loud the other voices are, speed, a left/right ear option and chord accompaniment." width="1440" height="960" loading="lazy"><figcaption>The Rehearsal tracks dialog.</figcaption></figure>
+
+
+  <h2 id="score">17. The score display and Settings</h2>
+  <h3>Notation details</h3>
+  <ul>
+    <li>Clefs and accidentals are drawn as vector shapes from the Bravura music font, so they look the same on every computer and scale with the staff.</li>
+    <li>Stems point up or down by the note's position on the staff; eighths and sixteenths are beamed in groups within a beat, or flagged when alone. In 6/8, 9/8 and 12/8 a beat is a dotted quarter, so beams group in threes; groups never cross a barline.</li>
+    <li>Ties join notes of the same pitch. Dynamics and hairpins sit below the stave; fermatas, articulations, breath marks and text above or beside the note; tempo words, rit./accel. with a dashed line, and boxed rehearsal letters above the top stave (see <a href="#marks">Expressive marks</a>). Grace notes carried in from an imported score are shown as small noteheads but are view-only.</li>
+    <li>Key changes, tempo changes and time-signature changes are drawn where they happen (see <a href="#changes">Key, tempo and time changes</a>).</li>
+    <li>The part name sits above the top-left of each stave. With many staves, a small badge at the top or bottom of the score names any that are scrolled out of view; click it to scroll.</li>
+    <li>A long piece scrolls horizontally; a short one stretches to fill the width.</li>
+  </ul>
+  <h3>Settings</h3>
+  <p>The gear icon in the header opens <b>Settings</b>:</p>
+  <ul>
+    <li><b>Black on white</b> &mdash; the score pane's colour scheme: black notation on a white page (default), or light-on-dark. Score only, remembered in this browser across every song.</li>
+    <li><b>Barlines</b> &mdash; show or hide the automatic barlines. Saved with the song.</li>
+    <li><b>Range warnings</b> (on by default) &mdash; any note outside the comfortable range of its stave's voice part is tinted orange; hover it to see which range it's outside, for example &ldquo;Above the Alto's comfortable range (G3&ndash;D5)&rdquo;. The ranges are the same ones Generate parts writes within, judged at sounding pitch (so a tenor-clef note counts an octave below where it's written). Change a stave's <b>Part</b> and its notes are judged against the new voice.</li>
+    <li><b>Mark parallel fifths &amp; octaves</b> (off by default) &mdash; wherever two staves move in the same direction from a perfect fifth to another fifth, or from an octave (or unison) to another octave, a dashed red line joins each voice's two notes, labelled <b>5</b> or <b>8</b>. Every pair of staves is checked, melody included &mdash; except that two staves singing exactly the same notes (a doubled part, like Alto&nbsp;1 and 2 in unison) aren't flagged; the same line an octave apart is, and a count appears in the status bar when you switch it on. Voices that hold, move in contrary motion, or cross aren't flagged.</li>
+    <li><b>Song library backup</b> &mdash; see <a href="#save">Backing up every song</a>.</li>
+  </ul>
+  <p>Black on white, Range warnings and the parallels marks are remembered in this browser across every song. The warning colours and marks never appear when you print.</p>
+
+  <h2 id="import">18. Importing a MusicXML score</h2>
+  <p>Press <b>Open&hellip;</b> and choose a MusicXML file &mdash; <code>.musicxml</code>, <code>.xml</code>, or a compressed <code>.mxl</code> from MuseScore, Finale, Sibelius or similar. It always opens as a <b>new song</b>, so nothing you have is overwritten.</p>
+  <p>If the file has more than one line of music, a dialog lists them so you can choose which becomes the <b>melody</b> (its lyrics and chords become the song's) and which others come in as further staves (up to eight in all). Vocal parts are ticked to start with; if nothing in the file looks vocal, every single-line part is. <b>Keep each voice's own rhythm</b> (on by default) keeps each voice's rhythm; untick it to have the other staves follow the melody's rhythm. Press <b>Import</b>, or <kbd>Esc</kbd> to cancel. The status line then reports what came across.</p>
+  <h3 id="import-report">The Import report</h3>
+  <p>After every import an <b>Import report</b> button appears in the status bar at the bottom. It opens a table of what the file held against what's now in the song, for the parts you brought in: notes, lyric syllables, dynamics, hairpins, slurs, fermatas, articulations, breath marks, words, rehearsal marks, tempo, meter and key changes, repeats, endings and chord symbols. Below it, <b>Not brought across</b> lists anything Harmonizer doesn't model: ornaments (trills, mordents, turns), tremolos, arpeggio signs, glissandos, other articulations, notes shorter than a sixteenth, double dots, tuplets other than triplets, verses past the sixth, C clefs, clef changes within a part, and chord-symbol extensions or slash basses. For MIDI it matches the file note for note (each key at each sixteenth), says how many notes sit on chord lines you didn't tick, and counts notes that had to be moved onto the sixteenth grid.</p>
+  <p>If anything came up short, or something in the file couldn't be brought across, the report opens by itself and the button turns amber. Otherwise it stays closed until you click the button. Notes are counted once per attack: tied notes count as one note, and each divisi head counts. It's the quickest way to check a file before you start arranging from it.</p>
+  <h3>Parts with more than one line</h3>
+  <p>A part that holds several lines is split so none of them is lost:</p>
+  <ul>
+    <li>A <b>second voice</b> on the same staff (MusicXML voice 2, as in a SA stave or a fugue) is offered as its own stave: &ldquo;Piano &ndash; voice 2&rdquo;.</li>
+    <li><b>Chords</b> within a voice &mdash; a divisi, or a piano reduction &mdash; are split top-down into one line per note: &ldquo;Soprano &ndash; upper&rdquo; / &ldquo;Soprano &ndash; lower&rdquo;, or &ldquo;note 1 (top)&rdquo; to &ldquo;note 4 (bottom)&rdquo; for bigger chords. Where a chord has fewer notes than there are lines, the lower lines share its bottom note, so a divisi that comes back to unison sings the same note on both staves.</li>
+    <li><b>Keep divisi on one stave</b> (on by default): a part's lower line goes onto its upper line's stave as <a href="#staves">divisi</a> &mdash; two notes on a stem where they differ, one note where they agree &mdash; instead of an upper and a lower stave running the whole piece. The dialog marks those rows &ldquo;as divisi on the &hellip; stave&rdquo;, and they don't count toward the eight staves. Untick it to get separate staves; you can still combine or split them later in Staves.</li>
+    <li>With that option off, the lower line of an <i>occasional</i> divisi starts unticked; tick it to bring it in. A part that is split most of the time is ticked for you.</li>
+    <li>Lower lines and second voices are given the next part down (Soprano&nbsp;II, Alto&nbsp;II&hellip;) so two staves don't end up with the same name.</li>
+  </ul>
+  <figure class="shot"><img src="docs/screenshots/harmonizer-5-import.png" alt="The import dialog for The Coolin: Soprano, Alto upper and lower, Tenor, Bass upper and lower, with the lower lines marked as divisi on their upper staves." width="1440" height="960" loading="lazy"><figcaption>Importing <i>The Coolin</i> (a MIDI file): the lower Alto and Bass lines will come in as divisi on their upper staves, so the song opens on four staves.</figcaption></figure>
+  <h3>What comes across</h3>
+  <p>Notes, rests, lyrics (every verse, with hyphens and extenders), ties, chord symbols, the key, tempo and time signature, a pickup measure, and every <b>key change, tempo change and time-signature change</b>. Dynamics, hairpins, slurs, fermatas, articulations (accent, staccato, tenuto, marcato), breath marks and caesuras, and text directions (&ldquo;hum&rdquo;) come across on every stave that keeps its own rhythm (with <b>Keep each voice's own rhythm</b> unticked, only the melody keeps them), and you can edit them like any others. Rehearsal marks and tempo words come across too, and so do section headings written as text (&ldquo;Verse&nbsp;1&rdquo;, &ldquo;Chorus&rdquo;, &ldquo;Bridge&rdquo;, &ldquo;Chorus 4 Repeat&rdquo;), which become named rehearsal marks, so they also show up in the play window's <b>Section</b> list. Tempo words include Allegro and the like, <i>rit.</i>/<i>rall.</i>/<i>accel.</i> (running to the end of their dashed line), <i>a tempo</i> and <i>Tempo&nbsp;I</i>. Grace notes are shown and exported but can't be edited. Each part's instrument name comes across as its stave's Instrument label. Tenor parts on the &ldquo;8&rdquo; treble clef are read as sounding an octave below written; a transposing instrument's part (clarinet in B&flat;, horn in F&hellip;) is brought to concert pitch, key signature and chord symbols included; and bass-range parts written in a treble clef are shown on a bass clef. Parts named for a voice (&ldquo;Soprano&rdquo;, &ldquo;Piano, Alto&rdquo;) get that part; unnamed ones (&ldquo;Track 1&rdquo;) get the usual choir layout for the number of staves, highest first.</p>
+  <h3>What is simplified</h3>
+  <ul>
+    <li>Rhythms from whole notes down to sixteenths (dotted if needed) and 3:2 triplets are kept. Longer notes are split into ties; anything faster than a sixteenth is folded into a neighbouring note.</li>
+    <li>Repeats, 1st/2nd endings, segno, coda, Fine and D.C./D.S. directions are read. A rit. whose slowing is already spelled out by tempo marks in the file is shown but not slowed twice.</li>
+    <li>A file whose title is MuseScore's placeholder &ldquo;Untitled score&rdquo; takes its title from the title text on the page, or else the file name.</li>
+    <li>Anything else the file holds that Harmonizer doesn't model is listed in the <a href="#import-report">Import report</a>.</li>
+  </ul>
+
+  <h3 id="examples">Examples</h3>
+  <p>The <b>Examples &#9662;</b> menu, next to Open&hellip; in the header, lists the example arrangements that come with Harmonizer &mdash; choral pieces by Barber, Bruckner, Byrd and Morley. Pick one and it opens as a new song, through the same chooser as any other file, so you pick the melody and which voices to bring in. When Harmonizer starts with no music at all (a first visit, or a library of only empty songs), a welcome window offers the same list, along with <b>Start with an empty song</b>, <b>Open a file&hellip;</b> and the quick-start guide. Opening anything into an untitled, empty song replaces it rather than leaving a blank song behind in the Song menu.</p>
+  <div class="note tip"><p><b>Adding your own examples.</b> The examples live in the <code>data</code> folder beside the app folder. Put a <code>.mid</code>, <code>.mxl</code>, <code>.musicxml</code> or <code>.json</code> file there and add a line for it to <code>data/index.json</code>, which lists each file with the title the menu shows. (Without an <code>index.json</code>, Harmonizer falls back to the web server's own folder listing, where the server allows one.)</p></div>
+
+  <h2 id="midi">19. Importing a MIDI file</h2>
+  <p><b>Open&hellip;</b> also reads MIDI files (<code>.mid</code>, <code>.midi</code>, <code>.kar</code>) and opens them as a new song through the same dialog:</p>
+  <ul>
+    <li>Every track becomes a candidate stave (in a single-track file, every channel does). The drum channel is ignored.</li>
+    <li>A track that plays more than one note at a time &mdash; all four voices on one track, or a piano part &mdash; is split top-down into one line per simultaneous note, like chords in MusicXML; a note held while another line moves is tied across. With <b>Keep divisi on one stave</b> ticked, a track that only divides now and then (Alto 1 and 2 on one track) comes in as one stave with divisi.</li>
+    <li>The file's tempo, time and key signatures, and all their changes, come across, and so do lyric events. When a file sets two time signatures at the same moment (The Coolin opens with 4/4 and then 12/8), the last one wins. The track name names the stave; the MIDI program becomes its Instrument label (programs 53&ndash;55, the choir and voice sounds, mark a track as vocal). A track named for an instrument (&ldquo;Tenor Recorder&rdquo;) isn't mistaken for a voice.</li>
+    <li><b>Dynamics from velocities.</b> Where a track's note velocities really vary, Harmonizer averages them over about two bars and marks the level (pp to ff) wherever it changes and holds for at least six beats, so one accented note doesn't get a mark of its own. A file that plays every note at the same velocity gets no dynamics.</li>
+    <li><b>Hairpins from volume swells.</b> A steady rise or fall in a track's volume or expression controller (four or more steps, a beat or less apart) becomes a crescendo or diminuendo over the notes it covers.</li>
+    <li><b>Fermatas from tempo drops.</b> Many files write a fermata as a sudden deep drop in tempo that springs back within a beat. That's read as a fermata on every part at that point, not as two tempo changes.</li>
+    <li><b>Ritardandos from tempo steps.</b> A run of small tempo steps in one direction (100, 99, 98&hellip; down to 40) becomes one <i>rit.</i> or <i>accel.</i> span ending at the tempo it arrives at, not dozens of tempo changes. A tempo change that falls in the middle of a long note keeps its place instead of moving to the next note.</li>
+    <li><b>Markers</b> (section names, rehearsal letters) become rehearsal marks. The same key struck twice at once counts as one note, and a keyboard track's upper line is chosen together with its lower (divisi) line.</li>
+    <li>MIDI holds timings rather than notation, so rhythms are <b>rounded to the nearest sixteenth</b> (triplets come out as sixteenths), and there is no pickup measure. Note spellings follow the key signature in force; a file without a key signature gets the key with the fewest accidentals for its notes.</li>
+  </ul>
+
+  <h2 id="save">20. Saving, songs, backup and export</h2>
+  <h3>Autosave</h3>
+  <p>Every change is saved to this browser as you go; the status bar flashes &ldquo;Autosaved&rdquo;. Songs are stored per browser and per computer, so a different browser, a private window, or cleared site data will not have them &mdash; keep a backup (below).</p>
+  <div class="note warn"><p><b>If saving fails.</b> A browser gives each site limited storage, typically about 5&nbsp;MB. If Harmonizer can't save, an amber <b>&#9888; Not saved in this browser</b> warning appears in the status bar (saying &ldquo;storage full&rdquo; when that's the cause) and stays until a save succeeds. Your work is still on screen: export a backup straight away, then delete songs you no longer need.</p></div>
+  <h3>Several songs</h3>
+  <p>The <b>Song</b> dropdown switches between songs in progress. <b>New</b> starts another without touching the current one. The trash button deletes the current song (with confirmation).</p>
+  <h3>Copying a song</h3>
+  <p>Press <b>Copy</b> beside the Song menu to duplicate the current song as &ldquo;&hellip; (copy)&rdquo; and switch to it. Try a different key, chords, style or arrangement there; the original stays untouched.</p>
+  <h3>Transposing a song</h3>
+  <p><b>Transpose to</b>, beside Key, lists only keys of the same mode: other majors for a major song, other minors for a minor one. Each entry shows the shortest move, for example &uarr;5 or &darr;2 semitones. Choosing one moves every note on every stave, every chord and every key change, and changes the key. Spellings follow the new key (a raised leading tone stays a sharp). To undo, press Undo or transpose back. Changing the plain <b>Key</b> menu, by contrast, only relabels the key.</p>
+  <h3 id="backup">Backing up every song</h3>
+  <p><b>Settings &rarr; Song library backup</b> shows how many songs are stored in this browser and roughly how much of its storage they use. <b>Export library</b> downloads every song as one file, <code>harmonizer-library-YYYY-MM-DD.json</code>. <b>Import library&hellip;</b> (or opening that file with <b>Open&hellip;</b>) adds its songs back &mdash; it never overwrites: songs you already have are skipped, and a song that has changed since the backup comes in as a separate copy. This is also how to move all your songs to another computer or browser.</p>
+  <h3>Files</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Format</th><th>Use it for</th></tr>
+    <tr><td>.json (song)</td><td>Backing up one song, moving it to another computer, or reopening it in Harmonizer exactly as it was, generated harmony, style and changes included. Opening one adds it as a new song.</td></tr>
+    <tr><td>.json (library)</td><td>A backup of every song in this browser (Settings &rarr; Export library).</td></tr>
+    <tr><td>.musicxml</td><td>Finishing the arrangement in notation software. Contains the melody and every stave with notes, divisi (as chords on one stem), lyrics (every verse, with hyphens and extenders), ties, chord symbols, key, time and tempo with all their changes, tempo words, rit./accel., dynamics, hairpins, fermatas, articulations, breath marks, slurs, text, rehearsal marks, repeats, endings and D.C./D.S. marks, grace notes carried in from an import, instrument labels, and title/composer. The tenor clef is exported as a treble clef with an octave change.</td></tr>
+    <tr><td>.mid</td><td>Rehearsal apps, DAWs, and anything else that plays MIDI. One track per stave, named for its voice part, on its own channel with a General MIDI instrument from its Instrument label; a conductor track with the title, tempo, time and key signatures and all their changes; tied notes as single notes; divisi as a second note; lyrics (verse 1) as lyric events; dynamics, hairpins and accents as note velocities, staccato as shorter notes, and rit./accel. and fermatas as tempo changes. Repeats and D.C./D.S. are written out, as they're played. Chord symbols and the chord accompaniment are not included.</td></tr>
+    <tr><td>.wav</td><td>The audio of the whole song as you'd hear it on Play, repeats and all.</td></tr>
+    <tr><td>.zip of .wav</td><td>Rehearsal tracks, one per voice (see <a href="#rehearsal">Rehearsal tracks</a>).</td></tr>
+    <tr><td>Print / PDF</td><td>The score alone, through the browser's print dialog; choose &ldquo;Save as PDF&rdquo; there for a PDF. The score is laid out in lines (systems) across the page, broken at barlines &mdash; each line starts with its clef, the key signature in force there, the part names and a measure number &mdash; and runs onto as many pages as it needs, never splitting a line across two pages. The title, composer, key and time head the first page. Everything shown on screen prints (lyrics, chords, ties, dynamics, key and tempo changes); a tie or slur that crosses the end of a line is cut there. Portrait fits about three four-part lines per page; landscape gives longer lines. Range warnings and parallels marks never print.</td></tr>
+  </table></div>
+
+  <h2 id="keys">21. Keyboard and mouse reference</h2>
+  <div class="tbl-wrap"><table>
+    <tr><th>Action</th><th>Input</th></tr>
+    <tr><td>Play / pause / resume</td><td><kbd>Space</kbd></td></tr>
+    <tr><td>Undo / redo</td><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd> (or <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd>)</td></tr>
+    <tr><td>Add a note</td><td>Click the melody staff, or an Own rhythm stave</td></tr>
+    <tr><td>Select a note</td><td>Click or tap it</td></tr>
+    <tr><td>Extend selection over a range</td><td><kbd>Shift</kbd>+click</td></tr>
+    <tr><td>Add/remove one note from selection</td><td><kbd>Ctrl</kbd>+click (<kbd>Cmd</kbd> on Mac)</td></tr>
+    <tr><td>Move selection along the stave</td><td><kbd>&larr;</kbd> <kbd>&rarr;</kbd></td></tr>
+    <tr><td>Nudge pitch one step</td><td><kbd>&uarr;</kbd> <kbd>&darr;</kbd></td></tr>
+    <tr><td>Nudge pitch by seven steps</td><td><kbd>Shift</kbd>+<kbd>&uarr;</kbd> / <kbd>&darr;</kbd></td></tr>
+    <tr><td>Move up/down one octave</td><td><kbd>Ctrl</kbd>+<kbd>&uarr;</kbd> / <kbd>&darr;</kbd></td></tr>
+    <tr><td>Swap pitches of two selected notes</td><td><kbd>Ctrl</kbd>+<kbd>X</kbd></td></tr>
+    <tr><td>Delete the selected note</td><td><kbd>Delete</kbd> or <kbd>Backspace</kbd></td></tr>
+    <tr><td>Re-pitch by dragging</td><td>Drag a note up or down (mouse, pen or finger)</td></tr>
+    <tr><td>Add or select a chord</td><td>Click the chord lane</td></tr>
+    <tr><td>Play window: page / jump</td><td><kbd>&larr;</kbd> <kbd>&rarr;</kbd> / <kbd>Home</kbd> <kbd>End</kbd></td></tr>
+    <tr><td>Fermata on the selected note(s)</td><td><kbd>F</kbd></td></tr>
+    <tr><td>Start typing lyrics on the selected note</td><td><kbd>Enter</kbd></td></tr>
+    <tr><td>Lyric box: next / previous note</td><td><kbd>Space</kbd> or <kbd>Tab</kbd> / <kbd>Shift</kbd>+ either</td></tr>
+    <tr><td>Lyric box: next syllable of the word / hold the syllable</td><td><kbd>-</kbd> / <kbd>_</kbd></td></tr>
+    <tr><td>Play window: loop on/off</td><td><kbd>L</kbd></td></tr>
+    <tr><td>Play window: speed &minus;5% / +5%</td><td><kbd>[</kbd> / <kbd>]</kbd></td></tr>
+    <tr><td>Close the play window or a dialog</td><td><kbd>Esc</kbd></td></tr>
+  </table></div>
+  <p>Keyboard shortcuts are ignored while you are typing in a text box, and editing keys are ignored while a dialog is open, so typing lyrics or melody text never moves notes.</p>
+
+  <h2 id="limits">22. What Harmonizer doesn't do</h2>
+  <p>Harmonizer is for sketching vocal arrangements, not engraving a finished score. By design:</p>
+  <ul>
+    <li>Durations are whole to sixteenth notes, dotted, plus simple triplets. No thirty-seconds, and no other tuplets.</li>
+    <li>No bar-line arithmetic: it places barlines from the time signature but does not stop you writing a short or long measure.</li>
+    <li>Key, tempo and time changes start at the beginning of a measure (tempo words, rit./accel. and a tempo can go on any note).</li>
+    <li>Up to six verses of lyrics. Grace notes appear only when they come in from an imported score, and can't be edited. Repeats and jumps are whole measures; no multi-measure rests, no nested repeats.</li>
+    <li>Playback is always grand piano, whatever a stave's Instrument label says.</li>
+    <li>Printing is a straightforward layout: lines break at barlines with a ragged right edge, spacing isn't re-justified, and a tie or slur crossing a line break is cut.</li>
+    <li>Harmony generation is a rough draft.</li>
+  </ul>
+  <p>For anything beyond that, export MusicXML and carry on in a notation program.</p>
+
+  <h2 id="trouble">23. Troubleshooting</h2>
+  <div class="tbl-wrap"><table>
+    <tr><th>Symptom</th><th>Cause and remedy</th></tr>
+    <tr><td>No sound</td><td>Wait a moment after the first Play while the piano samples load. Check the stave's <b>Play</b> box, <b>Play chords</b>, the Hear buttons, your device volume, and that the browser tab isn't muted. Some browsers need a click on the page before audio can start.</td></tr>
+    <tr><td>Samples fail to load when running locally</td><td>Browsers block a page opened by double-clicking (<code>file://</code>) from reading its neighbouring sample file. Serve the folder instead, for example <code>python3 -m http.server</code>, and open it via <code>http://localhost</code>.</td></tr>
+    <tr><td>&ldquo;Generate parts&rdquo; is missing</td><td>It needs at least two staves and at least one chord. Set <b>Staves</b> above 1, add chords, and open the Staves section.</td></tr>
+    <tr><td>Harmony staves went blank</td><td>Changing the melody, chords, or a stave's Part or Clef clears harmony that would now be stale. Press <b>Generate parts</b> again.</td></tr>
+    <tr><td>Notes show unexpected naturals after a key change</td><td>A key change keeps existing pitches. If the passage should move into the new key, re-pitch those notes (or type them again in Melody text without accidentals).</td></tr>
+    <tr><td>Amber &ldquo;Not saved in this browser&rdquo; warning</td><td>The browser's storage for the site is full or blocked. Export a backup from Settings, then delete songs you don't need. The warning clears on the next successful save.</td></tr>
+    <tr><td>My songs have gone</td><td>Autosave lives in the browser's site storage. A different browser or computer, a private window, or cleared site data starts empty. Restore from a library backup (Settings &rarr; Import library) or a <code>.json</code> song with <b>Open&hellip;</b>.</td></tr>
+    <tr><td>A MIDI import has odd rhythms</td><td>MIDI stores timings, not notation; Harmonizer rounds them to sixteenths. Triplets and swung or freely played rhythms come out approximate. Export MusicXML from the program that made the MIDI file if you can.</td></tr>
+    <tr><td>An imported score looks simplified</td><td>See <a href="#import">Importing a MusicXML score</a> for exactly what is kept and simplified, and tick any extra voices or divisi lines you need in the import dialog.</td></tr>
+    <tr><td>The browser asks to allow several downloads</td><td>That shouldn't happen for rehearsal tracks, which come as one .zip. If your browser blocks the .zip, allow downloads for the site.</td></tr>
+    <tr><td>Playback jumps back or skips measures</td><td>That's the repeats, endings or a D.C./D.S. being followed. Untick <b>Repeats</b> in the play window to play straight through as written; Loop always does.</td></tr>
+    <tr><td>Combine with &hellip; refuses</td><td>Somewhere the two staves have triplets that don't line up with the other line's notes, so they can't share a stem. The status line names the measures; change those triplets on one stave and try again.</td></tr>
+    <tr><td>The launcher shows an old version</td><td>The launcher reads <code>current.txt</code> in the app folder to decide which version to open. Reload once; if that doesn't help, check that the file names the newest release.</td></tr>
+  </table></div>
+
+  <h2 id="new">24. What's new</h2>
+  <h3>2.31</h3>
+  <ul>
+    <li><b>Better Generate parts voicing</b>, from a review of the partwriting rules. Chords no longer drop their third; in particular a V7 keeps its leading tone. The bass keeps out of the way of the voices above it, so a final chord can't collapse into a unison. The voice just above the bass is now checked for wide gaps and muddy low thirds. First inversion is preferred to second, which is kept for the cadential 6/4. An inner-voice leading tone may fall to the fifth of the tonic chord. With the tune in an inner voice (a tenor lead, say), the parts above it stay above it and the bass stays below it.</li>
+  </ul>
+  <h3>2.28</h3>
+  <ul>
+    <li><b>Import report:</b> after an import, a button in the status bar shows what the file held against what came across, and lists anything Harmonizer doesn't model. It opens by itself when something came up short. See <a href="#import-report">The Import report</a>.</li>
+    <li>MusicXML: section headings (&ldquo;Verse&nbsp;1&rdquo;, &ldquo;Chorus&rdquo;) become named rehearsal marks; transposing instruments come in at concert pitch; a note held under a moving line keeps its tie through a save and reopen; &ldquo;Untitled score&rdquo; falls back to the file name.</li>
+    <li>MIDI: two time signatures at the same moment (The Coolin's opening) now give the right meter. Velocities become dynamics, volume swells become hairpins, brief tempo drops become fermatas, runs of small tempo steps become <i>rit.</i>/<i>accel.</i>, markers become rehearsal marks, and hyphenated syllables (&ldquo;un -&rdquo;) keep their hyphen. Doubled strikes count as one note. Keyboard tracks bring in their upper line with the divisi, and recorder-named SATB tracks (the Byrd) all come in, as Soprano, Alto, Tenor, Bass.</li>
+    <li>Divisi: where one voice holds a note while the other moves, the held note is no longer struck again; <b>Split divisi</b> puts the higher note on the upper stave.</li>
+  </ul>
+  <h3>2.27</h3>
+  <ul>
+    <li>Hairpins stop before the dynamic they lead into, and open a little wider when they're long. The opening tempo word no longer sits on top of the top stave's name.</li>
+  </ul>
+  <h3>2.26</h3>
+  <ul>
+    <li><b>Divisi on one stave:</b> a note can carry a second note on the same stem &mdash; add, edit, swap or remove it in Selected. <b>Combine with the stave below</b> and <b>Split divisi</b> in Staves. Importing now keeps a part's second line on its own stave as divisi (<b>Keep divisi on one stave</b>, on by default) &mdash; The Coolin comes in on four staves instead of six. See <a href="#staves">Divisi on one stave</a>.</li>
+  </ul>
+  <h3>2.25</h3>
+  <ul>
+    <li><b>Mark parallel fifths &amp; octaves</b> no longer flags two staves that sing exactly the same notes &mdash; that's a doubled part. Octaves apart are still flagged.</li>
+  </ul>
+  <h3>2.24</h3>
+  <ul>
+    <li><b>Repeats and endings:</b> start/end repeats (played twice, or more), 1st/2nd/3rd endings, and D.C., D.S., Fine, Segno, To Coda and Coda &mdash; from the new <b>Repeat &#9662;</b> menu in the Marks row. Play, Save .wav, rehearsal tracks and Save .mid follow them; a <b>Repeats</b> switch in the play window plays straight through instead. MusicXML both ways. See <a href="#repeats">Repeats, endings, D.C. and D.S.</a></li>
+    <li><b>Lyrics:</b> up to six verses on every stave; hyphens drawn between syllables and extender lines under held syllables; type lyrics straight through the song (<kbd>Enter</kbd> on a note, then <kbd>Space</kbd>, <kbd>-</kbd>, <kbd>_</kbd>); fill, load or clear a whole verse; <b>Copy lyrics to the other staves</b>; every verse in and out of MusicXML. See <a href="#lyrics">Lyrics</a>.</li>
+    <li>Filling lyrics from a line of text now keeps each word's hyphens, so exported lyrics hyphenate properly.</li>
+  </ul>
+  <h3>2.23</h3>
+  <ul>
+    <li><b>Expressive marks</b>, from a new <b>Marks</b> row under Note entry: tempo words (Allegro&hellip;), rit. / rall. / accel., a tempo and Tempo I, fermatas, breath marks and caesuras, dynamics and hairpins, accent / staccato / tenuto / marcato, slurs, text above the stave, and boxed rehearsal letters. <b>All voices</b> puts a mark on every stave at once. See <a href="#marks">Expressive marks</a>.</li>
+    <li><b>They play:</b> the tempo slows through a rit., fermatas hold, breaths leave a gap, dynamics and hairpins change the volume, staccato is short &mdash; in Play, Loop, Save .wav and rehearsal tracks.</li>
+    <li><b>Section</b> menu in the play window: jump to a rehearsal letter, and loop just that section.</li>
+    <li>Dynamics, slurs and the other marks that come in from MusicXML are now editable; MusicXML import also brings fermatas, articulations, breath marks, hairpins, text, rehearsal marks and tempo words, and Save .musicxml / .mid write them back out.</li>
+  </ul>
+  <h3>2.22</h3>
+  <ul>
+    <li><b>Jump to beginning / end fixed:</b> in the play window, &#9198; and &#9197; (<kbd>Home</kbd> / <kbd>End</kbd>) now move the play position, not just the view, so the next Play really starts from the top (or the last measure) instead of jumping back to a paused spot or an earlier selected note.</li>
+  </ul>
+  <h3>2.21</h3>
+  <ul>
+    <li><b>Clearer header:</b> a <b>Current song</b> panel (which song, title, composer, key, transpose, staves, time, tempo) and a <b>Commands</b> panel with captioned groups &mdash; Playback, Edit, App, Songs &amp; files &mdash; and chunkier buttons that are easier to spot.</li>
+    <li><b>Rehearsal tracks&hellip;</b> moved into the <b>Save &#9662;</b> menu, with the other ways to save.</li>
+    <li><b>Staves section:</b> one line per stave, controls in aligned columns, the melody stave highlighted.</li>
+  </ul>
+  <h3>2.19</h3>
+  <ul>
+    <li><b>More contrast:</b> the Note entry, Chords and Staves strips are tinted in their own colours (violet, gold, teal), and the scrollbars are brighter.</li>
+  </ul>
+  <h3>2.18</h3>
+  <ul>
+    <li><b>Generate parts reads the music</b> before writing: phrase ends and cadences throughout the piece (not just the last note), secondary dominants, and the local key, heard from the notes and chords.</li>
+    <li>Each voice is judged <b>three notes at a time</b>: leaps are followed by a step back, and hymn and open styles avoid lockstep blocks.</li>
+    <li><b>Suspensions</b>: prepared, tied over and resolved down by step, mostly the cadential 4&ndash;3.</li>
+  </ul>
+  <h3>2.17</h3>
+  <ul>
+    <li><b>Print / PDF</b> now lays the score out in lines across as many pages as it needs, each line with its clef, key signature, part names and measure number, instead of one tiny strip.</li>
+  </ul>
+  <h3>2.16</h3>
+  <ul>
+    <li>The song's <b>title and composer</b> appear above the score and in the play window. Examples take theirs from the Examples menu.</li>
+    <li>The <b>Note entry</b>, <b>Chords</b> and <b>Staves</b> strips say &ldquo;Click to show&hellip;&rdquo; / &ldquo;Click to hide&hellip;&rdquo; on hover.</li>
+  </ul>
+  <h3>2.15</h3>
+  <ul>
+    <li><b>One Save menu</b> (as .json, .musicxml, .mid, .wav) in place of four buttons.</li>
+    <li><b>Examples</b> menu with choral pieces to open, and a <b>welcome</b> window offering them when there's no music yet.</li>
+    <li>Tidier MIDI imports: no redundant tempo changes from ritardandos, and nonsense time signatures ignored.</li>
+  </ul>
+  <h3>2.14</h3>
+  <ul>
+    <li><b>Pause and resume</b>: <kbd>Space</kbd> pauses playback and resumes from the same spot &mdash; or from a note you click in the play window while paused. Stop starts over.</li>
+  </ul>
+  <h3>2.13</h3>
+  <ul>
+    <li><b>Range warnings</b>: notes outside a voice's comfortable range are tinted orange, with the range on hover.</li>
+    <li><b>Parallel fifths and octaves</b> can be marked on the score (Settings), between any two staves.</li>
+  </ul>
+  <h3>2.12</h3>
+  <ul>
+    <li><b>Style presets for Generate parts</b>: Close harmony, Traditional (hymn) and Open (wide), chosen from a menu beside the button and saved with the song.</li>
+    <li><b>Key changes and tempo changes</b>, set per measure from the Selected panel (which also sets time-signature changes), drawn on the score, followed by playback, exports and harmony, kept on import and moved by Transpose.</li>
+    <li><b>Nothing dropped on MusicXML import</b>: second voices and chord notes (divisi, piano reductions) come in as their own staves, key and tempo changes are kept, and dynamics reach every part, not just one voice.</li>
+    <li><b>MIDI import and export</b>: <b>Open&hellip;</b> reads <code>.mid</code> files; <b>Save &rarr; as .mid</b> writes one track per stave with tempo, key, time, lyrics and dynamics.</li>
+    <li>Unnamed parts in an import (&ldquo;Track 1&rdquo;&hellip;) get a proper choir layout, and a part's own name now wins over its instrument name when choosing its voice.</li>
+  </ul>
+  <h3>2.11</h3>
+  <ul>
+    <li><b>Rehearsal tracks</b>: one .wav per voice with that voice brought forward, optional left/right ear split and practice speed, in one .zip.</li>
+    <li><b>Loop</b> and a <b>practice-speed</b> slider in the play window.</li>
+    <li><b>Save safety</b>: a visible warning when the browser can't save, and <b>Export / Import library</b> in Settings. Opening a .json song now adds it as a new song instead of replacing the open one.</li>
+    <li><b>Touch and pen</b>: dragging notes to re-pitch them works on tablets.</li>
+  </ul>
+  <h3>2.10</h3>
+  <ul>
+    <li>An <b>Instrument</b> label per stave, kept from imports and written to exports.</li>
+    <li>Dynamics, slurs and grace notes from imported scores shown on the staff.</li>
+    <li><b>Print / PDF</b> and <b>Save &rarr; as .wav</b>.</li>
+    <li>A <b>Settings</b> dialog for Black on white and Barlines.</li>
+  </ul>
+  <h3>2.9</h3>
+  <ul>
+    <li><b>Undo and redo</b>, with typing sessions and drags each counting as one step.</li>
+  </ul>
+  <h3>2.8</h3>
+  <ul>
+    <li>More room for the staves: the tool bars fold into the <b>Note entry</b>, <b>Chords</b> and <b>Staves</b> sections, and the side column became an <b>icon rail</b> whose panels slide out on demand.</li>
+  </ul>
+  <h3>2.5</h3>
+  <ul>
+    <li><b>Close-harmony voicing</b> for Generate parts, with the bass planned first and a search across the whole passage.</li>
+    <li>Generated voices with <b>independent rhythm</b>, <b>locking</b> of hand-edited notes, and <b>chord suggestions</b>.</li>
+  </ul>
+  <h3>Earlier</h3>
+  <ul>
+    <li><b>2.4</b> &mdash; the <a href="quickstart.html">Quickstart guide</a>.</li>
+    <li><b>2.3</b> &mdash; <b>Transpose to</b> and <b>Copy</b>.</li>
+    <li><b>2.2</b> &mdash; <b>Chords from voices</b>.</li>
+    <li><b>2.1</b> &mdash; jump to beginning/end and <b>Hear</b> buttons in the play window; hidden-stave hints.</li>
+    <li><b>2.0</b> &mdash; up to eight staves, with Descant, second parts and Baritone.</li>
+    <li><b>1.9</b> &mdash; the play window.</li>
+    <li><b>1.8</b> &mdash; sixteenth notes and compound-meter beaming.</li>
+    <li><b>1.7</b> &mdash; independent rhythm per stave, and imports that keep each voice's rhythm.</li>
+    <li><b>1.6</b> &mdash; black-on-white score, engraved clefs and accidentals, and this guide.</li>
+  </ul>
+  <p style="color:var(--text-faint);font-size:.85rem;margin-top:var(--sp-6);">Clefs and accidentals use the Bravura font's glyph outlines (SMuFL, &copy; Steinberg Media Technologies, SIL Open Font License 1.1). Piano samples: Salamander Grand Piano by Alexander Holm, CC BY 3.0.</p>
+
+</article>
+</main>
+
+
+<!-- Pager: floating buttons for moving up and down the page by section (top, previous, next, end). -->
+<nav class="doc-pager" id="docPager" data-headings=".guide h2" aria-label="Move through this page">
+  <button type="button" data-go="top" title="Back to the top" aria-label="Back to the top">&#10514;</button>
+  <button type="button" data-go="prev" title="Previous section" aria-label="Previous section">&#9650;</button>
+  <button type="button" data-go="next" title="Next section" aria-label="Next section">&#9660;</button>
+  <button type="button" data-go="end" title="To the end" aria-label="To the end">&#10515;</button>
+</nav>
+<style>
+  .guide h2, .guide h3 { scroll-margin-top: 84px; }
+  .doc-pager { position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 60;
+    display: flex; flex-direction: column; gap: 6px; }
+  .doc-pager button { width: 42px; height: 42px; border-radius: 10px; border: 1px solid var(--line, #2a2f36);
+    background: var(--bg-raised, #14171b); color: var(--text, #e6e6e6); font-size: 17px; line-height: 1; cursor: pointer;
+    box-shadow: 0 6px 18px -8px rgba(0,0,0,.6); opacity: .88; transition: opacity .15s, border-color .15s, color .15s; }
+  .doc-pager button:hover { opacity: 1; border-color: var(--violet, #b28dff); color: var(--violet, #b28dff); }
+  .doc-pager button:focus-visible { outline: 2px solid var(--violet, #b28dff); outline-offset: 2px; }
+  .doc-pager button:disabled { opacity: .3; cursor: default; border-color: var(--line, #2a2f36); color: var(--text, #e6e6e6); }
+  @media (max-width: 640px) { .doc-pager { right: 10px; } .doc-pager button { width: 38px; height: 38px; } }
+  @media print { .doc-pager { display: none; } }
+</style>
+<script>
+(function(){
+  var pager = document.getElementById('docPager');
+  if (!pager) return;
+  var sel = pager.getAttribute('data-headings') || document.body.getAttribute('data-pager') || '.guide h2';
+  function heads(){ return Array.prototype.slice.call(document.querySelectorAll(sel)); }
+  var OFFSET = 90;   // below the sticky site header
+  function current(){
+    var hs = heads(), idx = -1;
+    for (var i = 0; i < hs.length; i++){ if (hs[i].getBoundingClientRect().top - OFFSET <= 2) idx = i; else break; }
+    return { hs: hs, idx: idx };
+  }
+  function go(where){
+    var c = current(), reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var behavior = reduce ? 'auto' : 'smooth';
+    if (where === 'top') return window.scrollTo({ top: 0, behavior: behavior });
+    if (where === 'end') return window.scrollTo({ top: document.documentElement.scrollHeight, behavior: behavior });
+    var target = null;
+    if (where === 'next') target = c.hs[c.idx + 1];
+    else {
+      // "previous": back to the start of this section, or the one before if already at its start
+      var here = c.hs[c.idx];
+      if (here && here.getBoundingClientRect().top < OFFSET - 12) target = here; else target = c.hs[c.idx - 1];
+      if (!target) return window.scrollTo({ top: 0, behavior: behavior });
+    }
+    if (target) target.scrollIntoView({ behavior: behavior, block: 'start' });
+  }
+  function label(h){ return h ? h.textContent.replace(/\s+/g, ' ').trim() : ''; }
+  function sync(){
+    var c = current(), atTop = window.scrollY < 4, atEnd = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+    var b = pager.querySelectorAll('button');
+    b[0].disabled = atTop; b[1].disabled = atTop;
+    b[2].disabled = atEnd || !c.hs[c.idx + 1]; b[3].disabled = atEnd;
+    var nx = c.hs[c.idx + 1], pv = c.hs[c.idx] && c.hs[c.idx].getBoundingClientRect().top < OFFSET - 12 ? c.hs[c.idx] : c.hs[c.idx - 1];
+    b[2].title = nx ? 'Next: ' + label(nx) : 'Next section';
+    b[1].title = pv ? 'Back to: ' + label(pv) : 'Back to the top';
+  }
+  pager.addEventListener('click', function(e){ var t = e.target.closest('button'); if (t) go(t.getAttribute('data-go')); });
+  window.addEventListener('scroll', function(){ window.requestAnimationFrame(sync); }, { passive: true });
+  window.addEventListener('resize', sync);
+  sync();
+})();
+</script>
+</body>
+</html>
