@@ -273,6 +273,67 @@ function serveDir(dir){
   await page.selectOption('#harmonyStyleSelect', 'hymn');
   await page.waitForTimeout(150);
   check('picking a style says what it does', /Traditional \(hymn\)/.test(await page.$eval('#statusText', el => el.textContent)));
+  // ---- v2.32: Generate parts refines the draft; Refine parts and the Refine report ----
+  await page.click('#sideRail button[data-rail="melody"]');
+  await page.waitForTimeout(200);
+  await page.fill('#melodyText', 'E4q D4q C4q D4q E4q E4q E4h D4q D4q D4h E4q G4q G4h E4q D4q C4q D4q E4q E4q E4q E4q D4q D4q E4q D4q C4w');
+  await page.click('#applyTextBtn');
+  await page.waitForTimeout(250);
+  page.once('dialog', d => d.accept().catch(() => {}));
+  await page.evaluate(() => document.getElementById('suggestChordsBtn').click());
+  await page.waitForTimeout(250);
+  check('Refine parts sits beside Generate parts', await page.$('#refinePartsBtn') !== null);
+  // v2.33: the Added notes menu beside the style menu
+  check('an Added notes menu offers none / some / more', (await page.$$eval('#harmonyMotionSelect option', os => os.map(o => o.value).join(','))) === 'none,some,more');
+  check('a Repeated music menu offers keep alike / vary lightly / write fresh, keep alike by default (v2.34)',
+    (await page.$$eval('#harmonyRecurSelect option', os => os.map(o => o.value).join(','))) === 'same,vary,fresh' && (await page.$eval('#harmonyRecurSelect', el => el.value)) === 'same');
+  await page.selectOption('#harmonyRecurSelect', 'vary');
+  await page.waitForTimeout(100);
+  check('picking one says what it does', /vary lightly/.test(await page.$eval('#statusText', el => el.textContent)));
+  await page.selectOption('#harmonyRecurSelect', 'same');
+  await page.selectOption('#harmonyMotionSelect', 'more');
+  await page.waitForTimeout(100);
+  check('picking an Added notes level says what it does', /More added notes/.test(await page.$eval('#statusText', el => el.textContent)));
+  await page.evaluate(() => document.getElementById('generatePartsBtn').click());
+  await page.waitForFunction(() => /refined:/.test(document.getElementById('statusText').textContent), null, { timeout: 15000 }).catch(() => {});
+  check('Generate parts writes a draft and refines it', /refined:/.test(await page.$eval('#statusText', el => el.textContent)));
+  check('...and adds notes of the voices’ own (v2.33)', /added note/.test(await page.$eval('#statusText', el => el.textContent)));
+  const rrShown = await page.$eval('#refineReportBtn', el => !el.hidden);
+  check('the Refine report button appears in the status bar', rrShown);
+  if (rrShown){
+    await page.evaluate(() => document.getElementById('refineReportBtn').click());
+    await page.waitForTimeout(150);
+    check('the Refine report opens with its before/after table', await page.$eval('#refineReportOverlay', el => !el.hidden) && (await page.$$eval('#refineReportBody .refine-stats tr', els => els.length)) >= 4);
+    // v2.34: the report's Repeated music section -- this tune states its opening bar twice
+    check('the Refine report has a Repeated music section with a line to link passages by hand (v2.34)',
+      /Repeated music/.test(await page.$eval('#refineReportBody', el => el.textContent)) && await page.$('#recurAddBtn') !== null && await page.$('#recurApplyBtn') !== null);
+    const recurBoxes = await page.$$('#refineReportBody input[data-recur]');
+    check('...listing the repeat it found, ticked', recurBoxes.length >= 1 && await recurBoxes[0].evaluate(el => el.checked));
+    if (recurBoxes.length){
+      await recurBoxes[0].click();
+      await page.waitForTimeout(100);
+      check('unticking one says it will go its own way', /its own way/.test(await page.$eval('#recurMsg', el => el.textContent)));
+      await page.click('#recurApplyBtn');
+      await page.waitForFunction(() => /^Generated/.test(document.getElementById('statusText').textContent), null, { timeout: 15000 }).catch(() => {});
+      check('Apply closes the report and regenerates the parts', await page.$eval('#refineReportOverlay', el => el.hidden) && /^Generated/.test(await page.$eval('#statusText', el => el.textContent)));
+      await page.evaluate(() => document.getElementById('refineReportBtn').click());
+      await page.waitForTimeout(150);
+      const boxes2 = await page.$$('#refineReportBody input[data-recur]');
+      check('...and the report now shows it unticked', boxes2.length >= 1 && !(await boxes2[0].evaluate(el => el.checked)));
+      await boxes2[0].click();   // back on, for the checks below
+    }
+    await page.evaluate(() => document.getElementById('refineReportOkBtn').click());
+    await page.waitForTimeout(100);
+  }
+  await page.evaluate(() => document.getElementById('refinePartsBtn').click());
+  await page.waitForFunction(() => /Refine/.test(document.getElementById('statusText').textContent) && !/Refining/.test(document.getElementById('statusText').textContent), null, { timeout: 15000 }).catch(() => {});
+  check('Refine parts runs on the written parts', /Refined the parts|found nothing to improve/.test(await page.$eval('#statusText', el => el.textContent)));
+  check('Settings has Refine after Generate parts, on by default', await page.$eval('#refineToggle', el => el.checked));
+  page.once('dialog', d => d.accept().catch(() => {}));
+  await page.evaluate(() => document.getElementById('clearChordsBtn').click());
+  await page.waitForTimeout(200);
+  await page.click('#sideRail button[data-rail="melody"]');   // close the melody panel again, as the next section expects
+  await page.waitForTimeout(200);
   await page.selectOption('#staveCountSelect', '1');
   await page.waitForTimeout(250);
 
@@ -421,7 +482,7 @@ function serveDir(dir){
   for (const steps of [1.5, 2, 2.5]){ await page.mouse.click(sx, bassBottom - steps * sp); await page.waitForTimeout(150); }
   // seeded with the melody's rhythm and pitches -> the bass copies the tune: parallel octaves/unisons with the melody
   const marks = await page.$$eval('#staffSvg .parallel-mark text', els => els.map(e => e.textContent));
-  check('parallel octaves between two staves are marked when the option is on', marks.length >= 1 && marks.every(t => t === '8'));
+  check('parallel octaves between two staves are marked when the option is on (' + marks.join(' ') + ')', marks.length >= 1 && marks.every(t => t === '8'));
   await page.click('#settingsBtn');
   await page.waitForTimeout(150);
   await page.uncheck('#parallelsToggle');
@@ -811,6 +872,129 @@ function serveDir(dir){
   // ---- v2.16: section strips say what clicking does ----
   const stripTitle = await page.$eval('.acc-strip[data-acc-toggle="chords"]', el => el.title);
   check('the tool-section strips have hover text saying click to show/hide', /^Click to (show|hide)/.test(stripTitle));
+
+  // ---- v2.35: the measure ruler, Selected measures, melody sections, Rewrite ----
+  await page.click('#newSongBtn');
+  await page.waitForTimeout(200);
+  await page.click('#sideRail button[data-rail="melody"]');
+  await page.waitForTimeout(200);
+  await page.fill('#melodyText', 'E5q D5q C5q D5q E5q E5q E5h D5q D5q E5q D5q C5w E5q D5q C5q D5q E5q E5q E5h D5q D5q E5q D5q C5w');
+  await page.click('#applyTextBtn');
+  await page.waitForTimeout(250);
+  await page.selectOption('#staveCountSelect', '4');
+  await page.waitForTimeout(250);
+  await page.evaluate(() => document.getElementById('suggestChordsBtn').click());
+  await page.waitForTimeout(250);
+  await page.evaluate(() => document.getElementById('generatePartsBtn').click());
+  await page.waitForTimeout(1500);
+  { const cr = await page.$('#sideSlideoutClose'); if (cr && await cr.isVisible()) await cr.click(); }
+  await page.waitForTimeout(150);
+  const rulerNums = await page.$$eval('#staffSvg .ruler-num', els => els.map(e => e.textContent));
+  check('v2.35: a row of measure numbers runs above the chord lane', rulerNums.join(',') === '1,2,3,4,5,6,7,8');
+  const numAt = async i => page.$$eval('#staffSvg .ruler-num', (els, k) => { els[k].scrollIntoView({ block: 'nearest', inline: 'center' }); const r = els[k].getBoundingClientRect(); return { x: r.left + 12, y: r.top + r.height / 2 }; }, i);
+  let q0 = await numAt(4);
+  await page.mouse.click(q0.x, q0.y);
+  await page.waitForTimeout(250);
+  { const cr = await page.$('#sideSlideoutClose'); if (cr && await cr.isVisible()) await cr.click(); }
+  await page.waitForTimeout(600);   // the panel slides away
+  q0 = await numAt(7);
+  await page.keyboard.down('Shift'); await page.mouse.click(q0.x, q0.y); await page.keyboard.up('Shift');
+  await page.waitForTimeout(300);
+  check('clicking a measure number, then Shift-clicking another, selects mm. 5–8 on every stave', /mm\. 5–8 selected/.test(await page.$eval('#measuresBox', el => el.textContent)) && !!(await page.$('#staffSvg .measure-band')));
+  check('...and opens Selected measures, with the ticked staves (not the tune)', !(await page.$eval('#measuresPanel', el => el.hidden)) &&
+    JSON.stringify(await page.$$eval('#measuresBox input[data-stave]', els => els.map(e => [e.checked, e.disabled]))) === JSON.stringify([[false, true], [true, false], [true, false], [true, false]]));
+  const tenorId = await page.$$eval('#melodyInSelect option', els => (els.find(o => /Tenor/.test(o.textContent)) || {}).value);
+  await page.selectOption('#melodyInSelect', tenorId);
+  check('Melody in: Tenor offers to bring the tune, ticked (the tenor has no notes of its own there)', await page.$eval('#bringTuneBox', el => el.checked && !el.parentNode.hidden));
+  await page.click('#measuresBox button.accent');
+  await page.waitForTimeout(300);
+  check('Apply: the tune is in the tenor for mm. 5–8, and the ruler says so', /Tune in the Tenor in mm\. 5–8 — copied 12 notes/.test(await page.$eval('#statusText', el => el.textContent)) &&
+    (await page.$$eval('#staffSvg .ruler-sec-label', els => els.map(e => e.textContent))).includes('Tune: Tenor'));
+  await page.click('#rewriteBtn');
+  await page.waitForTimeout(1500);
+  check('Rewrite writes the other staves around the tenor tune in those measures', /Rewrote Soprano, Alto, Bass in mm\. 5–8/.test(await page.$eval('#statusText', el => el.textContent)));
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
+  check('Esc clears the measure selection', !(await page.$('#staffSvg .measure-band')));
+  await page.evaluate(() => document.getElementById('generatePartsBtn').click());
+  await page.waitForTimeout(1500);
+  check('Generate parts then goes by melody section', /by melody section \(tune in the Soprano mm\. 1–4; tune in the Tenor mm\. 5–8/.test(await page.$eval('#statusText', el => el.textContent)));
+  check('v2.37: ...and goes back over the joins, with both sides in place', /at the joins between sections written again with both sides in place/.test(await page.$eval('#statusText', el => el.textContent)));
+  await page.click('#undoBtn').catch(() => {});
+  await page.waitForTimeout(200);
+  const pr = await page.evaluate(() => { window.dispatchEvent(new Event('beforeprint')); const n = document.querySelectorAll('#printScore .ruler, #printScore .measure-band').length; const sys = document.querySelectorAll('#printScore .print-sys').length; window.dispatchEvent(new Event('afterprint')); return [n, sys]; });
+  check('the ruler and the band stay out of the print copy', pr[0] === 0 && pr[1] > 0);
+
+  // ---- v2.36: measure numbers on the score, lock marks ----
+  const mnums = async () => page.$$eval('#staffSvg .score-mnum', els => els.map(e => e.textContent));
+  check('v2.36: measure numbers sit over the top stave at each barline (2–8; none on m. 1)', (await mnums()).join(',') === '2,3,4,5,6,7,8');
+  await page.evaluate(() => { const s = document.getElementById('measureNumSelect'); s.value = 'all'; s.dispatchEvent(new Event('change')); });
+  check('...Settings › Measure numbers › Above every stave numbers all four', (await mnums()).length === 28);
+  await page.evaluate(() => { const s = document.getElementById('measureNumSelect'); s.value = 'off'; s.dispatchEvent(new Event('change')); });
+  check('...and Off takes them away (the ruler stays)', (await mnums()).length === 0 && (await page.$$('#staffSvg .ruler-num')).length === 8);
+  await page.evaluate(() => { const s = document.getElementById('measureNumSelect'); s.value = 'top'; s.dispatchEvent(new Event('change')); });
+  check('no lock marks before anything is locked', (await page.$$('#staffSvg .lock-mark')).length === 0);
+  q0 = await numAt(0);
+  await page.mouse.click(q0.x, q0.y);
+  await page.waitForTimeout(600);
+  await page.evaluate(() => { const b = Array.from(document.querySelectorAll('#measuresBox button')).find(x => x.textContent === 'Lock'); b.click(); });
+  await page.waitForTimeout(250);
+  const lockMarks = await page.$$eval('#staffSvg .lock-mark', els => els.map(e => e.querySelector('title').textContent));
+  check('Lock on m. 1 draws a padlock over the locked notes of each ticked stave (' + lockMarks.length + ')', lockMarks.length === 3 && lockMarks.every(t => /locked note/.test(t)));
+  check('...and the Staves list in Selected measures says how much is locked', /all locked/.test(await page.$eval('#measuresBox .measure-staves', el => el.textContent)));
+  await page.evaluate(() => document.querySelector('#staffSvg .lock-mark').dispatchEvent(new MouseEvent('click', { bubbles: true })));
+  await page.waitForTimeout(300);
+  check('clicking a lock mark selects those notes, with Unlock selected at hand', await page.evaluate(() => Array.from(document.querySelectorAll('button')).some(b => b.textContent === 'Unlock selected' && b.offsetParent)));
+  await page.evaluate(() => { const t = document.getElementById('lockMarksToggle'); t.checked = false; t.dispatchEvent(new Event('change')); });
+  check('Settings › Show locked notes off hides them', (await page.$$('#staffSvg .lock-mark')).length === 0);
+  await page.evaluate(() => { const t = document.getElementById('lockMarksToggle'); t.checked = true; t.dispatchEvent(new Event('change')); });
+  const pr2 = await page.evaluate(() => { window.dispatchEvent(new Event('beforeprint')); const n = document.querySelectorAll('#printScore .lock-mark').length; const m = document.querySelectorAll('#printScore .score-mnum').length; window.dispatchEvent(new Event('afterprint')); return [n, m]; });
+  check('the print copy keeps the measure numbers and leaves out the lock marks', pr2[0] === 0 && pr2[1] > 0);
+
+  // ---- v2.38: marks over generated notes, and the partwriting checks ----
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(150);
+  const genMarks = await page.$$eval('#staffSvg .gen-mark', els => els.map(e => e.querySelector('title').textContent));
+  check('v2.38: runs of generated notes are marked on the staves that mix them with the tune (' + genMarks.length + ')', genMarks.length >= 2 && genMarks.every(t => /written by Generate parts/.test(t)));
+  await page.evaluate(() => document.querySelector('#staffSvg .gen-mark').dispatchEvent(new MouseEvent('click', { bubbles: true })));
+  await page.waitForTimeout(250);
+  check('...clicking one selects its notes', (await page.$$('#staffSvg .note-group.selected')).length >= 1);
+  await page.keyboard.press('Escape');
+  const setGen = async v => { await page.evaluate(v => { const s = document.getElementById('genMarksSelect'); s.value = v; s.dispatchEvent(new Event('change')); }, v); await page.waitForTimeout(150); return (await page.$$('#staffSvg .gen-mark')).length; };
+  const nAll = await setGen('all');
+  check('...Settings › Mark generated notes › on every stave marks the all-generated staves too', nAll > genMarks.length);
+  check('...and off marks none', (await setGen('off')) === 0);
+  await setGen('mixed');
+  const pr3 = await page.evaluate(() => { window.dispatchEvent(new Event('beforeprint')); const n = document.querySelectorAll('#printScore .gen-mark, #printScore .parallel-mark').length; window.dispatchEvent(new Event('afterprint')); return n; });
+  check('...never printed', pr3 === 0);
+  check('Settings has a tick box for each partwriting check', (await page.$$('#pwKindsRow input[type=checkbox]')).length === 6);
+  await page.evaluate(() => { const t = document.getElementById('parallelsToggle'); t.checked = true; t.dispatchEvent(new Event('change')); });
+  await page.waitForTimeout(200);
+  const pwStatus = await page.$eval('#statusText', el => el.textContent);
+  check('Mark partwriting problems reports what it found (' + pwStatus + ')', /^Marked: |^No partwriting problems found/.test(pwStatus));
+  const kinds = await page.$$eval('#staffSvg .parallel-mark', els => els.map(e => e.getAttribute('class')));
+  check('...and draws a mark for each (' + kinds.length + ')', /^Marked/.test(pwStatus) ? kinds.length >= 1 : kinds.length === 0);
+  await page.evaluate(() => { document.querySelectorAll('#pwKindsRow input').forEach(cb => { if (cb.checked){ cb.checked = false; cb.dispatchEvent(new Event('change')); } }); });
+  await page.waitForTimeout(200);
+  check('...unticking every kind clears the marks', (await page.$$('#staffSvg .parallel-mark')).length === 0);
+  await page.evaluate(() => { document.querySelectorAll('#pwKindsRow input').forEach(cb => { cb.checked = true; cb.dispatchEvent(new Event('change')); }); const t = document.getElementById('parallelsToggle'); t.checked = false; t.dispatchEvent(new Event('change')); });
+  await page.waitForTimeout(150);
+
+  // ---- v2.37: the tune in the bass ----
+  await page.keyboard.press('Escape');
+  q0 = await numAt(0);
+  await page.mouse.click(q0.x, q0.y);
+  await page.waitForTimeout(600);
+  const bassId = await page.$$eval('#melodyInSelect option', els => (els.find(o => /Bass/.test(o.textContent)) || {}).value);
+  await page.selectOption('#melodyInSelect', bassId);
+  await page.waitForTimeout(100);
+  await page.click('#measuresBox button.accent');
+  await page.waitForTimeout(300);
+  const st37 = await page.$eval('#statusText', el => el.textContent);
+  check('v2.37: Melody in Bass for m. 1 — no "not handled" caveat any more', /Tune in the Bass in m\. 1/.test(st37) && !/isn’t handled/.test(st37));
+  await page.click('#rewriteBtn');
+  await page.waitForTimeout(1500);
+  check('...Rewrite writes the other staves above the bass tune', /Rewrote .*in m\. 1/.test(await page.$eval('#statusText', el => el.textContent)));
 
   console.log('\nJS errors captured during the run:', JSON.stringify(errors));
   check('no console/page errors during the whole run', errors.length === 0);

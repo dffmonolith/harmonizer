@@ -1162,9 +1162,11 @@ section('Partwriting fixes (v2.31)');
     const g = H.getSong();
     return mel.map((m, i) => g.parts.map(p => at(p.id === g.melodyPartId ? g.notes : p.notes, p.clef, i * 2)));
   }
+  // v2.33: a suspension may hold the third back to the middle of the chord -- look there too
+  function runMid(){ const g = H.getSong(); return mel.map((m, i) => g.parts.map(p => at(p.id === g.melodyPartId ? g.notes : p.notes, p.clef, i * 2 + 1))); }
   ['close', 'hymn', 'open'].forEach(st => {
-    const V = run(st);
-    const missing = V.filter((v, i) => { const c = mel[i][1], r = SEMI[c[0]], th = (r + (c === 'Dm' ? 3 : 4)) % 12; return !v.some(x => x % 12 === th); }).length;
+    const V = run(st), M = runMid();
+    const missing = V.filter((v, i) => { const c = mel[i][1], r = SEMI[c[0]], th = (r + (c === 'Dm' ? 3 : 4)) % 12; return !v.some(x => x % 12 === th) && !M[i].some(x => x % 12 === th); }).length;
     check(st + ': every chord keeps its third', missing === 0);
     check(st + ': the G7 keeps its leading tone (B)', V[10].some(x => x % 12 === 11));
     check(st + ': the bass stays at least an octave under the melody at the end', V[V.length - 1][0] - V[V.length - 1][3] >= 12);
@@ -1172,6 +1174,613 @@ section('Partwriting fixes (v2.31)');
   });
   const T = run('close', 'T');
   check('tenor lead: the soprano stays above the melody and the bass below it', T.every(v => v[0] >= v[2] && v[2] >= v[3]));
+})();
+
+// v2.32: the wider shortlist and the refine pass (refineVoices / Refine parts). Uses the v2.31
+// chorale above plus a vamp built to tempt an inner voice into sitting on one note.
+section('Refine pass (v2.32)');
+(function(){
+  const SEMI = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+  const mel = [['G4','C'],['G4','C'],['F4','Dm'],['E4','C'],['D4','G'],['E4','C'],['G4','C'],['A4','F'],['G4','C'],['G4','C'],['F4','G7'],['E4','C'],['D4','G'],['C4','C']];
+  const Q = { C: 'maj', Dm: 'min', G: 'maj', G7: 'dom7', F: 'maj', Am: 'min' };
+  function chorale(style){
+    return fourPartSong({ harmonyStyle: style,
+      notes: mel.map((m, i) => { const x = /([A-G])(\d)/.exec(m[0]); return note(x[1], 0, +x[2], i === mel.length - 1 ? 'w' : 'h'); }),
+      chords: mel.map((m, i) => chord(m[1].replace(/m|7/, ''), Q[m[1]], i * 2)) });
+  }
+  function pitches(g, id){ const p = g.parts.find(q => q.id === id); return p.notes.map(n => n.type === 'note' ? H.soundingSemitoneOfNote(n, p.clef) : null); }
+  function draftP(ctx){ const sk = {}; ctx.others.forEach(p => { sk[p.id] = H.readVoiceSkeleton(p, ctx.events); }); return ctx.events.map((ev, e) => { const o = {}; ctx.others.forEach(p => { o[p.id] = sk[p.id].pitch[e]; }); return o; }); }
+
+  // 1. the refine pass only ever lowers the total cost, and does the same thing every time
+  ['close', 'hymn', 'open'].forEach(st => {
+    H.setSong(chorale(st)); H.render(); H.setRefineAfterGenerate(false); H.generatePartsFromMelodyAndChords();
+    check(st + ': with Refine after Generate off there is no refine report', H.getState().refineReport === null);
+    const ctx = H.prepareHarmonyContext(), P = draftP(ctx);
+    const r1 = H.refineVoices(ctx, P, H.refineFixedMap(ctx, P, null));
+    const r2 = H.refineVoices(ctx, P, H.refineFixedMap(ctx, P, null));
+    check(st + ': refining never raises the total cost (' + r1.before.total.toFixed(1) + ' → ' + r1.after.total.toFixed(1) + ')', r1.after.total <= r1.before.total + 1e-9);
+    check(st + ': refining is deterministic', JSON.stringify(r1.P) === JSON.stringify(r2.P));
+    check(st + ': the refined result has no impossible voicing', r1.after.total < 1e5);
+  });
+  H.setRefineAfterGenerate(true);
+
+  // 2. with refine on, the v2.31 guarantees still hold, and hymn style still writes no parallels
+  ['close', 'hymn', 'open'].forEach(st => {
+    H.setSong(chorale(st)); H.render(); H.generatePartsFromMelodyAndChords();
+    const g = H.getSong(), rr = H.getState().refineReport;
+    check(st + ': Generate parts leaves a refine report', !!rr && Array.isArray(rr.items) && !!rr.statsBefore && !!rr.statsAfter);
+    check(st + ': the status line mentions the refine', /refined:/.test(H.getStatus()));
+    const S = g.notes.map(n => SEMI[n.letter] + 12 * (n.octave + 1));
+    const A = pitches(g, 'A'), T = pitches(g, 'T'), B = pitches(g, 'B');
+    const sk = {}; g.parts.filter(p => p.id !== 'S').forEach(p => { sk[p.id] = H.readVoiceSkeleton(p, H.prepareHarmonyContext().events).pitch; });
+    const noThird = mel.filter((m, i) => { const c = m[1], r = SEMI[c[0]], th = (r + (c === 'Dm' ? 3 : 4)) % 12; return ![S[i], sk.A[i], sk.T[i], sk.B[i]].some(x => x % 12 === th); }).length;
+    check(st + ': after refining, every chord still has its third', noThird === 0);
+    check(st + ': after refining, the bass stays lowest and under the soprano', S.every((x, i) => sk.B[i] <= sk.A[i] && sk.B[i] <= sk.T[i] && x >= sk.A[i]));
+    if (st === 'hymn') check('hymn: no parallel fifths or octaves after refining', H.findParallels().length === 0);
+  });
+
+  // 3. a vamp that invites the alto to sit on one note for sixteen chord changes
+  const vamp = fourPartSong({ harmonyStyle: 'close',
+    notes: ['G4','A4','G4','A4','G4','A4','G4','A4','E4','F4','E4','F4','E4','F4','E4','F4','C4'].map((m, i, a) => note(m[0], 0, +m[1], i === a.length - 1 ? 'w' : 'h')),
+    chords: Array.from({ length: 17 }, (_, i) => chord(i % 2 ? 'F' : 'C', 'maj', i * 2)) });
+  H.setSong(vamp); H.render(); H.setRefineAfterGenerate(false); H.generatePartsFromMelodyAndChords();
+  let ctx = H.prepareHarmonyContext(); const P0 = draftP(ctx);
+  function longestHold(P, id){ let run = 0, best = 0; for (let e = 1; e < P.length; e++){ if (P[e][id] === P[e-1][id]) { run++; best = Math.max(best, run); } else run = 0; } return best; }
+  const before = Math.max(longestHold(P0, 'A'), longestHold(P0, 'T'));
+  H.refinePartsNow();
+  ctx = H.prepareHarmonyContext(); const P1 = draftP(ctx);
+  const after = Math.max(longestHold(P1, 'A'), longestHold(P1, 'T'));
+  check('vamp: Refine parts shortens the longest held inner note (' + before + ' → ' + after + ' chord changes)', after < before || before <= 3);
+  check('vamp: ...by at least half', after * 2 <= before);
+  const rep = H.getState().refineReport;
+  check('vamp: the report names voices and measures', rep && rep.items.length > 0 && rep.items.every(it => it.voice && it.m1 >= 1 && it.m2 >= it.m1 && it.notes > 0));
+  H.undo();
+  check('vamp: one Undo puts the unrefined parts back', JSON.stringify(draftP(H.prepareHarmonyContext())) === JSON.stringify(P0));
+  H.setRefineAfterGenerate(true);
+
+  // 4. Refine parts keeps locked notes, lyrics and a hand-written own-rhythm stave
+  H.setSong(chorale('close')); H.render(); H.setRefineAfterGenerate(false); H.generatePartsFromMelodyAndChords();
+  let g = H.getSong();
+  const alto = g.parts.find(p => p.id === 'A'), tenor = g.parts.find(p => p.id === 'T');
+  alto.notes.forEach((n, i) => { if (n.type === 'note') { n.locked = true; n.lyric = 'la' + i; } });   // alto all locked, with words
+  const altoBefore = JSON.stringify(alto.notes.map(n => [n.letter, n.accidental, n.octave, n.lyric]));
+  H.refinePartsNow();
+  g = H.getSong();
+  check('Refine parts leaves locked notes (and their lyrics) exactly as they were', JSON.stringify(g.parts.find(p => p.id === 'A').notes.map(n => [n.letter, n.accidental, n.octave, n.lyric])) === altoBefore);
+  tenor.notes = [note('C', 0, 4, 'w'), note('C', 0, 4, 'w'), note('C', 0, 4, 'w'), note('C', 0, 4, 'w'), note('C', 0, 4, 'w'), note('C', 0, 4, 'w'), note('C', 0, 4, 'w')];
+  const tenorBefore = JSON.stringify(tenor.notes);
+  H.refinePartsNow();
+  check('a stave in its own rhythm is heard but not rewritten', JSON.stringify(H.getSong().parts.find(p => p.id === 'T').notes) === tenorBefore);
+  H.getSong().parts.find(p => p.id === 'B').notes = [];
+  H.refinePartsNow();
+  check('with an empty stave, Refine parts asks for Generate parts first', /Run Generate parts first/.test(H.getStatus()));
+  H.setRefineAfterGenerate(true);
+
+  // 5. scoring one voicing (forced mode): inner voices may cross briefly at a cost; never the melody
+  H.setSong(chorale('close')); H.render(); H.generatePartsFromMelodyAndChords();
+  ctx = H.prepareHarmonyContext();
+  const ev = ctx.events[0], slots = ctx.fullSlots, lk = { A: {}, T: {} };
+  function score(a, t){ const st = H.beamVoicingsForEvent(slots, ctx.mPart, ctx.bassPart, ev.melodySounding, 48, ev.chordInfo, false, lk, 0, ctx.style, 1, ev, { A: a, T: t }); return st.length ? st[0].cost : Infinity; }
+  check('forced scoring: an uncrossed voicing is possible (E4 over C4)', isFinite(score(64, 60)));
+  check('forced scoring: a brief crossing (alto C4 under tenor E4) costs more but is allowed', isFinite(score(60, 64)) && score(60, 64) > score(64, 60));
+  check('forced scoring: a voice above the melody is refused', !isFinite(score(72, 60)));
+  check('forced scoring: a non-chord tone is refused', !isFinite(score(62, 60)));
+
+  // 6. the shortlist keeps the cheapest chords and stays bounded
+  const sets = H.shortlistVoicings(ctx.events, slots, ctx.mPart, ctx.bassPart, ctx.lockedByPart, ctx.upperPartIds, ctx.style);
+  check('shortlist: one set per event, none empty, none over 24', sets.length === ctx.events.length && sets.every(s => s.length > 0 && s.length <= 24));
+  const cheapest = H.beamVoicingsForEvent(slots, ctx.mPart, ctx.bassPart, ctx.events[3].melodySounding, ctx.events[3].bassSounding, ctx.events[3].chordInfo, false, ctx.lockedByPart, 3, ctx.style, 48, ctx.events[3])[0];
+  check('shortlist: the cheapest voicing as a chord is always kept', sets[3].some(v => JSON.stringify(v.assign) === JSON.stringify(cheapest.assign)));
+})();
+
+// v2.33: phase 2 -- voices follow chord changes under a held melody note, added notes of their
+// own (passing, neighbour, suspension, chord-tone skip), and a reload keeping locks and the
+// generated tag.
+section('Added notes and held-note harmony (v2.33)');
+(function(){
+  const SEMI = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+  function pitchOf(p, n){ return H.soundingSemitoneOfNote(n, p.clef); }
+  function tl(list){ let t = 0; return list.map(n => { const o = { s: t, n }; t += H.noteBeats(n); return o; }); }
+  function totalBeats(list){ return list.reduce((a, n) => a + H.noteBeats(n), 0); }
+
+  // 1. chords under a held note
+  const held = fourPartSong({ harmonyStyle: 'hymn', harmonyMotion: 'none',
+    notes: [note('E', 0, 4, 'h'), note('G', 0, 4, 'w'), note('C', 0, 5, 'w')],
+    chords: [chord('C', 'maj', 0), chord('F', 'maj', 2), chord('G', 'maj', 4), chord('C', 'maj', 6)] });
+  H.setSong(held); H.render(); H.generatePartsFromMelodyAndChords();
+  let g = H.getSong();
+  const tones = { 2: [5, 9, 0], 4: [7, 11, 2], 6: [0, 4, 7] };
+  const follow = g.parts.filter(p => p.id !== 'S').every(p => Object.keys(tones).every(b => { const x = tl(p.notes).filter(o => o.s <= +b + 1e-6).pop(); return tones[b].includes(pitchOf(p, x.n) % 12); }));
+  check('under a held melody note, every voice takes each new chord (F, G, C under one G whole note)', follow);
+  check('...and the parts still add up to the melody’s length', g.parts.filter(p => p.id !== 'S').every(p => Math.abs(totalBeats(p.notes) - totalBeats(g.notes)) < 1e-6));
+  const ctx = H.prepareHarmonyContext();
+  check('the held note becomes several events, the later one marked held', ctx.events.length === 4 && ctx.events.filter(e => e.held).length === 1);
+
+  // 2. a reload keeps locks and the generated tag, so Generate parts still works afterwards
+  g.parts[1].notes[0].locked = true;
+  const back = H.normalizeSong(JSON.parse(JSON.stringify(g)));
+  check('a reload keeps the generated tag on each written stave', back.parts.filter(p => p.id !== 'S').every(p => p._generated));
+  check('a reload keeps a locked note locked', !!back.parts[1].notes[0].locked);
+  check('a reload keeps the song’s Added notes setting', H.normalizeSong({ harmonyMotion: 'more', notes: [], parts: [] }).harmonyMotion === 'more' && H.normalizeSong({ notes: [], parts: [] }).harmonyMotion === 'some');
+  H.setSong(back); H.render(); H.generatePartsFromMelodyAndChords();
+  check('...and Generate parts rewrites those staves after a reload', /^Generated/.test(H.getStatus()));
+
+  // 3. note values
+  const sb = x => H.splitBeats(x).map(d => d.duration + (d.dotted ? '.' : '')).join('+');
+  check('lengths as note values: 2.5 = h+e, 3 = h., 1.75 = q.+s', sb(2.5) === 'h+e' && sb(3) === 'h.' && sb(1.75) === 'q.+s');
+  check('split points: 2 -> 1, 3 -> 2, 1.5 -> 1, 1 -> 0.5, 0.75 -> none', H.decoSplitPoint(2, 1) === 1 && H.decoSplitPoint(3, 1) === 2 && H.decoSplitPoint(1.5, 1) === 1 && H.decoSplitPoint(1, 1) === 0.5 && H.decoSplitPoint(0.75, 1) == null);
+  check('...and in 6/8 a dotted half splits into two dotted quarters', H.decoSplitPoint(3, 1.5) === 1.5);
+
+  // 4. the added notes themselves, on a longer tune in half notes
+  const tune = [['E4','C'],['D4','G'],['C4','Am'],['E4','F'],['G4','C'],['F4','Dm'],['E4','C'],['D4','G'],['E4','C'],['F4','F'],['G4','C'],['A4','F'],['G4','C'],['F4','G7'],['E4','C'],['D4','G'],['C4','C']];
+  const Q = { C: 'maj', G: 'maj', Am: 'min', F: 'maj', Dm: 'min', G7: 'dom7' };
+  function song(style, motion){
+    return fourPartSong({ harmonyStyle: style, harmonyMotion: motion,
+      notes: tune.map((m, i) => { const x = /([A-G])(\d)/.exec(m[0]); return note(x[1], 0, +x[2], i === tune.length - 1 ? 'w' : 'h'); }),
+      chords: tune.map((m, i) => chord(m[1].replace(/m$|7/, '').replace('Dm', 'D'), Q[m[1]], i * 2)) });
+  }
+  const counts = {};
+  ['close', 'hymn', 'open'].forEach(st => ['none', 'some', 'more'].forEach(mo => {
+    H.setSong(song(st, mo)); H.render(); H.generatePartsFromMelodyAndChords();
+    const G = H.getSong(), parts = G.parts.filter(p => p.id !== 'S');
+    let n = 0, bad = [];
+    parts.forEach(p => {
+      const L = tl(p.notes);
+      L.forEach((o, k) => {
+        if (!o.n.orn) return;
+        n++;
+        const x = pitchOf(p, o.n), prev = L[k-1] && pitchOf(p, L[k-1].n), next = L[k+1] && pitchOf(p, L[k+1].n);
+        if (H.noteBeats(o.n) < 0.5 - 1e-6) bad.push('short ' + o.n.orn);
+        if (o.n.orn === 'pass' && !(Math.abs(x - prev) <= 2 && Math.abs(next - x) <= 2 && Math.sign(x - prev) === Math.sign(next - x))) bad.push('pass@' + o.s);
+        if (o.n.orn === 'nbr' && !(prev === next && Math.abs(x - prev) <= 2)) bad.push('nbr@' + o.s);
+        if (o.n.orn === 'sus' && !(L[k-1].n.tied && prev === x && (x - next === 1 || x - next === 2))) bad.push('sus@' + o.s);
+      });
+      if (Math.abs(totalBeats(p.notes) - totalBeats(G.notes)) > 1e-6) bad.push(p.id + ' length');
+    });
+    counts[st + mo] = n;
+    if (mo === 'none') check(st + ', no added notes: none written', n === 0);
+    else check(st + ', ' + mo + ' added notes: each is a proper passing/neighbour/suspension figure, an eighth or longer (' + n + ' written)', bad.length === 0 && (bad.length || true));
+    if (bad.length) console.log('   ', bad.slice(0, 6).join(', '));
+    if (st === 'hymn' && mo !== 'none') check('hymn, ' + mo + ': still no parallel fifths or octaves', H.findParallels().length === 0);
+  }));
+  check('More added notes writes at least as many as Some, in every style', ['close', 'hymn', 'open'].every(st => counts[st + 'more'] >= counts[st + 'some']));
+  check('Some added notes writes at least one somewhere', ['close', 'hymn', 'open'].some(st => counts[st + 'some'] > 0));
+
+  // 5. Refine parts on a stave with added notes: reads the skeleton, keeps words and a locked added note
+  H.setSong(song('hymn', 'more')); H.render(); H.generatePartsFromMelodyAndChords();
+  g = H.getSong();
+  const withOrn = g.parts.find(p => p.id !== 'S' && p.notes.some(n => n.orn));
+  check('a stave with added notes reads back on the grid', !!withOrn && H.readVoiceSkeleton(withOrn, H.prepareHarmonyContext().events).onGrid);
+  const orn = withOrn.notes.find(n => n.orn), ornAt = tl(withOrn.notes).find(o => o.n === orn).s;
+  orn.locked = true;
+  withOrn.notes[0].lyric = 'Glo';
+  H.refinePartsNow();
+  g = H.getSong();
+  const again = g.parts.find(p => p.id === withOrn.id);
+  const kept = tl(again.notes).find(o => Math.abs(o.s - ornAt) < 1e-6);
+  check('Refine parts keeps a locked added note where it was', !!kept && kept.n.letter === orn.letter && kept.n.octave === orn.octave && kept.n.orn === orn.orn && !!kept.n.locked);
+  check('Refine parts carries the words on a stave over to the rewritten notes', again.notes[0].lyric === 'Glo');
+  H.generatePartsFromMelodyAndChords();
+  const kept2 = tl(H.getSong().parts.find(p => p.id === withOrn.id).notes).find(o => Math.abs(o.s - ornAt) < 1e-6);
+  check('Generate parts keeps it too', !!kept2 && kept2.n.letter === orn.letter && kept2.n.orn === orn.orn);
+  const rr = H.getState().refineReport;
+  check('the refine report counts the added notes per voice', rr && rr.deco && rr.deco.total > 0 && Object.keys(rr.deco.counts).length >= 3);
+})();
+
+// v2.34: repeated music -- a passage that comes back (the same melody over the same chords, or
+// the whole thing moved by one interval) gets the parts it had the first time.
+section('Repeated music (v2.34)');
+(function(){
+  function tl(list){ let t = 0; return list.map(n => { const o = { s: t, n }; t += H.noteBeats(n); return o; }); }
+  const P = (p, n) => H.soundingSemitoneOfNote(n, p.clef);
+  function rest(d, dotted){ return { id: 'r' + Math.random(), type: 'rest', letter: 'B', accidental: 0, octave: 4, duration: d, dotted: !!dotted, tuplet: null, lyric: '', tied: false }; }
+  // how many notes of the other staves in [src, src+len) come back at dst, moved by t (any octave), same length
+  function alike(g, src, dst, len, t){
+    let same = 0, tot = 0;
+    g.parts.filter(p => p.id !== g.melodyPartId).forEach(p => {
+      const L = tl(p.notes);
+      L.forEach(o => {
+        if (o.s < src - 1e-6 || o.s >= src + len - 1e-6 || o.n.type !== 'note') return;
+        tot++;
+        const m = L.find(q => Math.abs(q.s - (o.s - src + dst)) < 1e-6);
+        if (m && m.n.type === 'note' && (P(p, m.n) - P(p, o.n) - t) % 12 === 0 && H.noteBeats(m.n) === H.noteBeats(o.n) && (m.n.orn || '') === (o.n.orn || '')) same++;
+      });
+    });
+    return { same, tot, share: tot ? same / tot : 0 };
+  }
+  const A = [['E4','q'],['D4','q'],['C4','q'],['D4','q'],['E4','q'],['E4','q'],['E4','h'],['D4','q'],['D4','q'],['D4','h'],['E4','q'],['G4','q'],['G4','h']];
+  const Ach = [['C',0],['G',2],['C',4],['G',8],['C',12],['F',14]];
+  const B = [['A4','q'],['G4','q'],['F4','q'],['E4','q'],['D4','h'],['G4','h'],['E4','q'],['D4','q'],['C4','h'],['C4','w']];
+  const Bch = [['F',0],['C',2],['G',4],['C',8],['G',10],['C',12]];
+  function verses(style, mode, motion){
+    const notes = [], chords = []; let t = 0;
+    function add(ph, ch){ ph.forEach(([p, d]) => { const x = /([A-G])(\d)/.exec(p); notes.push(note(x[1], 0, +x[2], d)); }); ch.forEach(([r, b]) => chords.push(chord(r, 'maj', t + b))); t += 16; }
+    add(A, Ach); add(B, Bch); add(A, Ach); add(B, Bch);
+    return fourPartSong({ notes, chords, harmonyStyle: style, harmonyMotion: motion || 'some', recurMode: mode });
+  }
+  ['close', 'hymn', 'open'].forEach(st => {
+    H.setSong(verses(st, 'same')); H.render(); H.generatePartsFromMelodyAndChords();
+    const g = H.getSong(), a = alike(g, 0, 32, 32, 0);
+    check(st + ', Keep alike: a second verse gets exactly the parts of the first, added notes included (' + a.same + '/' + a.tot + ')', a.tot > 20 && a.same === a.tot);
+    if (st === 'hymn') check('hymn, Keep alike: still no parallel fifths or octaves', H.findParallels().length === 0);
+    check(st + ': the parts still add up to the melody’s length', g.parts.filter(p => p.id !== 'S').every(p => Math.abs(tl(p.notes).reduce((x, o) => x + H.noteBeats(o.n), 0) - 64) < 1e-6));
+  });
+  H.setSong(verses('close', 'same')); H.render(); H.generatePartsFromMelodyAndChords();
+  let rr = H.getState().refineReport;
+  check('the report lists the repeat found, by measures: "mm. 9–16 like mm. 1–8"', rr && rr.repeats && rr.repeats.occs.length === 1 && rr.repeats.occs[0].text === 'mm. 9–16 like mm. 1–8');
+  check('the status line says the repeat was kept alike', /1 repeated passage kept alike/.test(H.getStatus()));
+  H.setSong(verses('close', 'vary')); H.render(); H.generatePartsFromMelodyAndChords();
+  const va = alike(H.getSong(), 0, 32, 32, 0);
+  check('Vary lightly: the repeat mostly follows the first time, but not note for note (' + va.same + '/' + va.tot + ')', va.share >= 0.6 && va.same < va.tot);
+  check('...and the status line says so', /varied lightly/.test(H.getStatus()));
+  H.setSong(verses('close', 'fresh')); H.render(); H.generatePartsFromMelodyAndChords();
+  rr = H.getState().refineReport;
+  check('Write fresh: the report still lists the repeat, and the status line doesn’t claim one kept', rr && rr.repeats && rr.repeats.occs.length === 1 && !/repeated passage/.test(H.getStatus()));
+  check('the Repeated music modes are same / vary / fresh, Keep alike by default', Object.keys(H.RECUR_MODES).join(',') === 'same,vary,fresh' && H.normalizeSong({ notes: [], parts: [] }).recurMode === 'same');
+  const saved = H.normalizeSong({ notes: [], parts: [], recurMode: 'vary', recurOff: [{ from: 32, to: 64 }, { from: 5, to: 2 }], recurLinks: [{ src: 0, dst: 16, beats: 8 }, { src: 16, dst: 0, beats: 8 }] });
+  check('a reload keeps the mode, switched-off repeats and links (and drops nonsense ones)', saved.recurMode === 'vary' && saved.recurOff.length === 1 && saved.recurLinks.length === 1 && saved.recurLinks[0].dst === 16);
+
+  // a real sequence: the phrase again a whole step higher, chords and all
+  const up = [note('F', 1, 4), note('G', 0, 4), note('A', 0, 4), note('F', 1, 4), note('E', 0, 4), note('F', 1, 4), note('G', 0, 4), note('E', 0, 4)];
+  const seq = fourPartSong({ harmonyStyle: 'close', recurMode: 'same',
+    notes: [note('E', 0, 4), note('F', 0, 4), note('G', 0, 4), note('E', 0, 4), note('D', 0, 4), note('E', 0, 4), note('F', 0, 4), note('D', 0, 4)].concat(up, [note('C', 0, 4, 'w')]),
+    chords: [chord('C', 'maj', 0), chord('F', 'maj', 2), chord('G', 'maj', 4), chord('D', 'maj', 8), chord('G', 'maj', 10), chord('A', 'maj', 12), chord('C', 'maj', 16)] });
+  H.setSong(seq); H.render(); H.generatePartsFromMelodyAndChords();
+  rr = H.getState().refineReport;
+  const sa = alike(H.getSong(), 0, 8, 8, 2);
+  check('a sequence up a whole step is found as one ("mm. 3–4 like mm. 1–2 (up a whole step)")', rr && rr.repeats && rr.repeats.occs.some(o => o.text === 'mm. 3–4 like mm. 1–2 (up a whole step)'));
+  check('...and its parts are the first statement’s moved up a whole step (' + sa.same + '/' + sa.tot + ')', sa.tot >= 12 && sa.share >= 0.9);
+
+  // small differences: one changed note and one quarter split into two eighths, same chords
+  const ph1 = () => [note('E', 0, 4), note('D', 0, 4), note('C', 0, 4), note('D', 0, 4), note('E', 0, 4), note('E', 0, 4), note('E', 0, 4, 'h')];
+  const ph2 = [note('E', 0, 4), note('D', 0, 4), note('C', 0, 4), note('E', 0, 4, 'e'), note('D', 0, 4, 'e'), note('E', 0, 4), note('G', 0, 4), note('E', 0, 4, 'h')];
+  const tail = () => [note('D', 0, 4), note('D', 0, 4), note('D', 0, 4, 'h'), note('D', 0, 4, 'w')];
+  const sd = fourPartSong({ harmonyStyle: 'hymn', recurMode: 'same', notes: [].concat(ph1(), tail(), ph2, tail(), [note('C', 0, 4, 'w')]),
+    chords: [chord('C', 'maj', 0), chord('G', 'maj', 2), chord('C', 'maj', 4), chord('G', 'maj', 8), chord('C', 'maj', 16), chord('G', 'maj', 18), chord('C', 'maj', 20), chord('G', 'maj', 24), chord('C', 'maj', 32)] });
+  H.setSong(sd); H.render(); H.generatePartsFromMelodyAndChords();
+  rr = H.getState().refineReport;
+  const da = alike(H.getSong(), 0, 16, 16, 0);
+  check('a repeat with a changed note and a split quarter is still found, "with small differences"', rr && rr.repeats && rr.repeats.occs.some(o => /like mm\. 1–4, with small differences/.test(o.text)));
+  check('...its parts mostly follow the first time (' + da.same + '/' + da.tot + ')', da.share >= 0.75);
+  check('...and Traditional still writes no parallels there', H.findParallels().length === 0);
+
+  // a pickup: the phrase comes back with its pickup, in the same place in the bar
+  const pk = () => [note('G', 0, 4), note('C', 0, 5, 'h'), note('B', 0, 4), note('A', 0, 4), note('G', 0, 4, 'h'), note('E', 0, 4), note('F', 0, 4), note('G', 0, 4, 'h')];
+  const ps = fourPartSong({ harmonyStyle: 'close', recurMode: 'same', pickupBeats: 1, notes: [].concat(pk(), [note('D', 0, 4, 'h'), rest('h', true)], pk(), [note('C', 0, 5, 'w')]),
+    chords: [chord('C', 'maj', 0), chord('F', 'maj', 3), chord('C', 'maj', 5), chord('G', 'maj', 9), chord('C', 'maj', 16), chord('F', 'maj', 19), chord('C', 'maj', 21), chord('G', 'maj', 25), chord('C', 'maj', 27)] });
+  H.setSong(ps); H.render(); H.generatePartsFromMelodyAndChords();
+  rr = H.getState().refineReport;
+  check('a phrase with a pickup is found again, pickup and all (measures counted from the pickup as 0)', rr && rr.repeats && rr.repeats.occs.some(o => /^mm\. 4–7 like mm\. 0–3/.test(o.text)));
+  check('...and its parts follow', alike(H.getSong(), 0, 16, 9, 0).share >= 0.9);
+
+  // a locked note in the repeat stays as written; the rest still follows
+  H.setSong(verses('close', 'same', 'none')); H.render(); H.generatePartsFromMelodyAndChords();
+  let g = H.getSong();
+  const alto = g.parts.find(p => p.id === 'A'), tLo = tl(alto.notes).find(o => o.s >= 36 && o.n.type === 'note');
+  const LET = 'CDEFGAB', i0 = LET.indexOf(tLo.n.letter);
+  tLo.n.letter = LET[(i0 + 5) % 7]; if (i0 < 2) tLo.n.octave -= 1;   // down a third
+  tLo.n.locked = true;
+  const lockedAt = tLo.s, lockedP = P(alto, tLo.n);
+  H.generatePartsFromMelodyAndChords();
+  g = H.getSong();
+  const kept = tl(g.parts.find(p => p.id === 'A').notes).find(o => Math.abs(o.s - lockedAt) < 1e-6);
+  check('a locked note in a repeat is kept as written', !!kept && kept.n.locked && P(alto, kept.n) === lockedP);
+  check('...while most of the repeat still follows the first time', alike(g, 0, 32, 32, 0).share >= 0.8);
+
+  // edit the first time through, lock it, Refine parts: the repeat follows
+  H.setSong(verses('close', 'same', 'none')); H.render(); H.generatePartsFromMelodyAndChords();
+  g = H.getSong();
+  const tones = { C: ['C', 'E', 'G'], G: ['G', 'B', 'D'], F: ['F', 'A', 'C'] };
+  const chordAt = b => { let c = null; g.chords.forEach(x => { if (x.beat <= b + 1e-6) c = x; }); return c; };
+  const A2 = g.parts.find(p => p.id === 'A'), T2 = tl(g.parts.find(p => p.id === 'T').notes);
+  let edit = null;
+  for (const o of tl(A2.notes)){
+    if (o.s >= 32 || o.n.type !== 'note') continue;
+    const i = LET.indexOf(o.n.letter), nl = LET[(i + 5) % 7], noct = o.n.octave - (i < 2 ? 1 : 0);
+    if (!tones[chordAt(o.s).root.letter].includes(nl)) continue;
+    const newP = H.soundingSemitoneOfNote({ type: 'note', letter: nl, accidental: 0, octave: noct }, A2.clef);
+    const ten = T2.filter(q => q.s <= o.s + 1e-6).pop().n;
+    if (newP <= H.soundingSemitoneOfNote(ten, 'tenor8va') + 2) continue;
+    o.n.letter = nl; o.n.octave = noct; o.n.locked = true; edit = { s: o.s, p: newP }; break;
+  }
+  H.refinePartsNow();
+  g = H.getSong();
+  const echo = edit && tl(g.parts.find(p => p.id === 'A').notes).find(o => Math.abs(o.s - edit.s - 32) < 1e-6);
+  check('edit a note the first time through (locked), Refine parts: the repeat takes the change', !!echo && P(A2, echo.n) === edit.p && !echo.n.locked);
+
+  // switch a repeat off, and back on; link one by hand
+  H.setSong(verses('close', 'same')); H.render();
+  let ctx = H.prepareHarmonyContext(), rep = H.findRepeats(ctx);
+  const occ = rep.occs.find(o => !o.off);
+  H.setRecurOccOn(occ, false);
+  rep = H.findRepeats(H.prepareHarmonyContext());
+  check('switched off in the report: the song remembers it, nothing is copied, and the report still offers it', H.getSong().recurOff.length === 1 && rep.count === 0 && rep.occs.length === 1 && rep.occs[0].off);
+  H.setRecurOccOn(rep.occs[0], true);
+  rep = H.findRepeats(H.prepareHarmonyContext());
+  check('...and switched back on', H.getSong().recurOff.length === 0 && rep.count > 0);
+  check('a link by hand needs the first statement to come first', /before/.test(H.addRecurLink(1, 2, 5) || ''));
+  check('...and measures that are in the song', /aren’t in the song/.test(H.addRecurLink(40, 41, 1) || ''));
+  H.getSong().recurOff = [{ from: 32, to: 64 }];
+  check('link mm. 9–12 like m. 1 by hand', H.addRecurLink(9, 12, 1) === null && H.getSong().recurLinks.length === 1 && H.getSong().recurOff.length === 0);
+  rep = H.findRepeats(H.prepareHarmonyContext());
+  check('...it is used, marked as linked by you, and the rest is found as usual', rep.occs.some(o => o.manual && !o.off && o.events > 0) && rep.occs.some(o => !o.manual && !o.off));
+  H.generatePartsFromMelodyAndChords();
+  check('...and Generate parts still keeps the whole second verse alike', alike(H.getSong(), 0, 32, 32, 0).share === 1);
+})();
+
+// -------------------------------------------------------------------------
+// MELODY SECTIONS AND REWRITE (v2.35) -- the tune in another stave for a passage, chords-only
+// passages, rewriting chosen staves in chosen measures, generated marked per note
+// -------------------------------------------------------------------------
+section('Melody sections and Rewrite (v2.35)');
+(function(){
+  const mk = (l, o) => ({ id: 'n' + Math.random(), type: 'note', letter: l, accidental: 0, octave: o, duration: 'q', dotted: false, tuplet: null, lyric: 'la', tied: false });
+  const tune = 'E4 D4 C4 D4 E4 E4 E4 D4 D4 E4 D4 C4 D4 G4 G4 C4'.split(' ');
+  const prog = ['C','G','C','G', 'C','C','C','G', 'G','C','G','C', 'G','G','G','C'];
+  function sectionsSong(){
+    const notes = [];
+    for (let v = 0; v < 4; v++) tune.forEach(t => notes.push(mk(t[0], +t[1])));
+    const chords = [];
+    for (let m = 0; m < 16; m++){ chords.push(chord(prog[m], 'maj', m * 4)); if (m % 4 === 1) chords.push(chord(prog[m] === 'C' ? 'F' : 'C', 'maj', m * 4 + 2)); }
+    return H.normalizeSong(fourPartSong({ title: 'Sections', notes, chords }));
+  }
+  H.setSong(sectionsSong()); H.render();
+  const S = () => H.getSong();
+  const list = id => id === S().melodyPartId ? S().notes : S().parts.find(p => p.id === id).notes;
+  const clef = id => S().parts.find(p => p.id === id).clef;
+  const at = (id, beat) => { let t = 0; for (const n of list(id) || []){ const d = H.noteBeats(n); if (beat >= t - 1e-6 && beat < t + d - 1e-6) return n.type === 'note' ? H.soundingSemitoneOfNote(n, clef(id)) : null; t += d; } return undefined; };
+  const len = id => (list(id) || []).reduce((a, n) => a + H.noteBeats(n), 0);
+  const snap = (id, a, b) => { const o = []; for (let x = a; x < b; x += 0.5) o.push(at(id, x)); return o.join(','); };
+  const down = str => str.split(',').map(x => x === '' ? '' : +x - 12).join(',');
+
+  // cutting and joining note lists
+  const half = [Object.assign(mk('C', 4), { duration: 'h', lyric: 'long' }), mk('D', 4), mk('E', 4)];
+  const cut = H.sliceNotes(half, 1, 3, true);
+  check('sliceNotes cuts a half note at beat 1: a tied quarter without its word, then the next note', cut.length === 2 && cut[0].duration === 'q' && cut[0].letter === 'C' && !cut[0].lyric && cut[1].letter === 'D');
+  check('...and pads with rests past the end', H.sliceNotes(half, 3, 6, true).map(n => n.type).join(',') === 'note,rest');
+  const sp = H.spliceNotes(half, 1, 2, [mk('G', 4)]);
+  check('spliceNotes puts a new note in the middle of a held one, keeping the length and untying the cut', sp.reduce((a, n) => a + H.noteBeats(n), 0) === 4 && sp[0].letter === 'C' && !sp[0].tied && sp[1].letter === 'G');
+
+  // a song without sections takes the 2.34 path, and marks every generated note
+  H.generatePartsFromMelodyAndChords();
+  check('no melody sections: Generate parts as before (not by section)', !H.hasMelodySections() && !/by melody section/.test(H.getStatus()) && ['A','T','B'].every(id => len(id) === 64));
+  check('every generated note is marked generated, and the staves too', ['A','T','B'].every(id => list(id).every(n => n.type !== 'note' || n.gen)) && S().parts.filter(p => p.id !== 'S').every(p => p._generated));
+  const re = H.normalizeSong(JSON.parse(JSON.stringify(Object.assign({}, S(), { parts: S().parts.map(p => Object.assign({}, p, { notes: p.notes && p.notes.map(n => { const c = Object.assign({}, n); delete c.gen; return c; }) })) }))));
+  check('a 2.34 song (generated stave, notes unmarked) has its notes marked on opening', re.parts.find(p => p.id === 'A').notes.every(n => n.type !== 'note' || n.gen));
+  const before = {}; ['S','A','T','B'].forEach(id => before[id] = snap(id, 0, 64));
+
+  // Rewrite: alto and tenor in mm. 5-8
+  H.generateWithSections({ a: 16, b: 32, staves: { A: true, T: true } });
+  check('Rewrite mm. 5–8, alto and tenor: soprano and bass untouched', snap('S', 0, 64) === before.S && snap('B', 0, 64) === before.B);
+  check('...alto and tenor untouched outside those measures', ['A','T'].every(id => snap(id, 0, 16) === before[id].split(',').slice(0, 32).join(',') && snap(id, 32, 64) === before[id].split(',').slice(64).join(',')));
+  check('...and singing throughout them, every stave still 16 measures', ['A','T'].every(id => { for (let x = 16; x < 32; x++) if (at(id, x) == null) return false; return true; }) && ['S','A','T','B'].every(id => len(id) === 64));
+  check('...the status names what was rewritten', /Rewrote Alto, Tenor in mm\. 5–8/.test(H.getStatus()));
+  const afterRw = snap('A', 0, 64);
+  H.undo();
+  check('...Undo puts the measures back as they were', snap('A', 0, 64) === before.A && snap('T', 0, 64) === before.T);
+  H.redo();
+  check('...and Redo brings the rewrite back', snap('A', 0, 64) === afterRw);
+
+  // the tune to the tenor, mm. 5-8
+  const tuneS = snap('S', 16, 32);
+  const copied = H.applyMelodyIn(16, 32, 'T', 'chord', true);
+  check('Melody in Tenor, mm. 5–8: a section from beat 16 to 32', H.hasMelodySections() && JSON.stringify(H.melodySectionSpans().map(s => [s.a, s.b, s.partId])) === JSON.stringify([[0, 16, 'S'], [16, 32, 'T'], [32, 64, 'S']]));
+  check('...the tune brought across, down an octave (' + copied + ' notes), with its words', copied === 16 && snap('T', 16, 32) === down(tuneS) && list('T').filter(n => n.lyric === 'la').length >= 16);
+  check('...the soprano gives it up there (its notes are generated now), the tenor’s are its own', (() => { let ok = true, t = 0; list('S').forEach(n => { if (t >= 16 && t < 32 && n.type === 'note' && !n.gen) ok = false; t += H.noteBeats(n); }); t = 0; list('T').forEach(n => { if (t >= 16 && t < 32 && n.type === 'note' && n.gen) ok = false; t += H.noteBeats(n); }); return ok; })());
+  H.generatePartsFromMelodyAndChords();
+  check('Generate parts goes by melody section, and says so', /by melody section \(tune in the Soprano mm\. 1–4, mm\. 9–16; tune in the Tenor mm\. 5–8/.test(H.getStatus()));
+  check('...the tenor tune kept note for note; the soprano tune kept elsewhere', snap('T', 16, 32) === down(tuneS) && snap('S', 0, 16) === before.S.split(',').slice(0, 32).join(',') && snap('S', 32, 64) === before.S.split(',').slice(64).join(','));
+  check('...over the tenor tune, soprano ≥ alto ≥ tune ≥ bass at every beat', (() => { for (let x = 16; x < 32; x++){ const s = at('S', x), a = at('A', x), t = at('T', x), b = at('B', x); if ([s, a, t, b].some(v => v == null) || s < a || a < t || b > t) return false; } return true; })());
+  check('...the tenor generated outside its section; every stave 16 measures', (() => { let ok = true, t = 0; list('T').forEach(n => { if ((t < 16 || t >= 32) && n.type === 'note' && !n.gen) ok = false; t += H.noteBeats(n); }); return ok; })() && ['S','A','T','B'].every(id => len(id) === 64));
+  check('...a stave holding the tune somewhere is not marked generated as a whole', !S().parts.find(p => p.id === 'T')._generated);
+
+  // chords only, mm. 13-16, each fill
+  const attacks = (id, a, b) => { let n0 = 0, t = 0; const l = list(id); l.forEach((n, i) => { if (t >= a - 1e-6 && t < b - 1e-6 && n.type === 'note' && !(l[i - 1] && l[i - 1].tied)) n0++; t += H.noteBeats(n); }); return n0; };
+  const expect = { chord: 4, held: [1, 4], beat: 16 };
+  ['chord', 'held', 'beat'].forEach(fill => {
+    H.applyMelodyIn(48, 64, null, fill, false);
+    H.generatePartsFromMelodyAndChords();
+    const every = ['S','A','T','B'].every(id => { for (let x = 48; x < 64; x++) if (at(id, x) == null) return false; return true; });
+    const n0 = attacks('S', 48, 64), ex = expect[fill];
+    check('chords only (' + fill + '), mm. 13–16: every stave sings; the top line sounds ' + n0 + ' times', every && (Array.isArray(ex) ? n0 >= ex[0] && n0 <= ex[1] : n0 === ex));
+  });
+  check('...and the top line moves by step, common tone or a small leap', (() => { const p = []; for (let x = 48; x < 64; x++) p.push(at('S', x)); return p.every((v, i) => i === 0 || Math.abs(v - p[i - 1]) <= 5); })());
+  check('...on the beat, the inner voices sing again on every beat too', attacks('A', 48, 64) === 16);
+  const moments = H.fillMoments(48, 64, 'chord');
+  check('fillMoments: one moment per real chord change (G, C at beat 54, G, C)', moments.map(m => m.beat).join(',') === '48,54,56,60');
+
+  H.refineWithSections();
+  check('Refine parts by section leaves the tenor tune alone', snap('T', 16, 32) === down(tuneS));
+
+  // saving
+  const saved = H.normalizeSong(JSON.parse(JSON.stringify(S())));
+  check('melody sections and the per-note marks survive saving', JSON.stringify(saved.melodySections) === JSON.stringify(S().melodySections) &&
+    saved.parts.find(p => p.id === 'T').notes.filter(n => n.gen).length === list('T').filter(n => n.gen).length && saved.notes.filter(n => n.gen).length === list('S').filter(n => n.gen).length);
+  const bad = H.normalizeSong(Object.assign(JSON.parse(JSON.stringify(S())), { melodySections: [{ beat: 16, partId: 'nope' }, { beat: 8, partId: null, fill: 'odd' }, { beat: 8, partId: 'A' }] }));
+  check('...sections naming a missing stave are dropped, an unknown fill becomes per chord, one per beat', JSON.stringify(bad.melodySections) === JSON.stringify([{ beat: 8, partId: null, fill: 'chord' }]));
+
+  // locks over a range, and on generated notes in the melody stave
+  const nl = H.lockRange(0, 16, { A: true, B: true }, true);
+  check('Lock mm. 1–4 on alto and bass locks their notes there (' + nl + ')', nl === 32 && list('A').slice(0, 8).every(n => n.type !== 'note' || n.locked));
+  const lockedA = snap('A', 0, 16);
+  H.generatePartsFromMelodyAndChords();
+  check('...Generate parts keeps them', snap('A', 0, 16) === lockedA);
+  check('Lock over the tune leaves the tune alone', H.lockRange(16, 32, { T: true }, true) === 0);
+  const sGen = list('S').findIndex((n, i) => { let t = 0; for (let k = 0; k < i; k++) t += H.noteBeats(list('S')[k]); return t >= 16 && t < 32 && n.type === 'note'; });
+  H.setCellLocked({ partId: 'S', index: sGen }, true);
+  check('a generated note in the melody stave (over the tenor tune) can be locked', H.isCellLocked({ partId: 'S', index: sGen }));
+  H.setCellLocked({ partId: 'S', index: 0 }, true);
+  check('...the tune itself can’t', !H.isCellLocked({ partId: 'S', index: 0 }));
+
+  // back to the soprano
+  H.applyMelodyIn(16, 32, 'S', null, true);
+  H.applyMelodyIn(48, 64, 'S', null, false);
+  check('× on both sections: none left, the soprano has its tune back', !H.hasMelodySections() && snap('S', 16, 32) === tuneS);
+  H.generatePartsFromMelodyAndChords();
+  check('...and Generate parts takes the ordinary path again', !/by melody section/.test(H.getStatus()) && ['A','T','B'].every(id => len(id) === 64));
+
+  // a hand-written stave: heard, kept, rewritten only when ticked
+  H.setSong(sectionsSong()); H.render();
+  S().parts.find(p => p.id === 'B').notes = list('S').map(n => Object.assign({}, n, { id: 'b' + Math.random(), octave: n.octave - 2, lyric: '' }));
+  H.render();
+  H.generatePartsFromMelodyAndChords();
+  const handB = snap('B', 0, 64);
+  H.applyMelodyIn(16, 32, 'T', 'chord', true);
+  H.generatePartsFromMelodyAndChords();
+  check('a hand-written bass is kept through Generate parts by section', snap('B', 0, 64) === handB);
+  check('...and the Rewrite panel’s defaults leave it unticked (written by hand)', H.hasHandNotesIn('B', 0, 16));
+  H.generateWithSections({ a: 0, b: 16, staves: { B: true } });
+  check('...ticked, Rewrite writes it again there only', snap('B', 16, 64) === handB.split(',').slice(32).join(',') && list('B').slice(0, 4).every(n => n.type !== 'note' || n.gen));
+
+  // ---- v2.37: the tune in the bass, and the joins ----
+  console.log('\n=== Tune in the bass, joins (v2.37) ===');
+  H.setSong(sectionsSong()); H.render();
+  H.generatePartsFromMelodyAndChords();
+  H.applyMelodyIn(16, 32, 'B', 'chord', true);
+  const tuneB = snap('B', 16, 32);
+  H.generatePartsFromMelodyAndChords();
+  check('the tune in the bass, mm. 5–8: kept note for note', snap('B', 16, 32) === tuneB);
+  check('...every other stave above it at every beat (none planned as a second bass line under or on it)', (() => { for (let x = 16; x < 32; x += 0.5){ const b = at('B', x); if (b == null) continue; for (const id of ['S','A','T']){ const v = at(id, x); if (v == null || v <= b) return false; } } return true; })());
+  check('...and the voices above in order: soprano ≥ alto ≥ tenor', (() => { for (let x = 16; x < 32; x++){ const s = at('S', x), a = at('A', x), t = at('T', x); if (s < a || a < t) return false; } return true; })());
+  const jn = H.getState().lastJoins;
+  check('Generate parts goes back over both joins, the measure either side (' + (jn && jn.kept) + ' of ' + (jn && jn.tried) + ' kept)', !!jn && jn.tried === 4 && jn.kept <= jn.tried);
+  check('...and says so', /measures at the joins between sections written again with both sides in place/.test(H.getStatus()));
+  check('...the tune untouched by the join passes', snap('B', 16, 32) === tuneB && snap('S', 0, 16) !== '' );
+  check('...every stave still 16 measures, nothing silent', ['S','A','T','B'].every(id => len(id) === 64) && ['S','A','T','B'].every(id => { for (let x = 0; x < 64; x++) if (at(id, x) == null) return false; return true; }));
+  check('seamScore scores a join (a number, the higher the rougher)', typeof H.seamScore(12, 20) === 'number' && H.seamScore(12, 20) >= 0);
+  // the chords-only top line, chosen with the voices under it
+  const mom = H.fillMoments(48, 64, 'chord'), topP = S().parts.find(p => p.id === 'S');
+  const opts = H.planTopLineOptions(topP, mom, 'chord', null, null, 3);
+  check('planTopLineOptions: up to three lines, different, cheapest first', opts.length >= 2 && opts.length <= 3 && new Set(opts.map(o => o.pitches.join())).size === opts.length && opts.every((o, i) => i === 0 || o.cost >= opts[i - 1].cost));
+  H.applyMelodyIn(48, 64, null, 'chord', false);
+  H.generatePartsFromMelodyAndChords();
+  check('...a chords-only ending is written with one of them on top (every stave singing)', ['S','A','T','B'].every(id => { for (let x = 48; x < 64; x++) if (at(id, x) == null) return false; return true; }));
+  // Rewrite inside a range: joins inside it only
+  H.generateWithSections({ a: 0, b: 16, staves: { A: true, T: true } });
+  check('Rewrite in mm. 1–4 (no join inside) goes back over no joins', H.getState().lastJoins.tried === 0);
+  H.generateWithSections({ a: 8, b: 24, staves: { A: true, T: true } });
+  check('Rewrite across the join at m. 5 goes back over it, the ticked staves only', H.getState().lastJoins.tried >= 1 && snap('B', 16, 32) === tuneB);
+})();
+
+
+// v2.38: the partwriting checks (findPartwritingIssues), spelling generated notes from the chord,
+// the costs that keep Generate parts clear of the new faults, and the marks over generated notes.
+section('Partwriting checks, spelling, generated-note marks (v2.38)');
+(function(){
+  const ALL = { par: 1, con: 1, hid: 1, ovl: 1, xrel: 1, aug2: 1 };
+  function three(sNotes, aNotes, bNotes){
+    return fourPartSong({ notes: sNotes,
+      parts: [ { id: 'S', role: 'S', clef: 'treble' }, { id: 'A', role: 'A', clef: 'treble', notes: aNotes }, { id: 'B', role: 'B', clef: 'bass', notes: bNotes } ] });
+  }
+  function issues(song, only){ H.setSong(song); H.render(); return H.findPartwritingIssues(only || ALL); }
+  const h = d => note('A', 0, 4, d || 'h');
+  // contrary fifths: S G4 -> D5 up, B C3 -> G2 down (a twelfth, then a nineteenth -- fifths both)
+  let f = issues(three([note('G', 0, 4, 'h'), note('D', 0, 5, 'h')], [note('E', 0, 4, 'w')], [note('C', 0, 3, 'h'), note('G', 0, 2, 'h')]));
+  check('contrary fifths are found, between the soprano and the bass', f.filter(x => x.kind === 'con').length === 1 && f.find(x => x.kind === 'con').sub === 5 && f.find(x => x.kind === 'con').b.partId === 'B');
+  check('...and are not called parallels', !f.some(x => x.kind === 'par'));
+  // hidden octave: S E5 -> A5 (a leap) over B F3 -> A3, both up
+  f = issues(three([note('E', 0, 5, 'h'), note('A', 0, 5, 'h')], [note('C', 0, 5, 'w')], [note('F', 0, 3, 'h'), note('A', 0, 3, 'h')]));
+  check('a hidden octave in the outer voices (soprano leaping) is found', f.some(x => x.kind === 'hid' && x.sub === 8));
+  f = issues(three([note('G', 0, 5, 'h'), note('A', 0, 5, 'h')], [note('C', 0, 5, 'w')], [note('F', 0, 3, 'h'), note('A', 0, 3, 'h')]));
+  check('...not when the soprano steps into it', !f.some(x => x.kind === 'hid'));
+  // overlap: S D5 -> G5, A B4 -> E5 (the alto rises above the D5 the soprano has just left)
+  f = issues(three([note('D', 0, 5, 'h'), note('G', 0, 5, 'h')], [note('B', 0, 4, 'h'), note('E', 0, 5, 'h')], [note('G', 0, 3, 'h'), note('C', 0, 3, 'h')]));
+  const ov = f.filter(x => x.kind === 'ovl');
+  check('a voice overlap is found (the alto above the soprano’s last note)', ov.length === 1 && ov[0].up && ov[0].b.partId === 'A');
+  f = issues(three([note('D', 0, 5, 'h'), note('G', 0, 5, 'h')], [note('B', 0, 4, 'h'), note('C', 0, 5, 'h')], [note('G', 0, 3, 'h'), note('C', 0, 3, 'h')]));
+  check('...not when it stays under it', !f.some(x => x.kind === 'ovl'));
+  // cross-relation: alto F4, then the soprano F#5 while the alto leaves
+  f = issues(three([note('C', 0, 5, 'h'), note('F', 1, 5, 'h')], [note('F', 0, 4, 'h'), note('D', 0, 4, 'h')], [note('F', 0, 3, 'h'), note('D', 0, 3, 'h')]));
+  check('a cross-relation (F in the alto, then F# in the soprano) is found', f.some(x => x.kind === 'xrel' && x.a.partId !== x.b.partId));
+  f = issues(three([note('C', 0, 5, 'h'), note('A', 0, 4, 'h')], [note('F', 0, 4, 'h'), note('F', 1, 4, 'h')], [note('F', 0, 3, 'h'), note('D', 0, 3, 'h')]));
+  check('...not when the alto sings F to F# itself (and the bass leaves F)', !f.some(x => x.kind === 'xrel'));
+  // augmented second, by spelling
+  f = issues(three([h(), h()], [note('F', 0, 4, 'h'), note('G', 1, 4, 'h')], [note('D', 0, 3, 'w')]));
+  check('an augmented second (F to G#) is found in the alto', f.filter(x => x.kind === 'aug2').length === 1 && f.find(x => x.kind === 'aug2').a.partId === 'A');
+  f = issues(three([h(), h()], [note('F', 0, 4, 'h'), note('A', -1, 4, 'h')], [note('D', 0, 3, 'w')]));
+  check('...a minor third (F to Ab) is not', !f.some(x => x.kind === 'aug2'));
+  check('describePartwritingIssues counts by kind', H.describePartwritingIssues([{ kind: 'par' }, { kind: 'par' }, { kind: 'xrel' }]) === '2 parallel fifths/octaves, 1 cross-relation');
+  check('the kinds can be asked for one at a time', issues(three([note('G', 0, 4, 'h'), note('D', 0, 5, 'h')], [note('E', 0, 4, 'w')], [note('C', 0, 3, 'h'), note('G', 0, 2, 'h')]), { hid: 1 }).length === 0);
+
+  // spelling: a chord tone from the chord, the rest from the key
+  const dm = H.pcSpellingFor({ root: { letter: 'A', accidental: 0 }, quality: 'maj' }, 'Dm');
+  check('in D minor, A major’s third is C# (was Db)', dm[1].letter === 'C' && dm[1].accidental === 1);
+  const fm = H.pcSpellingFor({ root: { letter: 'D', accidental: 0 }, quality: 'maj' }, 'F');
+  check('in F major, D major’s third is F# (was Gb)', fm[6].letter === 'F' && fm[6].accidental === 1);
+  const am = H.pcSpellingFor({ root: { letter: 'D', accidental: 0 }, quality: 'min' }, 'Am');
+  check('in A minor, the raised 7th off the chord is G#, the raised 6th F#', am[8].letter === 'G' && am[8].accidental === 1 && am[6].letter === 'F' && am[6].accidental === 1);
+  const pic = H.pcSpellingFor({ root: { letter: 'D', accidental: 0 }, quality: 'min' }, 'Dm');
+  check('a Picardy third on D minor is F#', pic[6].letter === 'F' && pic[6].accidental === 1);
+  const bs = H.pcSpellingFor({ root: { letter: 'G', accidental: 1 }, quality: 'maj' }, 'C#m');
+  check('G# major’s third is B# (octave kept right)', bs[0].letter === 'B' && bs[0].accidental === 1);
+  H.setSong(fourPartSong({ key: 'C#m', notes: [note('C', 1, 5, 'w')], chords: [chord('G#', 'maj', 0)] })); H.render();
+  const sp = H.spellGen(60, 0);
+  check('...and spellGen writes sounding C4 there as B#3', sp.letter === 'B' && sp.accidental === 1 && sp.octave === 3);
+
+  // Generate parts in D minor: every C#/Db written as C#, and no augmented seconds in the voices
+  const melD = [['F4','Dm'],['G4','Gm'],['E4','A'],['F4','Dm'],['D4','Gm'],['E4','A7'],['D4','Dm']];
+  const QD = { Dm: 'min', Gm: 'min', A: 'maj', A7: 'dom7' };
+  ['close', 'hymn', 'open'].forEach(st => {
+    H.setSong(fourPartSong({ key: 'Dm', harmonyStyle: st,
+      notes: melD.map((m, i) => { const x = /([A-G])(\d)/.exec(m[0]); return note(x[1], 0, +x[2], i === melD.length - 1 ? 'w' : 'h'); }),
+      chords: melD.map((m, i) => chord(m[1][0], QD[m[1]], i * 2)) }));
+    H.render(); H.generatePartsFromMelodyAndChords();
+    const g = H.getSong(), gen = g.parts.filter(p => p.id !== 'S').flatMap(p => p.notes).filter(n => n.type === 'note');
+    check(st + ', D minor: the leading tone is written C#, never Db', gen.some(n => n.letter === 'C' && n.accidental === 1) && !gen.some(n => n.letter === 'D' && n.accidental === -1));
+    const f2 = H.findPartwritingIssues(ALL);
+    check(st + ', D minor: no augmented second in a generated voice', !f2.some(x => x.kind === 'aug2' && x.a.partId !== 'S'));
+    if (st === 'hymn') check('hymn, D minor: no parallel or contrary fifths/octaves, no cross-relations', !f2.some(x => x.kind === 'par' || x.kind === 'con' || x.kind === 'xrel'));
+  });
+  // the v2.31 chorale: no contrary fifths/octaves in Traditional or Open, no parallels in Open (2.37 wrote a few there)
+  const mel = [['G4','C'],['G4','C'],['F4','Dm'],['E4','C'],['D4','G'],['E4','C'],['G4','C'],['A4','F'],['G4','C'],['G4','C'],['F4','G7'],['E4','C'],['D4','G'],['C4','C']];
+  const Q = { C: 'maj', Dm: 'min', G: 'maj', G7: 'dom7', F: 'maj' };
+  ['hymn', 'open'].forEach(st => {
+    H.setSong(fourPartSong({ harmonyStyle: st,
+      notes: mel.map((m, i) => { const x = /([A-G])(\d)/.exec(m[0]); return note(x[1], 0, +x[2], i === mel.length - 1 ? 'w' : 'h'); }),
+      chords: mel.map((m, i) => chord(m[1].replace(/m|7/, ''), Q[m[1]], i * 2)) }));
+    H.render(); H.generatePartsFromMelodyAndChords();
+    const f3 = H.findPartwritingIssues(ALL);
+    check(st + ', chorale: no parallel or contrary fifths/octaves', !f3.some(x => x.kind === 'par' || x.kind === 'con'));
+    if (st === 'hymn') check(st + ', chorale: no overlaps', !f3.some(x => x.kind === 'ovl'));
+  });
+
+  // the costs themselves (Generate parts' side of the checks)
+  const HY = H.HARMONY_STYLES.hymn.table, CL = H.HARMONY_STYLES.close.table;
+  check('contrary octaves cost something in every style, most in Traditional', H.pairTransitionCost(48, 43, 60, 67, false, HY) === HY.contraryCost && HY.contraryCost > CL.contraryCost && CL.contraryCost > 0);
+  check('...a fifth going to an octave the other way costs nothing', H.pairTransitionCost(48, 43, 55, 67, false, HY) === 0);
+  const evA = { chord: { root: { letter: 'D', accidental: 0 }, quality: 'min' }, chordInfo: { tones: [2, 5, 9] }, meloPc: 2, beat: 0 };
+  const evB = { chord: { root: { letter: 'A', accidental: 0 }, quality: 'maj' }, chordInfo: { tones: [9, 1, 4] }, meloPc: 4, beat: 2 };
+  H.setSong(fourPartSong({ key: 'Dm', notes: [note('D', 0, 5, 'h'), note('E', 0, 5, 'h')] })); H.render();
+  // pv/cv: [alto, tenor, melody, bass]; the alto F4 -> A4 while the tenor A3 -> C#4 -- no overlap, no F/F# issue
+  const base0 = H.checksTransitionCost([65, 57, 74, 50], [69, 61, 76, 45], 2, evA, evB, HY);
+  check('checksTransitionCost: a clean move costs nothing', base0 === 0);
+  // Bb3 -> C#4 in the tenor (Gm -> A): an augmented second
+  const evG = { chord: { root: { letter: 'G', accidental: 0 }, quality: 'min' }, chordInfo: { tones: [7, 10, 2] }, meloPc: 2, beat: 0 };
+  check('...an augmented second (Bb to C#) costs aug2Cost', H.checksTransitionCost([67, 58, 74, 43], [69, 61, 76, 45], 2, evG, evB, HY) === HY.aug2Cost);
+  // the tenor rises to A4, above the F4 the alto has just left, while the alto goes to C#5
+  check('...an overlap costs overlapCost', H.checksTransitionCost([65, 57, 74, 50], [73, 69, 76, 45], 2, evA, evB, HY) === HY.overlapCost);
+  const evF = { chord: { root: { letter: 'F', accidental: 0 }, quality: 'maj' }, chordInfo: { tones: [5, 9, 0] }, meloPc: 0, beat: 0 };
+  const evD = { chord: { root: { letter: 'D', accidental: 0 }, quality: 'maj' }, chordInfo: { tones: [2, 6, 9] }, meloPc: 2, beat: 2 };
+  H.setSong(fourPartSong({ key: 'C', notes: [note('C', 0, 5, 'h'), note('D', 0, 5, 'h')] })); H.render();
+  check('...F in the alto, then F# in the tenor: a cross-relation costs xrelCost', H.checksTransitionCost([65, 57, 72, 41], [69, 54, 74, 50], 2, evF, evD, HY) === HY.xrelCost);
+  check('...F to F# in the alto itself costs nothing', H.checksTransitionCost([65, 57, 72, 41], [66, 57, 74, 50], 2, evF, evD, HY) === 0);
+
+  // marks over runs of generated notes
+  const gen = (n, locked) => Object.assign(n, { gen: true }, locked ? { locked: true } : {});
+  H.setSong(fourPartSong({ notes: [h('q'), h('q'), h('q'), h('q'), h('q'), h('q')],
+    parts: [ { id: 'S', role: 'S', clef: 'treble' },
+             { id: 'A', role: 'A', clef: 'treble', notes: [note('E', 0, 4), note('F', 0, 4), gen(note('G', 0, 4)), gen(note('F', 0, 4)), gen(note('E', 0, 4), true), gen(note('D', 0, 4))] },
+             { id: 'B', role: 'B', clef: 'bass', notes: [gen(note('C', 0, 3)), gen(note('D', 0, 3)), gen(note('E', 0, 3)), gen(note('F', 0, 3)), gen(note('G', 0, 3)), gen(note('A', 0, 3))] } ] }));
+  const st = H.getState();
+  st.genMarks = 'mixed'; H.render();
+  const ra = H.genRuns('A');
+  check('generated notes on a mixed stave are marked in runs (a locked note breaks the run)', ra.length === 2 && ra[0].length === 2 && ra[1].length === 1 && ra[0][0].index === 2);
+  check('...a stave that is all generated is left unmarked by default', H.genRuns('B').length === 0 && H.genRuns('S').length === 0);
+  st.genMarks = 'all'; H.render();
+  check('"on every stave" marks it too, as one run', H.genRuns('B').length === 1 && H.genRuns('B')[0].length === 6);
+  st.genMarks = 'off'; H.render();
+  check('"off" marks nothing', H.genRuns('A').length === 0 && H.genRuns('B').length === 0);
+  st.genMarks = 'mixed'; H.render();
 })();
 
 console.log('\n' + count + ' checks, ' + fails + ' failure(s).');

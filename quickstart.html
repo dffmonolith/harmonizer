@@ -57,7 +57,7 @@
 <main>
 <article class="guide">
 
-  <span class="eyebrow">Harmonizer &middot; Quickstart &middot; v2.28</span>
+  <span class="eyebrow">Harmonizer &middot; Quickstart &middot; v2.38</span>
   <h1>Harmonizer Quickstart</h1>
   <p class="lede">Harmonizer helps you sketch, test and teach vocal arrangements. This page gets you productive fast with the two ways most people work &mdash; writing a song from scratch, or starting from a MusicXML or MIDI file you already have &mdash; and then handing your singers rehearsal tracks. For every detail, see the <a href="guide.html">full user guide</a>.</p>
   <p><a href="app/harmonizer.html" target="dff-app-harmonizer">Launch Harmonizer &rarr;</a> &nbsp;&middot;&nbsp; <a href="guide.html">User guide</a> &nbsp;&middot;&nbsp; <a href="index.html">About the project</a></p>
@@ -116,13 +116,15 @@
     <li>Open <b>Staves</b> and pick a <b>style</b> in the menu beside <b>Generate parts</b>:
       <ul>
         <li><b>Close harmony</b> &mdash; contemporary a cappella, voices close together (the default).</li>
-        <li><b>Traditional (hymn)</b> &mdash; textbook four-part writing, no parallel fifths or octaves.</li>
+        <li><b>Traditional (hymn)</b> &mdash; textbook four-part writing: no parallel fifths or octaves, and it steers clear of hidden and contrary ones, overlapping voices, cross-relations and augmented seconds.</li>
         <li><b>Open (wide)</b> &mdash; the voices spread out, with a lower tenor and bass.</li>
       </ul>
     </li>
-    <li>Press <b>Generate parts</b>. Every eligible stave gets a draft in that style, each voice holding (tied) through repeated or ornamental melody notes rather than restriking every beat. Not sure which style? Press <b>Copy</b>, and generate the copy in another style to compare.</li>
+    <li>Press <b>Generate parts</b>. Every eligible stave gets a draft in that style, each voice holding (tied) through repeated or ornamental melody notes rather than restriking every beat. The draft is then refined as lines: fewer long held notes and less back-and-forth, and notes are traded between voices where that helps. Where the melody holds, voices add notes of their own &mdash; passing and neighbour notes, suspensions &mdash; set by the <b>Added notes</b> menu beside the style (none / some / more). Music that comes back &mdash; a second verse, a refrain &mdash; gets the same parts as the first time (the <b>Repeated music</b> menu: keep alike, vary lightly, or write fresh). <b>Refine report</b> in the status bar shows what changed and where. Not sure which style? Press <b>Copy</b>, and generate the copy in another style to compare.</li>
     <li>Press Play. In the play window use the <b>Hear</b> buttons to listen to voices alone or together (click to include or exclude, <kbd>Shift</kbd>-click to hear only one).</li>
-    <li>Edit by hand: click a generated note and drag or nudge its pitch &mdash; this locks it (look for the &#128274;), so it survives the next Generate parts while the rest of the stave is rebuilt around it. Unlock it from the inspector, or lock/unlock a whole stave with the buttons in the Staves section.</li>
+    <li>Edit by hand: click a generated note and drag or nudge its pitch &mdash; this locks it (a blue padlock and dashed line appear over locked notes), so it survives the next Generate parts while the rest of the stave is rebuilt around it. Unlock it from the inspector, or lock/unlock a whole stave with the buttons in the Staves section. After editing, <b>Refine parts</b> smooths the other voices around your changes without rewriting them.</li>
+    <li><b>Move the tune, or leave it out, for a passage:</b> click a measure number in the row above the chords (Shift-click or drag for more). In the <b>Selected</b> panel, set <b>Melody in</b> to another stave &mdash; say the Tenor for verse 2, with <b>Bring the tune with it</b> ticked &mdash; or to <b>None (chords only)</b> for an introduction or a hummed background, and press <b>Apply</b>. Generate parts then writes the other voices around it (the sopranos over a tenor tune get a descant or a harmony).</li>
+    <li><b>Redo just part of it:</b> with measures selected, tick the staves to redo and press <b>Rewrite</b>; everything else stays as it is. To keep the soprano and bass and rewrite the inner parts, press <b>All measures</b>, untick Soprano and Bass, then Rewrite.</li>
     <li>To give a voice its own moving rhythm entirely by hand, tick <b>Own rhythm</b> on that stave, then click its staff to add notes. Once you've written into it, it's yours and Generate parts leaves it alone. Untick it to hand the stave back (it asks first).</li>
   </ol>
   <div class="note warn"><p><b>Generate parts is a rough draft,</b> not a voice-leading expert. It replaces every eligible stave's harmony on each run, keeping only the notes you've locked, so do your chord work first.</p></div>
@@ -225,7 +227,7 @@
   <ul>
     <li><kbd>Space</kbd> plays, pauses and resumes: pause, then press it again to carry on from the same spot &mdash; or click a note in the play window first to resume from there. <b>Stop</b> starts over. In the play window, <kbd>&larr;</kbd> <kbd>&rarr;</kbd> page, <kbd>Home</kbd> / <kbd>End</kbd> jump, <kbd>L</kbd> loops, <kbd>[</kbd> <kbd>]</kbd> change the speed, and <kbd>Esc</kbd> closes.</li>
     <li><b>Many staves?</b> If some are scrolled out of view, a small badge at the top or bottom of the score names them. Click it to scroll.</li>
-    <li><b>Settings</b> (the gear) switches the score between black-on-white and dark, turns barlines on or off, holds the library backup, and controls two checks: <b>Range warnings</b> (notes outside a voice's comfortable range turn orange &mdash; on by default) and <b>Mark parallel fifths &amp; octaves</b> (dashed red lines, labelled 5 or 8).</li>
+    <li><b>Settings</b> (the gear) switches the score between black-on-white and dark, turns barlines on or off, holds the library backup, and controls two checks: <b>Range warnings</b> (notes outside a voice's comfortable range turn orange &mdash; on by default) and <b>Mark partwriting problems</b> (dashed lines labelled 5 / 8 for parallels, c5 / c8 contrary, h5 / h8 hidden, ov overlap, x cross-relation, +2 augmented second; tick which to look for). <b>Mark generated notes</b> puts a dotted cyan line with a star over the notes Generate parts wrote, on staves that also have yours.</li>
     <li><b>Multi-select:</b> <kbd>Shift</kbd>-click for a range, <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>-click to add or remove one note.</li>
     <li><b>On a tablet</b> you can tap to select and drag notes with a finger.</li>
     <li><b>Help</b> in the app header gives a shorter in-app summary of everything above.</li>
@@ -249,10 +251,17 @@
     <tr><td>Split a part for a few notes</td><td>Select the notes &rarr; Selected &rsaquo; Divisi &rsaquo; <b>+ 3rd below</b></td></tr>
     <tr><td>Add chords</td><td><b>Suggest chords</b>, type them, or click the chord lane</td></tr>
     <tr><td>Write parts</td><td>Set <b>Staves</b>, pick a style, <b>Generate parts</b></td></tr>
+    <tr><td>Improve the lines after editing by hand</td><td><b>Refine parts</b> (then <b>Refine report</b> to see what changed)</td></tr>
     <tr><td>Protect a hand-edited note from Generate parts</td><td>Automatic &mdash; or lock/unlock it yourself</td></tr>
+    <tr><td>See what's locked</td><td>Blue padlock + dashed line over locked notes (click it to select them); Selected measures counts them per stave</td></tr>
+    <tr><td>See what was generated</td><td>Dotted cyan line + star over generated notes on a stave that also has yours (Settings &rarr; <b>Mark generated notes</b> for every stave)</td></tr>
+    <tr><td>Measure numbers over every stave, or none</td><td>&#9881; Settings &rarr; <b>Measure numbers</b></td></tr>
+    <tr><td>Select whole measures on every stave</td><td>Click, Shift-click or drag the measure numbers above the chords; <kbd>Esc</kbd> clears</td></tr>
+    <tr><td>Tenors (or basses) take the tune for a verse; chords-only intro</td><td>Select the measures &rarr; <b>Melody in</b> Tenor / Bass / None &rarr; Apply, then Generate parts</td></tr>
+    <tr><td>Rewrite some staves in some measures</td><td>Select the measures, tick the staves &rarr; <b>Rewrite</b></td></tr>
     <tr><td>Give a voice its own rhythm, off-limits to Generate parts</td><td>Tick <b>Own rhythm</b> on its stave</td></tr>
     <tr><td>Change key or tempo part-way through</td><td>Select a note there &rarr; Selected panel &rarr; <b>Key, tempo, time &amp; rehearsal marks</b></td></tr>
-    <tr><td>Check ranges and parallels</td><td>Orange notes are out of range; &#9881; Settings &rarr; <b>Mark parallel fifths &amp; octaves</b></td></tr>
+    <tr><td>Check ranges and partwriting</td><td>Orange notes are out of range; &#9881; Settings &rarr; <b>Mark partwriting problems</b></td></tr>
     <tr><td>Name the chords from the voices</td><td><b>Chords from voices</b></td></tr>
     <tr><td>Move the whole song to another key</td><td><b>Transpose to</b></td></tr>
     <tr><td>Try a variation safely</td><td><b>Copy</b> beside the Song menu</td></tr>
