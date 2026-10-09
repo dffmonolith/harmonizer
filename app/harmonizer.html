@@ -362,6 +362,11 @@
   .play-practice .loop-btn{ padding:3px 12px; border-radius:999px; border:1px solid var(--line); background:var(--bg-panel-2); color:var(--text-dim); font-size:12px; min-width:0; }
   .play-practice .loop-btn[aria-pressed="true"]{ background:var(--violet-dim); border-color:var(--violet); color:#fff; }
   .play-practice .play-loop-info{ min-width:0; }
+  .play-practice .sound-seg{ display:inline-flex; align-items:center; gap:0; }
+  .play-practice .sound-seg button{ padding:3px 10px; border:1px solid var(--line); background:var(--bg-panel-2); color:var(--text-dim); font-size:12px; min-width:0; border-radius:0; margin-left:-1px; }
+  .play-practice .sound-seg button:first-of-type{ border-radius:999px 0 0 999px; margin-left:6px; }
+  .play-practice .sound-seg button:last-of-type{ border-radius:0 999px 999px 0; }
+  .play-practice .sound-seg button[aria-pressed="true"]{ background:var(--cyan-dim); border-color:var(--cyan); color:#fff; position:relative; }
   .play-practice .play-speed{ display:flex; align-items:center; gap:6px; margin-left:auto; }
   .play-practice .play-speed input{ width:140px; accent-color:var(--cyan); }
   .play-practice #playSpeedLabel{ min-width:92px; font-variant-numeric:tabular-nums; }
@@ -903,14 +908,13 @@
       <div class="palette-bar parts-bar" id="partsBar"></div>
       <datalist id="instrumentPresetsList">
         <option value="Piano"></option>
-        <option value="Organ"></option>
         <option value="Choir Aahs"></option>
-        <option value="Choir Oohs"></option>
-        <option value="Voice"></option>
+        <option value="Organ"></option>
         <option value="Strings"></option>
+        <option value="Flute"></option>
+        <option value="Voice"></option>
         <option value="Violin"></option>
         <option value="Cello"></option>
-        <option value="Flute"></option>
         <option value="Clarinet"></option>
         <option value="Trumpet"></option>
         <option value="Trombone"></option>
@@ -1048,7 +1052,7 @@
         <h3>About</h3>
         <div class="help-text">
           Harmonizer. Melody entry &amp; playback: whole/half/quarter/eighth notes, dots, and simple (3:2) triplets &mdash; no bar-line math or beaming beyond eighths, by design, since this is for roughing out vocal lines rather than engraving a score. Click the staff to add a note, or drag an existing notehead up/down to re-pitch it (with a mouse, a pen, or a finger on a tablet). Treble, Tenor (treble clef sounding an octave lower, marked with the small "8"), and Bass clefs are available. Chords: a chord lane above the staff, click any beat to place or replace a chord (a chord holds until the next one), or <b>Suggest chords</b> for a diatonic guess from the key and melody, played back under the tune. Use the <b>Staves</b> setting in the header to show 1&ndash;8 vocal parts (4 defaults to SATB); each stave's Part and Clef can be reassigned above the staff, and the <b>Melody</b> radio there picks which one holds the tune, translating its octave to fit that part when it's not the top line. <b>Generate parts</b> fills the other staves with a close-harmony draft from the melody and chords &mdash; each voice keeps its own rhythm, holding through ornamental notes rather than restriking every beat &mdash; and every note &mdash; melody or generated &mdash; can be selected (including multi-select and range-select), dragged, nudged, swapped between staves, or bumped an octave; hand-editing a generated note locks it so the next Generate parts leaves it alone. Save your work as .json (to reopen here), .musicxml (to open in real notation software) or .mid (for rehearsal apps and DAWs).<br><br>
-          Piano playback uses the Salamander Grand Piano samples (Alexander Holm, CC BY 3.0), full 88-key range, loaded from <code>harmonizer-piano-samples.json</code> in the same folder as this file. Keep the two together, and open this page through a local server rather than double-clicking it &mdash; like the portfolio site, <code>file://</code> pages aren't allowed to fetch a sibling file. <code>python3 -m http.server</code> in that folder works fine.<br><br>
+          Piano playback uses the Salamander Grand Piano samples (Alexander Holm, CC BY 3.0), full 88-key range, loaded from <code>harmonizer-piano-samples.json</code> in the same folder as this file. The Choir Aahs, Organ, Strings and Flute sounds (3.0) come from GeneralUser GS by S. Christian Collins, one file each (<code>harmonizer-bank-choir-aah.json</code>, <code>-organ</code>, <code>-strings</code>, <code>-flute</code>), loaded only when a stave plays them. Keep these files together, and open this page through a local server rather than double-clicking it &mdash; like the portfolio site, <code>file://</code> pages aren't allowed to fetch a sibling file. <code>python3 -m http.server</code> in that folder works fine.<br><br>
           Work autosaves to this browser, per song &mdash; use the <b>Song</b> dropdown in the header to switch between songs in progress, or start another with <b>New</b>. Use <b>Save &rarr; as .json</b> / <b>Open&#8230;</b> to keep a song as its own file, or <b>Export library</b> in Settings to back up every song at once. See <b>? Help</b> in the header for a quick-start guide, or the <a href="../guide.html" target="_blank" rel="noopener">full user guide</a>.
         </div>
       </div>
@@ -1137,7 +1141,7 @@
       <p><b>Key, tempo and time changes.</b> The header sets the song's <i>opening</i> key, tempo and time signature. To change any of them part-way through, select a note (or chord) in the measure where the change should happen, open the <b>Selected</b> panel on the right, and use <b>Key, tempo &amp; time changes</b>: pick the new key, type a new tempo, and/or set a new time signature, then <b>Apply</b>. Changes always start at the beginning of that measure. The new key signature is drawn on every stave (naturals cancel the old one when the new key has none) and a tempo change shows as &ldquo;&#9833; = 72&rdquo; above the top stave. Every change in the song is listed underneath, each with a &#10005; to remove it. Existing notes keep their pitches when you add a key change &mdash; an F that was natural stays natural and now shows a natural sign &mdash; while new notes you enter, arrow-key nudges and letters typed in Melody Text without an accidental follow the key in force where they land. Playback, <b>Save &rarr; as .wav</b>, rehearsal tracks, MusicXML and MIDI all follow the changes, and <b>Transpose</b> moves key changes along with everything else.</p>
 
       <h3>Staves, vocal parts &amp; instruments</h3>
-      <p>The <b>Staves</b> setting in the header shows 1&ndash;8 staves at once (five to eight add Baritone, Soprano&nbsp;II, Alto&nbsp;II and Tenor&nbsp;II; pick any stave's voice and clef from its dropdowns). Four defaults to <b>SATB</b> (Soprano and Alto on treble clef, Tenor on the "8 lower" treble clef, Bass on bass clef); three defaults to <b>SAB</b>; fewer just uses the top part(s). Each stave has its own <b>Part</b> and <b>Clef</b> dropdowns right above the staff, so any part can be reassigned to a different voice or clef independently. The <b>Melody</b> radio button in that same row picks which single stave currently holds the tune &mdash; move it off the top line and the notes' octave is automatically shifted to a reasonable starting range for that voice (a rough default, worth fine-tuning by hand afterward). Each stave also has a <b>Play</b> checkbox (on by default) so you can mute individual staves without losing their content. A stave with <b>Own rhythm</b> ticked (every non-melody stave has the checkbox) has a rhythm independent of the melody: click the staff to add notes, and insert, delete, tie, dot or re-time them there just as on the melody. <b>Generate parts</b> (below) always writes independent-rhythm harmony, so this switches on by itself for every stave it fills; ticking it by hand first just seeds that stave with the melody's rhythm and pitches as a manual starting point. Unticking it discards the stave's notes and leaves it blank until you generate or add notes again (it asks first). Notes on all staves line up on a shared time grid. Each stave also has an <b>Instrument</b> field &mdash; a label only (playback and MusicXML export are still always grand piano, never a synthesized choir or other sound); it's there so an instrument name that came in from a MusicXML import (or one you'd rather use, if you don't want a stave labelled with whatever patch it was imported with) shows up correctly and round-trips back out on <b>Save &rarr; as .musicxml</b>. Type your own or pick from the suggestions.</p>
+      <p>The <b>Staves</b> setting in the header shows 1&ndash;8 staves at once (five to eight add Baritone, Soprano&nbsp;II, Alto&nbsp;II and Tenor&nbsp;II; pick any stave's voice and clef from its dropdowns). Four defaults to <b>SATB</b> (Soprano and Alto on treble clef, Tenor on the "8 lower" treble clef, Bass on bass clef); three defaults to <b>SAB</b>; fewer just uses the top part(s). Each stave has its own <b>Part</b> and <b>Clef</b> dropdowns right above the staff, so any part can be reassigned to a different voice or clef independently. The <b>Melody</b> radio button in that same row picks which single stave currently holds the tune &mdash; move it off the top line and the notes' octave is automatically shifted to a reasonable starting range for that voice (a rough default, worth fine-tuning by hand afterward). Each stave also has a <b>Play</b> checkbox (on by default) so you can mute individual staves without losing their content. A stave with <b>Own rhythm</b> ticked (every non-melody stave has the checkbox) has a rhythm independent of the melody: click the staff to add notes, and insert, delete, tie, dot or re-time them there just as on the melody. <b>Generate parts</b> (below) always writes independent-rhythm harmony, so this switches on by itself for every stave it fills; ticking it by hand first just seeds that stave with the melody's rhythm and pitches as a manual starting point. Unticking it discards the stave's notes and leaves it blank until you generate or add notes again (it asks first). Notes on all staves line up on a shared time grid. Each stave also has an <b>Instrument</b> field, which (3.0) is the sound the stave plays: <b>Piano</b>, <b>Choir Aahs</b>, <b>Organ</b>, <b>Strings</b> or <b>Flute</b>. Other names play the nearest of these (Voice, Soprano or Choir Oohs as Choir Aahs; Violin or Cello as Strings; Oboe, Clarinet or Recorder as Flute; brass as Organ), and a name it doesn't recognise plays piano. Hover over the field to see which sound a stave will use. The name is also written into MusicXML and MIDI exports, and an instrument name that comes in with an imported file is kept, so a file of Choir Aahs parts plays as a choir. Voice parts that the file played on some other sound (MIDI files often put the singers on flute or brass) come in as Piano. Type your own or pick from the suggestions. To hear the whole score on one sound without changing any staves, use <b>Sound</b> in the play window (see Playback).</p>
 
       <h3>Generating the other parts</h3>
       <p>With more than one stave and at least one chord in place, a <b>Generate parts</b> button appears above the staves. It fills every non-melody stave with a draft worked out from the melody and the chords underneath it, in the style chosen in the dropdown beside the button (saved with the song): <b>Close harmony</b> (the default &mdash; contemporary a cappella: close spacing, doubled thirds welcome, parallel fifths tolerated), <b>Traditional (hymn)</b> (textbook four-part writing: no parallel fifths or octaves, the root doubled rather than the third, the upper voices within an octave of each other, smooth inner voices) or <b>Open (wide)</b> (open voicing: the upper voices spread a fifth to a tenth apart, with a lower tenor and bass). Pick a style, then press Generate parts; locked notes are kept whichever style you use. Every draft has a bass line planned first, sensible voice ranges and spacing, doubling logic, and a search across the whole passage for smooth voice leading that avoids parallel octaves (and, depending on the style, parallel fifths). Before writing, it reads the whole melody: it finds the phrase ends (rests, long held notes, V&ndash;I arrivals) and treats each as a cadence (root-position bass, complete chords, leading tones and sevenths resolved), recognises secondary dominants (a D7 going to G in C major is V7 of G, so its F&sharp; rises), and hears the local key &mdash; a passage that has moved to the dominant or the relative minor is treated as being in that key, even with no key change written. It judges each voice three notes at a time, so a leap is followed by a step back the other way where it can be, and where a chord change allows it writes suspensions: a note held over from the chord before (tied), dissonant for a moment, then resolving down by step &mdash; the classic 4&ndash;3 at a cadence. The status line afterwards says how many cadences, suspensions and secondary dominants it found and any key areas it heard. Each voice keeps its own rhythm: it holds (ties) through repeated or ornamental melody notes rather than restriking every beat, and only moves when the harmony really changes. Music that comes back &mdash; a second verse, a refrain, a phrase repeated a step higher &mdash; gets the parts it had the first time (the <b>Repeated music</b> menu beside the style: keep alike, vary lightly, or write fresh); the Refine report lists each repeat found, where you can switch one off or link two passages yourself. Parallel, contrary and hidden fifths and octaves, overlapping voices, cross-relations and augmented seconds are all costed (most heavily in Traditional; 2.38), and generated notes are spelled from their chord (C&sharp; for D minor's leading tone). It's a starting draft, not a substitute for a real voice-leading pass by ear. Generated notes are click/drag-editable just like the melody (on a stave that also holds notes of your own, a dotted cyan line with a star marks the generated ones, 2.38) &mdash; click one to re-pitch it directly, letter/octave/accidental, in the inspector panel; select two notes on different staves and press <kbd>Ctrl</kbd>+<kbd>X</kbd> to swap them. Hand-editing a generated note &mdash; drag, nudge, or the inspector &mdash; locks it automatically (a blue padlock and dashed line mark locked notes on the score; click one to select them), so the next <b>Generate parts</b> keeps it as written while rebuilding everything else; unlock it from its inspector, or lock/unlock a whole stave at once from the buttons in the parts bar. When a melody note doesn't fit well under any voicing of its chord, Generate parts proposes a different chord instead &mdash; accept the suggestion next to the Generate parts button to apply it and regenerate. Changing the melody, the chords, or a stave's Part/Clef clears stale harmony so you know to regenerate.</p>
@@ -1148,7 +1152,7 @@
       <p>The lane above the staff holds chords, one per beat at most. Click anywhere in it to drop the chord currently set in the <b>Chord</b> palette (root + quality); a chord holds until the next one, so click partway through an existing chord's stretch to shorten it and start a new one there. Click near an existing chord's marker to select and edit it instead. <b>Suggest chords</b> guesses a reasonable one-per-measure progression from the key and melody &mdash; a starting point, not a final answer. The <b>Chords</b> text box on the right takes a quick shorthand line like <code>C G7 Am F</code>, one chord per measure. Uncheck <b>Play chords</b> if you just want to hear the melody alone.</p>
 
       <h3>Playback</h3>
-      <p><b>Play</b> / <b>Stop</b> in the header, or press <kbd>Space</kbd>. Playback uses real piano samples across the full keyboard, so very high or low notes will sound correctly rather than being clipped to a vocal range (this is true regardless of what a stave's Instrument field says &mdash; see <b>Staves, vocal parts &amp; instruments</b> above). Each stave's own <b>Play</b> checkbox (next to its Part/Clef dropdowns) controls whether that stave is heard (the play window has the same choice as <b>Hear</b> buttons: click to toggle, Shift-click to hear only that stave) &mdash; on by default for every stave, including the melody. <b>Play</b> starts at the selected note (or selected chord); with nothing selected it starts at the first measure that has a note in it, skipping any leading rests. Pressing <b>Play</b> opens a centered <b>play window</b> showing the staves as large as your screen allows (handy on a small screen): the current measure is shaded across every stave with a thin line following the beat, and the score scrolls along to keep it in view. <kbd>Space</kbd> is a pause/resume toggle: press it while playing to <b>pause</b> (the playhead stays where the music stopped, and the Play button reads <b>Resume</b>), and again to carry on from that spot. To resume from somewhere else, click a note in the play window first (clicking only chooses a starting point there &mdash; it doesn't edit), and playback picks up from that note instead. <b>Stop</b> forgets the paused spot, so the next Play starts from the selected note or the beginning as usual; so does editing the music. When stopped or paused, the window stays open with <b>&#9664;</b> / <b>&#9654;</b> buttons (or the left/right arrow keys) to page through the score, and <b>Close</b> (<kbd>Esc</kbd>) to return to editing. <b>Save &rarr; as .wav</b> (in the header) renders the whole song, start to finish, through the same piano samples and settings currently controlling what you hear (each stave's <b>Play</b> checkbox and <b>Play chords</b>), and downloads it as a standard, lossless <code>.wav</code> audio file &mdash; there's no MP3 export, since that needs an encoder this app doesn't bundle; a .wav opens and converts fine in anything.</p>
+      <p><b>Play</b> / <b>Stop</b> in the header, or press <kbd>Space</kbd>. Playback uses real recorded samples across the full keyboard, so very high or low notes sound correctly rather than being clipped to a vocal range. <b>Sound</b> in the play window chooses what the staves play on: <b>Per stave</b> (each stave's Instrument field &mdash; see <b>Staves, vocal parts &amp; instruments</b> above), <b>Piano</b> (every stave on piano) or <b>Choir</b> (every stave on Choir Aahs, so a choral arrangement can be heard sung rather than played). Press <kbd>V</kbd> in the play window to step through the three. Switching while playing carries on from the same spot. Chords always play on the piano. Your choice is remembered in this browser, and Save &rarr; as .wav and rehearsal tracks use it too. Each sound loads the first time it's needed, so the first Play on a new sound can take a moment. Each stave's own <b>Play</b> checkbox (next to its Part/Clef dropdowns) controls whether that stave is heard (the play window has the same choice as <b>Hear</b> buttons: click to toggle, Shift-click to hear only that stave) &mdash; on by default for every stave, including the melody. <b>Play</b> starts at the selected note (or selected chord); with nothing selected it starts at the first measure that has a note in it, skipping any leading rests. Pressing <b>Play</b> opens a centered <b>play window</b> showing the staves as large as your screen allows (handy on a small screen): the current measure is shaded across every stave with a thin line following the beat, and the score scrolls along to keep it in view. <kbd>Space</kbd> is a pause/resume toggle: press it while playing to <b>pause</b> (the playhead stays where the music stopped, and the Play button reads <b>Resume</b>), and again to carry on from that spot. To resume from somewhere else, click a note in the play window first (clicking only chooses a starting point there &mdash; it doesn't edit), and playback picks up from that note instead. <b>Stop</b> forgets the paused spot, so the next Play starts from the selected note or the beginning as usual; so does editing the music. When stopped or paused, the window stays open with <b>&#9664;</b> / <b>&#9654;</b> buttons (or the left/right arrow keys) to page through the score, and <b>Close</b> (<kbd>Esc</kbd>) to return to editing. <b>Save &rarr; as .wav</b> (in the header) renders the whole song, start to finish, through the same piano samples and settings currently controlling what you hear (each stave's <b>Play</b> checkbox and <b>Play chords</b>), and downloads it as a standard, lossless <code>.wav</code> audio file &mdash; there's no MP3 export, since that needs an encoder this app doesn't bundle; a .wav opens and converts fine in anything.</p>
       <p><b>Loop &amp; practice speed.</b> In the play window, <b>Loop</b> (or press <kbd>L</kbd>) repeats a passage until you stop it: select one note to loop its measure, or select notes across several measures (on any stave) to loop all of them; with nothing selected it loops the whole song. The loop always covers whole measures, and the measures it will play are shown beside the button. The <b>Speed</b> slider slows playback down (to 40%) or speeds it up (to 150%) without changing pitch, showing the resulting tempo; <kbd>[</kbd> and <kbd>]</kbd> nudge it by 5%. A new speed takes effect the next time Play starts, or on the next pass of a loop. It's remembered in this browser and doesn't change the song's written tempo.</p>
       <p><b>Save &#9662; &rarr; Rehearsal tracks&#8230;</b> makes part-learning tracks: one audio file per voice with that voice at full volume and the others quieter underneath (you choose how much quieter, or silent), plus an optional full mix, at any practice speed. Tick <b>left ear / right ear</b> to put the voice in one ear and the rest in the other, the classic learning-track layout. All the tracks download together in one <code>.zip</code>, named after the song and the voice (e.g. <code>My-Song - Alto.wav</code>), ready to hand out to the choir.</p>
 
@@ -1296,6 +1300,9 @@
         <label class="play-section" id="playSectionWrap" hidden title="Jump to a rehearsal mark. With Loop on (and no note selected), Play repeats just that section.">Section
           <select id="playSectionSelect"></select>
         </label>
+        <span class="sound-seg" id="playSoundSeg" role="group" aria-label="Sound" title="Sound: what the staves play on. Per stave follows each stave's Instrument field (Piano, Choir Aahs, Organ, Strings, Flute); Piano and Choir put every stave on that sound at once. Chords always use the piano. Shortcut: V">Sound
+          <button type="button" data-sound="staves" aria-pressed="true">Per stave</button><button type="button" data-sound="piano" aria-pressed="false">Piano</button><button type="button" data-sound="choir" aria-pressed="false">Choir</button>
+        </span>
         <label class="play-speed" title="Practice speed: slows down or speeds up playback without changing pitch. Takes effect the next time Play starts (or on the next loop pass). Shortcuts: [ and ]">Speed
           <input type="range" id="playSpeedRange" min="40" max="150" step="5" value="100">
           <span id="playSpeedLabel">100%</span>
@@ -1309,7 +1316,12 @@
 'use strict';
 (function(){
 
-  var APP_VERSION = '2.43';
+  var APP_VERSION = '3.0';
+  // v3.0: instruments. Besides the piano, a stave can now play Choir Aahs, Organ, Strings or Flute,
+  //   each a separate sound file fetched only when something will play it (see SOUND BANKS). The
+  //   stave's Instrument field picks its sound; the play window's Sound setting (Per stave / Piano
+  //   / Choir, shortcut V) switches every stave at once. All playback -- Play, Save .wav, rehearsal
+  //   tracks -- goes through one playNote(); the piano sounds exactly as in 2.43.
   // v2.43: the import dialog says "Import MIDI file" or "Import MusicXML"; added notes are checked
   //   against every 2.38 fault (no parallel fifths from them in any style, contrary and hidden
   //   fifths/octaves, overlaps, cross-relations, augmented seconds) and spelled from their line;
@@ -2205,6 +2217,184 @@
   }
 
   /* =========================================================================
+   * SOUND BANKS (v3.0) -- instruments besides the piano, each in its own sibling file
+   * (harmonizer-bank-<id>.json) that is fetched only when a stave is going to play it.
+   * Built by tools/build-banks.py from GeneralUser GS v2.0.3 (S. Christian Collins,
+   * schristiancollins.com; its license allows use and redistribution in software), with
+   * tools/check-banks.py confirming every key sounds at the written octave.
+   *
+   * A bank file: { format:'harmonizer-bank-1', id, name, source, env:{attack, release},
+   *   zones:[{ lo, hi, root, rate, loopStart, loopEnd, gain, pcm }] } -- pcm is base64 16-bit
+   * mono, uncompressed because the loops must be sample-exact (MP3's encoder delay would move
+   * them). These instruments hold their sound, so a zone loops between loopStart and loopEnd
+   * for as long as the note lasts, then fades over env.release.
+   *
+   * Which bank a stave plays: the Sound setting in the play window (state.soundMode) --
+   *   'staves' each stave's Instrument field decides (bankIdForLabel; unknown names -> piano)
+   *   'piano'  everything on piano (Harmonizer up to 2.43)
+   *   'choir'  every stave on Choir Aahs
+   * Chords are accompaniment and always use the piano.
+   * ========================================================================= */
+
+  var SOUND_BANKS = {
+    'piano':     { name: 'Piano',      url: null },   // the Salamander piano above
+    'choir-aah': { name: 'Choir Aahs', url: 'harmonizer-bank-choir-aah.json' },
+    'organ':     { name: 'Organ',      url: 'harmonizer-bank-organ.json' },
+    'strings':   { name: 'Strings',    url: 'harmonizer-bank-strings.json' },
+    'flute':     { name: 'Flute',      url: 'harmonizer-bank-flute.json' }
+  };
+  var SOUND_MODES = ['staves', 'piano', 'choir'];
+
+  // Instrument label -> bank id. Names are matched loosely, so imported General MIDI names
+  // ("Choir Aahs", "Church Organ", "String Ensemble 1", "Acoustic Grand Piano") work too. Other
+  // sustained instruments borrow the nearest bank we have (woodwinds -> flute, bowed strings ->
+  // strings, brass -> organ); anything unrecognised plays piano.
+  // Order matters: instruments first ("Tenor Sax", "Bass Clarinet", "Double Bass" and "Electric
+  // Bass" are not voices), then voice and choir words.
+  var BANK_LABEL_RULES = [
+    [/piano|keyboard|harpsichord|clavi|celest|guitar|\bharp\b|ukulele|banjo|mandolin|\blute\b|(electric|acoustic|fingered|picked|fretless|slap|synth) ?bass|bass guitar/i, 'piano'],
+    [/organ|harmonium/i, 'organ'],
+    [/string|violin|viola|cello|contrabass|double bass|upright bass|fiddle|orchestra/i, 'strings'],
+    [/flute|piccolo|recorder|fife|pan ?pipe|ocarina|whistle|oboe|clarinet|bassoon|english horn|cor anglais|sax|woodwind/i, 'flute'],
+    [/trumpet|cornet|trombone|tuba|horn|euphonium|flugel|brass/i, 'organ'],
+    [/choir|voice|vocal|\baahs?\b|\boohs?\b|sopran|\balto\b|tenor|baritone|\bbass\b|mezzo|descant|singer|chorus|chorale|\b[satb]\s*\d?\.?$/i, 'choir-aah']
+  ];
+  function bankIdForLabel(label){
+    var s = String(label || '').trim();
+    for (var i = 0; i < BANK_LABEL_RULES.length; i++) if (BANK_LABEL_RULES[i][0].test(s)) return BANK_LABEL_RULES[i][1];
+    return 'piano';
+  }
+  function bankIdForPart(part){
+    if (state.soundMode === 'piano') return 'piano';
+    if (state.soundMode === 'choir') return 'choir-aah';
+    return bankIdForLabel(part && part.instrument);
+  }
+  function bankIdForPartId(partId){
+    var p = null;
+    for (var i = 0; i < song.parts.length; i++) if (song.parts[i].id === partId){ p = song.parts[i]; break; }
+    return bankIdForPart(p);
+  }
+  // every bank the next Play (or audio file) will need: one per stave, plus the piano for chords
+  function banksForSong(withChords){
+    var seen = {}, out = [];
+    function add(id){ if (!seen[id]){ seen[id] = true; out.push(id); } }
+    song.parts.forEach(function(p){ add(bankIdForPart(p)); });
+    if (withChords && song.chords && song.chords.length) add('piano');
+    if (!out.length) add('piano');
+    return out;
+  }
+
+  // Bank data (the parsed JSON) is fetched once and cached; a stave's Instrument changing, or
+  // the Sound setting changing, starts the fetch early so it's usually ready by Play.
+  var bankDataPromises = {};
+  function loadBankData(id){
+    if (id === 'piano') return loadPianoSampleData();
+    if (!SOUND_BANKS[id]) return Promise.reject(new Error('unknown sound ' + id));
+    if (!bankDataPromises[id]){
+      bankDataPromises[id] = fetch(SOUND_BANKS[id].url).then(function(resp){
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        return resp.json();
+      }).then(function(data){
+        if (!data || data.format !== 'harmonizer-bank-1' || !Array.isArray(data.zones)) throw new Error('not a Harmonizer sound bank');
+        console.log('*** Harmonizer: loaded ' + data.name + ' (' + data.zones.length + ' samples) from ' + SOUND_BANKS[id].url);
+        return data;
+      });
+      bankDataPromises[id].catch(function(){ delete bankDataPromises[id]; });   // let a later Play retry
+    }
+    return bankDataPromises[id];
+  }
+  function prefetchBanks(ids){
+    (ids || []).forEach(function(id){ if (id !== 'piano' && !(state.audio && state.audio.banks[id])) loadBankData(id).catch(function(){}); });
+  }
+
+  function pcm16ToFloat32(b64){
+    var bin = atob(b64), n = bin.length >> 1, out = new Float32Array(n);
+    for (var i = 0, j = 0; i < n; i++, j += 2){
+      var v = bin.charCodeAt(j) | (bin.charCodeAt(j + 1) << 8);
+      out[i] = (v >= 32768 ? v - 65536 : v) / 32768;
+    }
+    return out;
+  }
+  // A ready-to-play bank: { id, name, sustained, env, zones:[{lo, hi, root, buffer, gain, loopStart, loopEnd}] }
+  function buildSampledBank(ctx, data){
+    var zones = data.zones.map(function(z){
+      var pcm = pcm16ToFloat32(z.pcm);
+      var buf = ctx.createBuffer(1, pcm.length, z.rate);
+      if (buf.copyToChannel) buf.copyToChannel(pcm, 0); else buf.getChannelData(0).set(pcm);
+      return { lo: z.lo, hi: z.hi, root: z.root, buffer: buf, gain: +z.gain || 1,
+               loopStart: z.loopStart / z.rate, loopEnd: z.loopEnd / z.rate };
+    });
+    return { id: data.id, name: data.name, sustained: true,
+             env: { attack: +(data.env && data.env.attack) || 0.05, release: +(data.env && data.env.release) || 0.2 }, zones: zones };
+  }
+  function buildPianoBank(ctx, sampleMap){
+    var names = Object.keys(sampleMap), buffers = {};
+    return Promise.all(names.map(function(name){
+      var ab = base64ToArrayBuffer(sampleMap[name]);
+      return new Promise(function(resolve){
+        ctx.decodeAudioData(ab, function(buf){ buffers[name] = buf; resolve(); },
+          function(err){ console.log('*** Harmonizer: decode failed for', name, err); resolve(); });
+      });
+    })).then(function(){
+      // one zone per sample, each covering the keys nearer to it than to its neighbours --
+      // the same choice nearestSample() makes
+      var list = names.filter(function(n){ return buffers[n] && SAMPLE_MIDI[n] != null; })
+                      .map(function(n){ return { name: n, root: SAMPLE_MIDI[n] }; })
+                      .sort(function(a, b){ return a.root - b.root; });
+      var zones = list.map(function(s, i){
+        return { lo: i ? Math.floor((list[i - 1].root + s.root) / 2) + 1 : 0,
+                 hi: i < list.length - 1 ? Math.floor((s.root + list[i + 1].root) / 2) : 127,
+                 root: s.root, buffer: buffers[s.name], gain: 1 };
+      });
+      return { id: 'piano', name: 'Piano', sustained: false, buffers: buffers, zones: zones };
+    });
+  }
+  function zoneFor(bank, midi){
+    var zs = bank.zones, m = Math.round(midi);
+    for (var i = 0; i < zs.length; i++) if (m >= zs[i].lo && m <= zs[i].hi) return zs[i];
+    return zs.length ? (m < zs[0].lo ? zs[0] : zs[zs.length - 1]) : null;
+  }
+  // the bank a stave plays through, falling back to the piano if its own sound didn't load
+  function soundBankFor(audio, id){ return audio.banks[id] || audio.banks.piano || null; }
+
+  // One note, through any bank. Every playback path (Play, Save .wav, rehearsal tracks) calls
+  // this. The piano keeps the envelope each caller has always used (pe: attack, sustainEnd,
+  // releaseEnd, floor -- unchanged from 2.43); a sustained bank instead fades in over its own
+  // attack, holds (looping) for the whole sounding length, and fades over its own release.
+  // Returns the source node (so live playback can stop it), or null if nothing could sound.
+  function playNote(ctx, dest, bank, midi, tStart, soundDur, peak, pe){
+    if (!bank) return null;
+    var z = zoneFor(bank, midi);
+    if (!z || !z.buffer) return null;
+    var src = ctx.createBufferSource();
+    src.buffer = z.buffer;
+    src.playbackRate.value = Math.pow(2, (midi - z.root) / 12);
+    var gain = ctx.createGain(), g = gain.gain, stopAt;
+    if (bank.sustained){
+      src.loop = true; src.loopStart = z.loopStart; src.loopEnd = z.loopEnd;
+      var pk = Math.max(0.0001, peak * z.gain);
+      var atk = Math.max(0.005, Math.min(bank.env.attack, soundDur * 0.35));
+      var off = Math.max(tStart + atk, tStart + soundDur - 0.02);
+      var end = off + bank.env.release;
+      g.setValueAtTime(0, tStart);
+      g.linearRampToValueAtTime(pk, tStart + atk);
+      g.setValueAtTime(pk, off);
+      g.exponentialRampToValueAtTime(pk * 0.001, end);
+      stopAt = end + 0.05;
+    } else {
+      var pp = peak * z.gain;
+      g.setValueAtTime(0, tStart);
+      g.linearRampToValueAtTime(pp, tStart + pe.attack);
+      g.setValueAtTime(pp, pe.sustainEnd);
+      g.exponentialRampToValueAtTime(pe.floor, pe.releaseEnd);
+      stopAt = pe.releaseEnd + 0.05;
+    }
+    src.connect(gain); gain.connect(dest);
+    src.start(tStart); src.stop(stopAt);
+    return src;
+  }
+
+  /* =========================================================================
    * SONG MODEL
    * ========================================================================= */
 
@@ -2271,6 +2461,7 @@
     currentChordRoot: { letter:'C', accidental:0 },
     currentChordQuality: 'maj',
     playChords: true,
+    soundMode: 'staves',      // v3.0: 'staves' (each stave's Instrument) | 'piano' | 'choir' -- browser preference
     refineAfterGenerate: true, // v2.32: run the refine pass after Generate parts (browser preference)
     refineReport: null,        // v2.32: what the last refine pass changed (for the Refine report)
     measureNumbers: 'top',   // v2.36: numbers on the score at each barline -- 'top' stave, 'all' staves, or 'off' (browser preference)
@@ -3030,13 +3221,18 @@
   };
   // v2.10: a rough General MIDI program per Instrument label, so "Save .musicxml" writes
   // something more useful than program 1 for a stave whose Instrument field isn't Piano --
-  // even though Harmonizer's own playback (Play/Save .wav) always uses the piano sampler.
+  // (v3.0: the Instrument field now also picks the stave's playback sound -- see SOUND BANKS.)
   var GM_PROGRAM_BY_INSTRUMENT = {
     piano: 1, organ: 20, 'choir aahs': 53, 'choir oohs': 54, voice: 53, strings: 49,
     violin: 41, cello: 43, flute: 74, clarinet: 72, trumpet: 57, trombone: 58,
     'french horn': 61, guitar: 25, harp: 47
   };
-  function gmProgramFor(name){ return GM_PROGRAM_BY_INSTRUMENT[(name||'').trim().toLowerCase()] || 1; }
+  // v3.0: a name not in the table takes the program of the sound it plays on
+  var GM_PROGRAM_BY_BANK = { 'piano': 1, 'choir-aah': 53, 'organ': 20, 'strings': 49, 'flute': 74 };
+  function gmProgramFor(name){ return GM_PROGRAM_BY_INSTRUMENT[(name||'').trim().toLowerCase()] || GM_PROGRAM_BY_BANK[bankIdForLabel(name)] || 1; }
+  // MusicXML <instrument-sound> for the names that are exactly one of Harmonizer's sounds
+  var INSTRUMENT_SOUND_BY_NAME = { 'piano': 'keyboard.piano.grand', 'choir aahs': 'voice.aah', 'choir': 'voice.aah', 'voice': 'voice.aah',
+    'organ': 'keyboard.organ.pipe', 'church organ': 'keyboard.organ.pipe', 'pipe organ': 'keyboard.organ.pipe', 'strings': 'strings.group', 'flute': 'wind.flutes.flute' };
   function musicXmlHarmony(c){
     return '<harmony><root><root-step>'+c.root.letter+'</root-step>' +
       (c.root.accidental ? '<root-alter>'+c.root.accidental+'</root-alter>' : '') +
@@ -3102,7 +3298,8 @@
       var partName = (PART_ROLES[part.role] || PART_ROLES.S).label;
       var midiChannel = (pi % 16) + 1;
       var instName = part.instrument || 'Piano';
-      var instSoundXml = /^piano$/i.test(instName) ? '<instrument-sound>keyboard.piano.grand</instrument-sound>' : '';
+      var instSnd = INSTRUMENT_SOUND_BY_NAME[instName.trim().toLowerCase()];
+      var instSoundXml = instSnd ? '<instrument-sound>' + instSnd + '</instrument-sound>' : '';
       partListXml += '<score-part id="'+pid+'"><part-name>'+musicXmlEscape(partName)+'</part-name>' +
         '<score-instrument id="'+pid+'-I1"><instrument-name>'+musicXmlEscape(instName)+'</instrument-name>'+instSoundXml+'</score-instrument>' +
         '<midi-instrument id="'+pid+'-I1"><midi-channel>'+midiChannel+'</midi-channel><midi-program>'+gmProgramFor(instName)+'</midi-program><volume>100</volume><pan>0</pan></midi-instrument>' +
@@ -3325,7 +3522,7 @@
 
   /* =========================================================================
    * AUDIO EXPORT (v2.10) -- renders the whole song offline (OfflineAudioContext) through the
-   * same piano samples Play uses, and downloads the result as a .wav file. This deliberately
+   * same sounds Play uses (v3.0: each stave's own sound, via playNote), and downloads the result as a .wav file. This deliberately
    * doesn't share code with playSong(): that function is full of visual/timer bookkeeping (the
    * playhead, note-highlight timers, the play window) that has no offline equivalent, and playSong
    * is live-playback-critical code this session would rather not risk touching. Each scheduling
@@ -3371,7 +3568,8 @@
   //   opts.channels      1 | 2     mono or stereo output (default 2)
   function renderSongOfflineBuffer(opts){
     opts = opts || {};
-    return ensureAudio().then(function(audio){
+    var withChordsPre = (opts.chords === undefined) ? state.playChords : !!opts.chords;
+    return ensureAudio(banksForSong(withChordsPre && opts.chordLevel !== 0)).then(function(audio){
       // v2.24: audio files are performances -- repeats, endings and D.C./D.S. written out
       var scoreSong = song;
       if (state.playRepeats !== false && opts.repeats !== false && hasRepeats(song)) song = performanceOf(song).song;
@@ -3393,7 +3591,7 @@
       function Span(b0, b1){ return Math.max(0, TM.sec(b1) - TM.sec(b0)); }
       function SoundSpan(b0, b1){ return Math.max(0.05, TM.endSec(b1) - TM.sec(b0)); }   // v2.23: stops short of a breath
       var melCurve = dynamicsCurve(song.notes);       // v2.23: dynamics, hairpins, articulation
-      var durationSec = TM.sec(total) + 1.2; // a little tail room for the last note's release
+      var durationSec = TM.sec(total) + 1.6; // a little tail room for the last note's release (v3.0: sustained sounds fade a bit longer)
       var sampleRate = audio.ctx.sampleRate;
       var OfflineCtor = window.OfflineAudioContext || window.webkitOfflineAudioContext;
       if (!OfflineCtor) throw new Error('This browser can’t render audio offline.');
@@ -3419,24 +3617,20 @@
       }
       function voiceBus(partId){ return busFor('p:' + partId, level(partId), panOf(partId)); }
 
-      function pluck(bus, buf, ratio, tStart, gainPeak, sustainEnd, releaseEnd){
-        if (!buf) return;
-        var src = offlineCtx.createBufferSource();
-        src.buffer = buf; src.playbackRate.value = ratio;
-        var gain = offlineCtx.createGain();
-        gain.gain.setValueAtTime(0, tStart);
-        gain.gain.linearRampToValueAtTime(gainPeak, tStart + 0.008);
-        gain.gain.setValueAtTime(gainPeak, sustainEnd);
-        gain.gain.exponentialRampToValueAtTime(Math.max(0.0004, gainPeak*0.0009), releaseEnd);
-        src.connect(gain); gain.connect(bus);
-        src.start(tStart); src.stop(releaseEnd + 0.05);
+      // v3.0: every note goes through playNote(), on the stave's own sound; the piano keeps the
+      // offline envelope it always had (8 ms attack, floor relative to the peak)
+      function pluck(bus, bank, midi, tStart, soundDur, gainPeak, sustainEnd, releaseEnd){
+        playNote(offlineCtx, bus, bank, midi, tStart, soundDur, gainPeak,
+          { attack: 0.008, sustainEnd: sustainEnd, releaseEnd: releaseEnd, floor: Math.max(0.0004, gainPeak*0.0009) });
       }
+      function bankOfPart(partId){ return soundBankFor(audio, bankIdForPartId(partId)); }
       var MELODY_PEAK = opts.uniform ? 0.6 : 1, HARMONY_PEAK = opts.uniform ? 0.6 : 0.45;
 
       var noteTimes = [];
       var t = 0, obeat = 0;
       var melodyAudible = level(song.melodyPartId) > 0;
       var melodyBus = melodyAudible ? voiceBus(song.melodyPartId) : null;
+      var melodyBank = bankOfPart(song.melodyPartId);
       var melodyTie = tieContinuations(function(k){ return song.notes[k].type === 'note' ? song.notes[k] : null; });
       song.notes.forEach(function(n, ni){
         var beats = noteBeats(n);
@@ -3447,9 +3641,8 @@
           var mc = melCurve[ni];
           var soundDur = SoundSpan(b0, b0 + beats + melodyTie.extra[ni]) * mc.len;
           var midi = midiNumber(n.letter, n.accidental, n.octave) + clefSoundingShift();
-          var samp = nearestSample(midi);
           var sustainEnd = t + Math.max(soundDur*0.72, soundDur-0.12);
-          pluck(melodyBus, audio.buffers[samp.name], samp.ratio, t, MELODY_PEAK * mc.gain, sustainEnd, t + soundDur + 0.18);
+          pluck(melodyBus, melodyBank, midi, t, soundDur, MELODY_PEAK * mc.gain, sustainEnd, t + soundDur + 0.18);
         }
         t += dur;
       });
@@ -3462,8 +3655,7 @@
           var chordDur = Math.max(0.1, Span(c.beat, nextBeat));
           var sustainEnd = chordStart + Math.max(chordDur*0.8, chordDur-0.15);
           chordToneMidis(c, 3).forEach(function(midi){
-            var samp = nearestSample(midi);
-            pluck(chordBus, audio.buffers[samp.name], samp.ratio, chordStart, 0.22, sustainEnd, chordStart + chordDur + 0.2);
+            pluck(chordBus, audio.banks.piano, midi, chordStart, chordDur, 0.22, sustainEnd, chordStart + chordDur + 0.2);
           });
         });
       }
@@ -3472,7 +3664,7 @@
       song.parts.forEach(function(part){
         if (part.id === mPartForExport.id || !Array.isArray(part.generatedNotes) || part.generatedNotes.length !== song.notes.length) return;
         if (!(level(part.id) > 0)) return;
-        var bus = voiceBus(part.id);
+        var bus = voiceBus(part.id), hBank = bankOfPart(part.id);
         var hTie = tieContinuations(function(k){
           var g = part.generatedNotes[k];
           return (g && song.notes[k] && song.notes[k].type === 'note') ? g : null;
@@ -3484,15 +3676,14 @@
           var hc = melCurve[i];   // a linked stave sings the melody's rhythm, so it takes its dynamics too
           var hDur = SoundSpan(nt.beat, nt.beat + nt.beats + hTie.extra[i]) * hc.len;
           var midi = midiNumber(hn.letter, hn.accidental, hn.octave) + (CLEF_SOUNDING_SHIFT[part.clef]||0);
-          var samp = nearestSample(midi);
           var sustainEnd = nt.tStart + Math.max(hDur*0.75, hDur-0.1);
-          pluck(bus, audio.buffers[samp.name], samp.ratio, nt.tStart, HARMONY_PEAK * hc.gain, sustainEnd, nt.tStart + hDur + 0.15);
+          pluck(bus, hBank, midi, nt.tStart, hDur, HARMONY_PEAK * hc.gain, sustainEnd, nt.tStart + hDur + 0.15);
         });
       });
 
       song.parts.forEach(function(part){
         if (!isIndependentPart(part) || !partNotes(part.id).length || !(level(part.id) > 0)) return;
-        var bus = voiceBus(part.id);
+        var bus = voiceBus(part.id), oBank = bankOfPart(part.id);
         var list = part.notes, tl = timelineOf(list);
         var oTie = tieContinuations(function(k){ return list[k].type === 'note' ? list[k] : null; }, list);
         var shift = CLEF_SOUNDING_SHIFT[part.clef] || 0;
@@ -3504,9 +3695,8 @@
           var tStart = At(st);
           var soundDur = SoundSpan(st, chainEnd) * oCurve[i].len;
           var midi = midiNumber(n.letter, n.accidental, n.octave) + shift;
-          var samp = nearestSample(midi);
           var sustainEnd = tStart + Math.max(soundDur*0.75, soundDur-0.1);
-          pluck(bus, audio.buffers[samp.name], samp.ratio, tStart, HARMONY_PEAK * oCurve[i].gain, sustainEnd, tStart + soundDur + 0.15);
+          pluck(bus, oBank, midi, tStart, soundDur, HARMONY_PEAK * oCurve[i].gain, sustainEnd, tStart + soundDur + 0.15);
         });
       });
 
@@ -3515,11 +3705,10 @@
         return { partId: p.id, list: p.notes, peak: HARMONY_PEAK, shift: CLEF_SOUNDING_SHIFT[p.clef] || 0 };
       })).forEach(function(L){
         if (!(level(L.partId) > 0) || !L.list.some(divisiNote)) return;
-        var bus = voiceBus(L.partId), dCurve = dynamicsCurve(L.list);
+        var bus = voiceBus(L.partId), dCurve = dynamicsCurve(L.list), dBank = bankOfPart(L.partId);
         divisiSounds(L.list).forEach(function(d){
           var tStart = At(d.start), soundDur = SoundSpan(d.start, d.start + d.beats) * dCurve[d.idx].len;
-          var samp = nearestSample(midiNumber(d.pitch.letter, d.pitch.accidental | 0, d.pitch.octave) + L.shift);
-          pluck(bus, audio.buffers[samp.name], samp.ratio, tStart, L.peak * dCurve[d.idx].gain, tStart + Math.max(soundDur*0.75, soundDur-0.1), tStart + soundDur + 0.15);
+          pluck(bus, dBank, midiNumber(d.pitch.letter, d.pitch.accidental | 0, d.pitch.octave) + L.shift, tStart, soundDur, L.peak * dCurve[d.idx].gain, tStart + Math.max(soundDur*0.75, soundDur-0.1), tStart + soundDur + 0.15);
         });
       });
 
@@ -5276,6 +5465,13 @@
     return !INSTRUMENT_RE.test(nm + ' ' + p.info.instrument);
   }
 
+  // v3.0: the Instrument (= playback sound) an imported part gets -- see the note where it's used
+  function importInstrumentFor(p){
+    var inst = ((p.info && p.info.instrument) || '').trim().slice(0, 40) || 'Piano';
+    if (importIsVocal(p) && bankIdForLabel(inst) !== 'choir-aah') return 'Piano';
+    return inst;
+  }
+
   // v1.8: sixteenths are now kept; only events shorter than a sixteenth (32nds) are folded into
   // the note before it (or, if that wouldn't come out to a representable length, the one after).
   // Later notes keep their true start times, so every voice stays lined up with every other.
@@ -5519,6 +5715,12 @@
     report.divisiKept = [];
 
     // staves, in file order
+    // v3.0: voice parts whose file sound (Flute, Brass...) was swapped for Piano on import
+    report.voicesToPiano = [];
+    chosen.forEach(function(idx){
+      var sp = score.parts[idx], fileInst = ((sp.info && sp.info.instrument) || '').trim();
+      if (fileInst && importInstrumentFor(sp) === 'Piano' && bankIdForLabel(fileInst) !== 'piano' && report.voicesToPiano.indexOf(fileInst) < 0) report.voicesToPiano.push(fileInst);
+    });
     report.voiceSound = chosen.some(function(idx){
       var pi = score.parts[idx].info || {};
       return /voice|choir|vocal|aah|ooh/i.test((pi.sound || '') + ' ' + (pi.instrument || ''));
@@ -5549,9 +5751,11 @@
       if (rankRole && idx !== sel.melody) clef = PART_ROLES[role].clef;
       // v2.12: no clef in the file (MIDI) but the part is named for a voice -- use that voice's clef
       if (idx !== sel.melody && !p.clef && /sopran|\balto\b|tenor|bari|\bbass\b|mezzo/i.test(p.baseName || p.name || '')) clef = PART_ROLES[role].clef;
-      // v2.10: the file's own instrument/voicing is kept as a label (playback stays piano either
-      // way -- see the Instrument field in the parts bar) instead of being discarded on import.
-      var instrument = (p.info.instrument || '').trim().slice(0, 40) || 'Piano';
+      // v2.10: the file's own instrument/voicing is kept on import (the Instrument field).
+      // v3.0: that field now sets the stave's sound, and MIDI files often park voice parts on any
+      // old patch (Christus factus est: four flutes). So a part the importer takes for a voice
+      // keeps the file's sound only if it's a choir/voice sound; otherwise it comes in as Piano.
+      var instrument = importInstrumentFor(p);
       var part = { id: uid(), role: role, clef: clef, instrument: instrument };
       if (idx === sel.melody){
         s.melodyPartId = part.id;
@@ -6256,7 +6460,8 @@
       s.notes.length + ' notes';
     var caveats = [];
     if (r.ownRhythm) caveats.push('each voice keeps its own rhythm');
-    if (r.voiceSound) caveats.push('instrument names are kept as labels (see each stave’s Instrument field) — playback still plays everything as grand piano');
+    if (r.voicesToPiano && r.voicesToPiano.length) caveats.push('the voice parts the file played on ' + r.voicesToPiano.join(' / ') + ' play on piano here (Sound → Choir in the play window sings them)');
+    if (r.voiceSound) caveats.push('each stave keeps the file’s instrument name (its Instrument field), which also sets its playback sound — the play window’s Sound setting can put everything on piano or choir');
     if (r.stats.folded || r.stats.rounded) caveats.push('rhythms shorter than a sixteenth were rounded');
     if (r.lostPerPart.length) caveats.push('simplified to the melody’s rhythm: ' + r.lostPerPart.join(', '));
     if (r.skippedParts) caveats.push(r.skippedParts + ' other part' + (r.skippedParts === 1 ? '' : 's') + ' left out');
@@ -13795,34 +14000,49 @@
     return bytes.buffer;
   }
 
-  function ensureAudio(){
-    if (state.audio) return Promise.resolve(state.audio);
-    setStatus('Loading piano samples…');
-    return loadPianoSampleData().then(function(sampleMap){
+  // v3.0: ensureAudio(bankIds) -- the audio context is made once (on the first Play, inside the
+  // click, so browsers allow it to sound); each bank is loaded the first time something needs it.
+  // A bank that fails to load is reported and its staves play on the piano instead.
+  function ensureAudio(bankIds){
+    bankIds = (bankIds && bankIds.length) ? bankIds : ['piano'];
+    var audio = state.audio;
+    if (!audio){
       var Ctor = window.AudioContext || window.webkitAudioContext;
       var ctx = new Ctor();
       var master = ctx.createGain();
       master.gain.value = 0.9;
       master.connect(ctx.destination);
-
-      var names = Object.keys(sampleMap);
-      var buffers = {};
-      var decodeOne = function(name){
-        var ab = base64ToArrayBuffer(sampleMap[name]);
-        return new Promise(function(resolve){
-          ctx.decodeAudioData(ab, function(buf){ buffers[name]=buf; resolve(); },
-            function(err){ console.log('*** Harmonizer: decode failed for', name, err); resolve(); });
-        });
-      };
-      return Promise.all(names.map(decodeOne)).then(function(){
-        state.audio = { ctx: ctx, buffers: buffers, master: master };
-        setStatus('Ready.');
-        return state.audio;
+      audio = state.audio = { ctx: ctx, master: master, banks: {}, buffers: {} };
+    }
+    if (audio.ctx.state === 'suspended' && audio.ctx.resume) audio.ctx.resume().catch(function(){});
+    var need = bankIds.filter(function(id){ return !audio.banks[id]; });
+    if (!need.length) return Promise.resolve(audio);
+    setStatus('Loading ' + need.map(function(id){ return (SOUND_BANKS[id] || { name: id }).name.toLowerCase(); }).join(', ') + ' sound' + (need.length > 1 ? 's' : '') + '…');
+    var failed = [];
+    function loadOne(id){
+      return loadBankData(id).then(function(data){
+        return id === 'piano' ? buildPianoBank(audio.ctx, data) : buildSampledBank(audio.ctx, data);
+      }).then(function(bank){
+        audio.banks[id] = bank;
+        if (id === 'piano') audio.buffers = bank.buffers;   // (2.x name, kept for anything still reading it)
+      }).catch(function(err){
+        console.log('*** Harmonizer: could not load the ' + id + ' sound', err);
+        failed.push(id);
       });
-    }).catch(function(err){
-      console.log('*** Harmonizer: could not load piano samples', err);
-      setStatus('Could not load piano samples — make sure harmonizer-piano-samples.json is next to this file and you opened it via a local server (not by double-clicking, since browsers block that from fetching files). See "About" for details.');
-      throw err;
+    }
+    return Promise.all(need.map(loadOne)).then(function(){
+      // anything that failed plays on the piano, so make sure the piano is there
+      if (failed.length && failed.indexOf('piano') < 0 && !audio.banks.piano) return loadOne('piano');
+    }).then(function(){
+      if (!audio.banks.piano && failed.indexOf('piano') >= 0 && !bankIds.some(function(id){ return audio.banks[id]; })){
+        setStatus('Could not load piano samples — make sure harmonizer-piano-samples.json is next to this file and you opened it via a local server (not by double-clicking, since browsers block that from fetching files).');
+        throw new Error('no sounds loaded');
+      }
+      var lost = failed.filter(function(id){ return id !== 'piano'; });
+      if (lost.length) setStatus('Could not load the ' + lost.map(function(id){ return SOUND_BANKS[id].name; }).join(', ') + ' sound (harmonizer-bank-' + lost[0] + '.json) — playing ' + (lost.length > 1 ? 'those staves' : 'it') + ' on piano.');
+      else if (failed.indexOf('piano') >= 0) setStatus('Could not load the piano samples (harmonizer-piano-samples.json) — the chords will be silent.');
+      else setStatus('Ready.');
+      return audio;
     });
   }
 
@@ -14198,6 +14418,22 @@
     state.loopOn = !!on;
     syncPracticeControls();
   }
+  // v3.0: the Sound setting. Changing it mid-play restarts from the same spot on the new sound.
+  function setSoundMode(mode){
+    if (SOUND_MODES.indexOf(mode) < 0) mode = 'staves';
+    if (mode === state.soundMode) return;
+    state.soundMode = mode;
+    try { localStorage.setItem('harmonizer.soundMode', mode); } catch(e){}
+    syncPracticeControls();
+    prefetchBanks(banksForSong(false));
+    if (state.playback){ pausePlayback(); playSong(); }
+    else setStatus(mode === 'piano' ? 'Sound: everything on piano.' : mode === 'choir' ? 'Sound: every stave on Choir Aahs (chords stay on piano).' : 'Sound: each stave plays its Instrument (' + soundSummary() + ').');
+  }
+  function soundSummary(){
+    var seen = {}, names = [];
+    song.parts.forEach(function(p){ var n = SOUND_BANKS[bankIdForPart(p)].name; if (!seen[n]){ seen[n] = true; names.push(n); } });
+    return names.join(', ');
+  }
   function syncPracticeControls(){
     var r = document.getElementById('playSpeedRange'), l = document.getElementById('playSpeedLabel');
     var pct = Math.round(state.playSpeed * 100);
@@ -14205,6 +14441,9 @@
     if (l) l.textContent = pct + '% \u00b7 ' + Math.round((song.tempo || 96) * state.playSpeed) + ' bpm';
     var b = document.getElementById('playLoopBtn');
     if (b) b.setAttribute('aria-pressed', state.loopOn ? 'true' : 'false');
+    document.querySelectorAll('#playSoundSeg button').forEach(function(sb){
+      sb.setAttribute('aria-pressed', sb.getAttribute('data-sound') === state.soundMode ? 'true' : 'false');
+    });
     var info = document.getElementById('playLoopInfo');
     if (info){
       var rr = state.playback && state.playback.loop ? state.playback.loop : (state.loopOn ? loopRange() : null);
@@ -14214,7 +14453,7 @@
 
   function playSong(){
     if (totalSongBeats() <= 0) { setStatus('Nothing to play yet.'); return; }
-    ensureAudio().then(function(audio){
+    ensureAudio(banksForSong(state.playChords)).then(function(audio){
       stopPlayback(true);   // v2.14: keep any paused spot until it's been read below
       openPlayModal();
       var ctx = audio.ctx;
@@ -14226,6 +14465,7 @@
                            // scheduling any generated harmony parts, which share the melody's rhythm
 
       var melodyAudible = partPlayIsOn(song.melodyPartId);
+      var melodyBank = soundBankFor(audio, bankIdForPartId(song.melodyPartId));   // v3.0
       var melodyTie = tieContinuations(function(k){ return song.notes[k].type === 'note' ? song.notes[k] : null; });
       // v2.11: with Loop on, play just the loop range (and come back round at its end)
       var loop = state.loopOn ? loopRange() : null;
@@ -14274,23 +14514,10 @@
         if (n.type === 'note' && melodyAudible){
           (function(n, tStart, dur, soundDur, isCont, peak){
             var midi = midiNumber(n.letter, n.accidental, n.octave) + clefSoundingShift();
-            var samp = nearestSample(midi);
-            var buf = audio.buffers[samp.name];
-            if (buf && !isCont){
-              var src = ctx.createBufferSource();
-              src.buffer = buf;
-              src.playbackRate.value = samp.ratio;
-              var gain = ctx.createGain();
-              var sustainEnd = tStart + Math.max(soundDur*0.72, soundDur-0.12);
-              var releaseEnd = tStart + soundDur + 0.18;
-              gain.gain.setValueAtTime(0, tStart);
-              gain.gain.linearRampToValueAtTime(peak, tStart + 0.007);
-              gain.gain.setValueAtTime(peak, sustainEnd);
-              gain.gain.exponentialRampToValueAtTime(0.0008, releaseEnd);
-              src.connect(gain); gain.connect(audio.master);
-              src.start(tStart);
-              src.stop(releaseEnd + 0.05);
-              sources.push(src);
+            if (!isCont){
+              var src = playNote(ctx, audio.master, melodyBank, midi, tStart, soundDur, peak,
+                { attack: 0.007, sustainEnd: tStart + Math.max(soundDur*0.72, soundDur-0.12), releaseEnd: tStart + soundDur + 0.18, floor: 0.0008 });
+              if (src) sources.push(src);
             }
             var msUntil = Math.max(0, (tStart - ctx.currentTime) * 1000);
             var msDur = Math.min(dur, clipSec) * 1000;
@@ -14318,23 +14545,9 @@
           var chordDur = Math.max(0.1, Span(effBeat, nextBeat));
           var tones = chordToneMidis(c, 3);
           tones.forEach(function(midi){
-            var samp = nearestSample(midi);
-            var buf = audio.buffers[samp.name];
-            if (!buf) return;
-            var src = ctx.createBufferSource();
-            src.buffer = buf;
-            src.playbackRate.value = samp.ratio;
-            var gain = ctx.createGain();
-            var sustainEnd = chordStart + Math.max(chordDur*0.8, chordDur-0.15);
-            var releaseEnd = chordStart + chordDur + 0.2;
-            gain.gain.setValueAtTime(0, chordStart);
-            gain.gain.linearRampToValueAtTime(0.22, chordStart + 0.02);
-            gain.gain.setValueAtTime(0.22, sustainEnd);
-            gain.gain.exponentialRampToValueAtTime(0.0006, releaseEnd);
-            src.connect(gain); gain.connect(audio.master);
-            src.start(chordStart);
-            src.stop(releaseEnd + 0.05);
-            sources.push(src);
+            var src = playNote(ctx, audio.master, audio.banks.piano, midi, chordStart, chordDur, 0.22,
+              { attack: 0.02, sustainEnd: chordStart + Math.max(chordDur*0.8, chordDur-0.15), releaseEnd: chordStart + chordDur + 0.2, floor: 0.0006 });
+            if (src) sources.push(src);
           });
         });
       }
@@ -14344,6 +14557,7 @@
         song.parts.forEach(function(part){
           if (part.id === mPartForPlayback.id || !Array.isArray(part.generatedNotes) || part.generatedNotes.length !== song.notes.length) return;
           if (!partPlayIsOn(part.id)) return;
+          var hBank = soundBankFor(audio, bankIdForPart(part));   // v3.0
           var hTie = tieContinuations(function(k){
             var g = part.generatedNotes[k];
             return (g && song.notes[k] && song.notes[k].type === 'note') ? g : null;
@@ -14356,23 +14570,9 @@
             var hc = melCurve[i];   // v2.23: a linked stave takes the melody's dynamics
             var hDur = Math.min(SoundSpan(nt.beat, nt.beat + nt.beats + hTie.extra[i]) * hc.len, Span(nt.beat, endBeat));
             var midi = midiNumber(hn.letter, hn.accidental, hn.octave) + (CLEF_SOUNDING_SHIFT[part.clef]||0);
-            var samp = nearestSample(midi);
-            var buf = audio.buffers[samp.name];
-            if (!buf) return;
-            var src = ctx.createBufferSource();
-            src.buffer = buf;
-            src.playbackRate.value = samp.ratio;
-            var gain = ctx.createGain();
-            var sustainEnd = nt.tStart + Math.max(hDur*0.75, hDur-0.1);
-            var releaseEnd = nt.tStart + hDur + 0.15;
-            gain.gain.setValueAtTime(0, nt.tStart);
-            gain.gain.linearRampToValueAtTime(0.45 * hc.gain, nt.tStart + 0.01);
-            gain.gain.setValueAtTime(0.45 * hc.gain, sustainEnd);
-            gain.gain.exponentialRampToValueAtTime(0.0007, releaseEnd);
-            src.connect(gain); gain.connect(audio.master);
-            src.start(nt.tStart);
-            src.stop(releaseEnd + 0.05);
-            sources.push(src);
+            var src = playNote(ctx, audio.master, hBank, midi, nt.tStart, hDur, 0.45 * hc.gain,
+              { attack: 0.01, sustainEnd: nt.tStart + Math.max(hDur*0.75, hDur-0.1), releaseEnd: nt.tStart + hDur + 0.15, floor: 0.0007 });
+            if (src) sources.push(src);
           });
         });
       }
@@ -14384,6 +14584,7 @@
         var oTie = tieContinuations(function(k){ return list[k].type === 'note' ? list[k] : null; }, list);
         var shift = CLEF_SOUNDING_SHIFT[part.clef] || 0;
         var oCurve = dynamicsCurve(list);   // v2.23
+        var oBank = soundBankFor(audio, bankIdForPart(part));   // v3.0
         list.forEach(function(n, i){
           var st = tl[i].start, en = Math.min(st + tl[i].beats, endBeat);
           if (n.type !== 'note' || en <= startBeat + 1e-6 || st >= endBeat - 1e-6) return;
@@ -14404,24 +14605,9 @@
           var tStart = At(atk);
           var soundDur = Math.min(SoundSpan(atk, chainEnd) * oCurve[i].len, Span(atk, endBeat));
           var midi = midiNumber(n.letter, n.accidental, n.octave) + shift;
-          var samp = nearestSample(midi);
-          var buf = audio.buffers[samp.name];
-          if (!buf) return;
-          var src = ctx.createBufferSource();
-          src.buffer = buf;
-          src.playbackRate.value = samp.ratio;
-          var gain = ctx.createGain();
-          var peak = 0.45 * oCurve[i].gain;
-          var sustainEnd = tStart + Math.max(soundDur*0.75, soundDur-0.1);
-          var releaseEnd = tStart + soundDur + 0.15;
-          gain.gain.setValueAtTime(0, tStart);
-          gain.gain.linearRampToValueAtTime(peak, tStart + 0.01);
-          gain.gain.setValueAtTime(peak, sustainEnd);
-          gain.gain.exponentialRampToValueAtTime(0.0007, releaseEnd);
-          src.connect(gain); gain.connect(audio.master);
-          src.start(tStart);
-          src.stop(releaseEnd + 0.05);
-          sources.push(src);
+          var src = playNote(ctx, audio.master, oBank, midi, tStart, soundDur, 0.45 * oCurve[i].gain,
+            { attack: 0.01, sustainEnd: tStart + Math.max(soundDur*0.75, soundDur-0.1), releaseEnd: tStart + soundDur + 0.15, floor: 0.0007 });
+          if (src) sources.push(src);
         });
       });
 
@@ -14430,27 +14616,16 @@
         return { partId: p.id, list: p.notes, peak: 0.45, shift: CLEF_SOUNDING_SHIFT[p.clef] || 0 };
       })).forEach(function(L){
         if (!partPlayIsOn(L.partId) || !L.list.some(divisiNote)) return;
-        var dCurve = dynamicsCurve(L.list);
+        var dCurve = dynamicsCurve(L.list), dBank = soundBankFor(audio, bankIdForPartId(L.partId));   // v3.0
         divisiSounds(L.list).forEach(function(d){
           var st = d.start, en = Math.min(st + d.beats, endBeat);
           if (en <= startBeat + 1e-6 || st >= endBeat - 1e-6) return;
           var atk = Math.max(st, startBeat);
           var tStart = At(atk);
           var soundDur = Math.min(SoundSpan(atk, en) * dCurve[d.idx].len, Span(atk, endBeat));
-          var samp = nearestSample(midiNumber(d.pitch.letter, d.pitch.accidental | 0, d.pitch.octave) + L.shift);
-          var buf = audio.buffers[samp.name];
-          if (!buf) return;
-          var src = ctx.createBufferSource();
-          src.buffer = buf; src.playbackRate.value = samp.ratio;
-          var gain = ctx.createGain(), pk = L.peak * dCurve[d.idx].gain;
-          var sustainEnd = tStart + Math.max(soundDur*0.75, soundDur-0.1), releaseEnd = tStart + soundDur + 0.15;
-          gain.gain.setValueAtTime(0, tStart);
-          gain.gain.linearRampToValueAtTime(pk, tStart + 0.01);
-          gain.gain.setValueAtTime(pk, sustainEnd);
-          gain.gain.exponentialRampToValueAtTime(0.0007, releaseEnd);
-          src.connect(gain); gain.connect(audio.master);
-          src.start(tStart); src.stop(releaseEnd + 0.05);
-          sources.push(src);
+          var src = playNote(ctx, audio.master, dBank, midiNumber(d.pitch.letter, d.pitch.accidental | 0, d.pitch.octave) + L.shift, tStart, soundDur, L.peak * dCurve[d.idx].gain,
+            { attack: 0.01, sustainEnd: tStart + Math.max(soundDur*0.75, soundDur-0.1), releaseEnd: tStart + soundDur + 0.15, floor: 0.0007 });
+          if (src) sources.push(src);
         });
       });
 
@@ -14695,19 +14870,24 @@
       });
       cClef.appendChild(clefSel);
 
-      // Instrument (v2.10): a label only -- playback and MusicXML export always use grand piano
-      // (see the Instrument help text) -- so an imported voicing shows correctly, and so it can
-      // be changed by hand (the "let me override an unwanted choral patch" case).
+      // Instrument (v2.10 a label; v3.0 also the stave's playback sound when the play window's
+      // Sound setting is Per stave). Any name is kept as typed; bankIdForLabel picks the sound.
       var instInput = document.createElement('input');
       instInput.type = 'text';
       instInput.setAttribute('list', 'instrumentPresetsList');
       instInput.value = part.instrument || 'Piano';
       instInput.placeholder = 'Instrument';
-      instInput.title = 'Instrument name (label only -- playback and MusicXML export always use grand piano). Change this to relabel an imported voicing, or note the part’s real instrument.';
+      function instTitle(){
+        instInput.title = 'Instrument: the sound this stave plays (Piano, Choir Aahs, Organ, Strings or Flute; other names use the nearest of these, or piano). This stave plays as ' +
+          SOUND_BANKS[bankIdForLabel(part.instrument)].name + '. The Sound setting in the play window can put every stave on piano or choir instead.';
+      }
+      instTitle();
       instInput.style.width = '130px'; instInput.style.fontSize = '12px';
       instInput.addEventListener('change', function(){
         part.instrument = (instInput.value || '').trim().slice(0, 40) || 'Piano';
         instInput.value = part.instrument;
+        instTitle();
+        if (state.soundMode === 'staves') prefetchBanks([bankIdForLabel(part.instrument)]);   // v3.0: fetch it now, not at Play
         afterEdit();
       });
       cInst.appendChild(instInput);
@@ -14918,6 +15098,7 @@
     // pattern as Black on white above -- previously state.playChords always started true.
     (function(){
       try { if (localStorage.getItem('harmonizer.playChords') === '0') state.playChords = false; } catch(e){}
+      try { var sm = localStorage.getItem('harmonizer.soundMode'); if (SOUND_MODES.indexOf(sm) >= 0) state.soundMode = sm; } catch(e){}   // v3.0
       var pc = document.getElementById('playChordsToggle');
       if (pc) pc.checked = state.playChords;
     })();
@@ -15051,6 +15232,9 @@
     modalBtn('playLastBtn', function(){ playModalJump(true); });
     modalBtn('playCloseBtn', closePlayModal);
     modalBtn('playLoopBtn', function(){ setLoopOn(!state.loopOn); });
+    document.querySelectorAll('#playSoundSeg button').forEach(function(sb){
+      sb.addEventListener('click', function(){ sb.blur(); setSoundMode(sb.getAttribute('data-sound')); });
+    });
     document.getElementById('playSpeedRange').addEventListener('input', function(e){ setPlaySpeed(+e.target.value / 100); });
     document.getElementById('playRepeatsToggle').addEventListener('change', function(e){   // v2.24
       state.playRepeats = !!e.target.checked;
@@ -15073,6 +15257,7 @@
       if (ev.key === 'Escape'){ closePlayModal(); ev.preventDefault(); }
       else if (ev.key === ' '){ ev.preventDefault(); togglePlayPause(); }   // v2.14: pause / resume
       else if (ev.key === 'l' || ev.key === 'L'){ setLoopOn(!state.loopOn); ev.preventDefault(); }
+      else if (ev.key === 'v' || ev.key === 'V'){ setSoundMode(SOUND_MODES[(SOUND_MODES.indexOf(state.soundMode) + 1) % SOUND_MODES.length]); ev.preventDefault(); }   // v3.0
       else if (ev.key === '['){ setPlaySpeed(state.playSpeed - 0.05); ev.preventDefault(); }
       else if (ev.key === ']'){ setPlaySpeed(state.playSpeed + 0.05); ev.preventDefault(); }
       else if (ev.key === 'Home' && !state.playback){ playModalJump(false); ev.preventDefault(); }
@@ -15884,7 +16069,12 @@
       decoSplitPoint: decoSplitPoint, HARMONY_MOTIONS: HARMONY_MOTIONS, setRefineAfterGenerate: function(v){ state.refineAfterGenerate = v; },
       secondOrderMotion: secondOrderMotion, getStatus: function(){ return document.getElementById('statusText').textContent; },
       diaShift: diaShift, scalePcsOf: scalePcsOf, respellOrnaments: respellOrnaments, repShift: repShift,   // v2.43
-      parseExampleIndex: parseExampleIndex, exampleTitle: exampleTitle, isBlankSong: isBlankSong, libraryIsEmpty: libraryIsEmpty   // v2.15
+      parseExampleIndex: parseExampleIndex, exampleTitle: exampleTitle, isBlankSong: isBlankSong, libraryIsEmpty: libraryIsEmpty,   // v2.15
+      // v3.0: sound banks
+      SOUND_BANKS: SOUND_BANKS, SOUND_MODES: SOUND_MODES, bankIdForLabel: bankIdForLabel, bankIdForPart: bankIdForPart, banksForSong: banksForSong,
+      setSoundMode: setSoundMode, getSoundMode: function(){ return state.soundMode; }, zoneFor: zoneFor, playNote: playNote,
+      buildSampledBank: buildSampledBank, pcm16ToFloat32: pcm16ToFloat32, ensureAudio: ensureAudio, getAudio: function(){ return state.audio; },
+      renderSongOfflineBuffer: renderSongOfflineBuffer, importInstrumentFor: importInstrumentFor
     };
   }
 
@@ -15892,6 +16082,5 @@
 
 })();
 </script>
-<!-- DFF site: corner nav back to the main site (v2.30) -->
 </body>
 </html>

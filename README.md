@@ -1,6 +1,6 @@
 # Harmonizer
 
-**A workbench for roughing out vocal arrangements.** Sketch a melody, place chords above it, and let Harmonizer generate SATB parts underneath. Then play it back on a real piano sound and edit any note until it sounds right.
+**A workbench for roughing out vocal arrangements.** Sketch a melody, place chords above it, and let Harmonizer generate SATB parts underneath. Then play it back on a real piano or choir sound and edit any note until it sounds right.
 
 **▶ Try it now: [dffmonolith.github.io/harmonizer](https://dffmonolith.github.io/harmonizer/)**. It runs in your browser with nothing to install.
 
@@ -13,6 +13,7 @@
 - **Choral notation**: fermatas, breaths, tempo words, rit./accel., dynamics and hairpins, articulations, rehearsal letters, repeats and endings, D.C./D.S./Coda. All of them affect playback.
 - **Import**: MusicXML (including compressed `.mxl` from MuseScore, Finale or Sibelius) and MIDI. An import report shows what came across.
 - **Export**: `.json`, `.musicxml`, `.mid`, `.wav`, print/PDF, and **rehearsal tracks**, a `.zip` with one WAV per voice.
+- **Sounds**: piano, Choir Aahs, organ, strings and flute, set per stave or switched for the whole score at once (Piano / Choir). Each sound loads only when something plays it.
 - **Practice**: a play window with loop, practice speed, and jumping to a rehearsal letter. Range warnings, optional partwriting marks (parallels, hidden and contrary fifths/octaves, overlaps, cross-relations, augmented seconds) and marks over locked and generated notes help as you write.
 - Autosaves in your browser, per song, with undo/redo and a full library backup.
 
@@ -30,6 +31,7 @@ It's deliberately not an engraver. It handles whole through eighth notes, dots, 
 Harmonizer is a single HTML file (`app/harmonizer.html`) of vanilla JavaScript with no build step and no dependencies. It needs two things beside it:
 
 - `app/harmonizer-piano-samples.json`: the piano sound
+- `app/harmonizer-bank-*.json`: the choir, organ, strings and flute sounds (each loaded only when a stave plays it)
 - `data/`: the Examples menu (optional)
 
 Browsers block a page opened by double-clicking from loading those files, so serve the folder from any static web server instead. For example, from the repository root:
@@ -53,6 +55,7 @@ See [app/tests/README.md](app/tests/README.md) for details.
 ## Credits
 
 - Piano: [Salamander Grand Piano](https://archive.org/details/SalamanderGrandPianoV3) by Alexander Holm, CC BY 3.0
+- Choir, organ, strings and flute: [GeneralUser GS](https://www.schristiancollins.com) by S. Christian Collins (see `app/tools/GeneralUser-GS-LICENSE.txt`; the banks are built by `app/tools/build-banks.py`)
 - Clefs and accidentals: glyph outlines from the Bravura font (SMuFL, © Steinberg Media Technologies), SIL Open Font License 1.1
 - Example arrangements in `data/` are MIDI renderings of choral works by Barber, Bruckner, Byrd and Morley.
 

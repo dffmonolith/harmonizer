@@ -56,9 +56,9 @@
 <main>
 <article class="guide">
 
-  <span class="eyebrow">Harmonizer &middot; v3.0</span>
+  <span class="eyebrow">Harmonizer &middot; v2.43</span>
   <h1>Harmonizer User Guide</h1>
-  <p class="lede">Harmonizer is a workbench for roughing out vocal arrangements: enter a melody, put chords under it, generate a draft harmony in the style you want, listen to it on a real piano or choir sound, and edit until it works. It also makes rehearsal tracks for your singers and moves music in and out as MusicXML and MIDI. This guide covers everything it does.</p>
+  <p class="lede">Harmonizer is a workbench for roughing out vocal arrangements: enter a melody, put chords under it, generate a draft harmony in the style you want, listen to it on a real piano sound, and edit until it works. It also makes rehearsal tracks for your singers and moves music in and out as MusicXML and MIDI. This guide covers everything it does.</p>
   <p><a href="app/harmonizer.html" target="dff-app-harmonizer">Launch Harmonizer &rarr;</a> &nbsp;&middot;&nbsp; <a href="quickstart.html">Quickstart</a> &nbsp;&middot;&nbsp; <a href="index.html">About the project</a></p>
 
   <nav class="toc" aria-label="Contents">
@@ -101,7 +101,7 @@
     <li>Open <b>Chords</b> and press <b>Suggest chords</b> for a starting harmony. Set <b>Staves</b> to 4, open <b>Staves</b>, choose a style and press <b>Generate parts</b>.</li>
     <li>Edit any note you don't like. Then keep it: it autosaves, and <b>Save &rarr; as .musicxml</b>, <b>Save &rarr; as .mid</b> or <b>Save &rarr; Rehearsal tracks&hellip;</b> take it wherever it needs to go.</li>
   </ol>
-  <div class="note tip"><p><b>Sounds.</b> Playback loads a sample file that sits next to the app: the piano (<code>harmonizer-piano-samples.json</code>, about 7&nbsp;MB), and from 3.0 the Choir Aahs, Organ, Strings and Flute sounds (about 1&nbsp;MB each). Each loads only the first time something plays it, so the first Play on a new sound can take a moment; after that it is instant.</p></div>
+  <div class="note tip"><p><b>Piano sound.</b> Playback loads a piano sample file (<code>harmonizer-piano-samples.json</code>, about 7&nbsp;MB) that sits next to the app. The first Play can take a moment while it loads; after that it is instant.</p></div>
 
   <h2 id="screen">2. The screen at a glance</h2>
   <p>From top to bottom and left to right:</p>
@@ -252,7 +252,7 @@
   <ul>
     <li><b>Part</b> &mdash; Descant, Soprano, Soprano&nbsp;II, Alto, Alto&nbsp;II, Tenor, Tenor&nbsp;II, Baritone, Bass, Bass&nbsp;II. Changes the stave's label and its range and role in harmony generation.</li>
     <li><b>Clef</b> &mdash; Treble, Bass, or Tenor. Tenor is a treble clef with a small 8 beneath it: the music sounds an octave lower than written, the standard way to notate a tenor line. Playback and every export honour this.</li>
-    <li><b>Instrument</b> &mdash; the sound the stave plays (from 3.0): <b>Piano</b> (the default), <b>Choir Aahs</b>, <b>Organ</b>, <b>Strings</b> or <b>Flute</b>. Other names play the nearest of these: Voice, Soprano, Choir Oohs and the like as Choir Aahs; Violin, Viola, Cello and Double Bass as Strings; Oboe, Clarinet, Recorder and saxophones as Flute; brass as Organ. Anything it doesn't recognise plays piano. Hover over the field to see which sound the stave will use. An imported file's instrument names are kept, so a MIDI file of &ldquo;Choir Aahs&rdquo; parts plays as a choir. The exception is voice parts that the file played on another sound (MIDI files often put the singers on flute or brass). Those come in as Piano, and the status line says so. The name is written into MusicXML and MIDI exports, where it also picks the General MIDI sound. To put every stave on one sound for a while without changing the fields, use <b>Sound</b> in the play window (see <a href="#play">Playback</a>).</li>
+    <li><b>Instrument</b> &mdash; a label for the stave (Piano by default, or whatever an imported file named it, such as &ldquo;Choir Aahs&rdquo;). It is written into MusicXML and MIDI exports, where it also picks the General MIDI sound. Harmonizer's own playback is always grand piano.</li>
     <li><b>Melody</b> (radio button) &mdash; chooses which stave holds the tune. Move it off the top line and the notes are shifted by octave to suit that voice; treat that as a rough starting point. Generated harmony is cleared, as it was written for the old arrangement.</li>
     <li><b>Own rhythm</b> (checkbox, non-melody staves) &mdash; the stave has a rhythm of its own, edited exactly like the melody: click its staff to add notes, and insert, delete, tie, dot or re-time them. Generate parts writes its harmony this way too, so the box switches on by itself for every stave it fills. Once <em>you've</em> written a note into a stave you ticked by hand, that stave is your own composed line and Generate parts leaves it alone. Unticking the box discards the stave's notes (it asks first).</li>
     <li><b>Play</b> (checkbox) &mdash; whether that stave is heard. Untick it to mute a part without losing it.</li>
@@ -406,7 +406,7 @@
   <p><b>What playback does.</b> Play follows the repeats and jumps in performance order, with the playhead going back where the music goes back. The usual conventions apply: after a D.C. or D.S. the repeats aren't taken again and the last ending is played, and a D.C./D.S. is taken once. The play window has a <b>Repeats</b> switch to play straight through as written instead. <b>Loop</b> always plays its passage as written. <b>Save .wav</b>, rehearsal tracks and <b>Save .mid</b> are performances too (following the Repeats switch); <b>Save .musicxml</b> writes the score as written, with its repeat barlines, endings and D.C./D.S. marks, and MusicXML import reads them back.</p>
 
   <h2 id="play">15. Playback, loop and practice speed</h2>
-  <p>Press <b>Play</b> or <kbd>Space</kbd>. Sound comes from recorded samples across the full keyboard, so extreme high and low notes sound correctly rather than being clipped to a vocal range.</p>
+  <p>Press <b>Play</b> or <kbd>Space</kbd>. Sound comes from Salamander Grand Piano samples across the full keyboard, so extreme high and low notes sound correctly rather than being clipped to a vocal range.</p>
   <ul>
     <li><b>Where it starts.</b> From the selected note if one is selected; otherwise from the selected chord; otherwise from the first measure that contains a note, skipping any leading rests.</li>
     <li><b>The play window.</b> Pressing Play opens the score in a centered window that uses as much of the screen as it can. The editing layout is untouched behind it and returns when you press <b>Close</b> or <kbd>Esc</kbd>.</li>
@@ -415,13 +415,6 @@
     <li><b>Stop</b> forgets the paused spot, so the next Play starts the usual way (from the selected note, or the beginning). Editing the music, switching songs, or reaching the end also clears it; closing the play window doesn't.</li>
     <li><b>When stopped or paused.</b> The window stays open. <b>&#9664;</b> / <b>&#9654;</b> (or <kbd>&larr;</kbd> / <kbd>&rarr;</kbd>) page through the score, and <b>&#9198;</b> / <b>&#9197;</b> (or <kbd>Home</kbd> / <kbd>End</kbd>) jump to the beginning or end &mdash; and move the play position there too: after &#9198;, <b>Play</b> starts from the top (even if you had paused somewhere, or selected a note earlier); after &#9197;, it plays the last measure. Paging with &#9664; / &#9654; only moves the view. Clicking a note afterwards still makes playback start from that note.</li>
     <li><b>Choosing what you hear.</b> The play window's <b>Hear</b> row has one button per stave plus <b>Chords</b>: click to include or exclude, <kbd>Shift</kbd>-click a stave to hear only that one, or press <b>All</b>. These mirror each stave's <b>Play</b> checkbox and the <b>Play chords</b> switch.</li>
-    <li><b>Sound.</b> Next to Loop, <b>Sound</b> chooses what the staves play on (from 3.0):
-      <ul>
-        <li><b>Per stave</b> &mdash; each stave plays its own <b>Instrument</b> (see <a href="#staves">Staves</a>). Songs that say Piano everywhere sound exactly as before.</li>
-        <li><b>Piano</b> &mdash; every stave on piano, whatever the Instrument fields say.</li>
-        <li><b>Choir</b> &mdash; every stave on Choir Aahs, to hear a choral arrangement sung rather than played.</li>
-      </ul>
-      <kbd>V</kbd> steps through the three. Switching while the music plays carries on from the same spot on the new sound. Chords always stay on the piano. The choice is remembered in this browser, and <b>Save &rarr; as .wav</b> and rehearsal tracks use it too.</li>
   </ul>
   <figure class="shot"><img src="docs/screenshots/harmonizer-4-play.png" alt="The play window during playback: the score full width, the current measure shaded and a playhead line, with the Hear buttons, Loop, Repeats, Section and Speed above." width="1440" height="960" loading="lazy"><figcaption>The play window. The Hear buttons choose the voices; Loop, Repeats, Section and Speed sit underneath.</figcaption></figure>
   <h3>Loop</h3>
@@ -431,7 +424,7 @@
   <h3>Practice speed</h3>
   <p>The <b>Speed</b> slider in the play window slows playback down to 40% or speeds it up to 150% without changing pitch, and shows the resulting tempo (&ldquo;80% &middot; 77 bpm&rdquo;). <kbd>[</kbd> and <kbd>]</kbd> nudge it by 5%. A new speed takes effect the next time Play starts, or on the next pass of a loop. It is remembered in this browser, applies to every song, and never changes the song's written tempo.</p>
   <h3>Saving the audio</h3>
-  <p><b>Save &rarr; as .wav</b> renders the whole song, start to finish, through the same sounds Play uses (the <b>Sound</b> setting included), with the staves and chords currently switched on, and downloads it as a standard, lossless .wav file. (There is no MP3 export: browsers don't include an MP3 encoder. Any audio program converts a .wav.)</p>
+  <p><b>Save &rarr; as .wav</b> renders the whole song, start to finish, through the same piano samples, with the staves and chords currently switched on, and downloads it as a standard, lossless .wav file. (There is no MP3 export: browsers don't include an MP3 encoder. Any audio program converts a .wav.)</p>
 
   <h2 id="rehearsal">16. Rehearsal tracks</h2>
   <p><b>Rehearsal tracks&hellip;</b>, the last item in the <b>Save &#9662;</b> menu, makes part-learning tracks for your singers: one audio file per voice, with that voice at full volume and the others underneath it. The dialog offers:</p>
@@ -572,7 +565,6 @@
     <tr><td>Lyric box: next / previous note</td><td><kbd>Space</kbd> or <kbd>Tab</kbd> / <kbd>Shift</kbd>+ either</td></tr>
     <tr><td>Lyric box: next syllable of the word / hold the syllable</td><td><kbd>-</kbd> / <kbd>_</kbd></td></tr>
     <tr><td>Play window: loop on/off</td><td><kbd>L</kbd></td></tr>
-    <tr><td>Play window: Sound (Per stave &rarr; Piano &rarr; Choir)</td><td><kbd>V</kbd></td></tr>
     <tr><td>Play window: speed &minus;5% / +5%</td><td><kbd>[</kbd> / <kbd>]</kbd></td></tr>
     <tr><td>Close the play window or a dialog</td><td><kbd>Esc</kbd></td></tr>
   </table></div>
@@ -585,7 +577,7 @@
     <li>No bar-line arithmetic: it places barlines from the time signature but does not stop you writing a short or long measure.</li>
     <li>Key, tempo and time changes start at the beginning of a measure (tempo words, rit./accel. and a tempo can go on any note).</li>
     <li>Up to six verses of lyrics. Grace notes appear only when they come in from an imported score, and can't be edited. Repeats and jumps are whole measures; no multi-measure rests, no nested repeats.</li>
-    <li>Five sounds: piano, Choir Aahs, organ, strings and flute. Other instrument names borrow the nearest of these. The choir sings a vowel, not the words.</li>
+    <li>Playback is always grand piano, whatever a stave's Instrument label says.</li>
     <li>Printing is a straightforward layout: lines break at barlines with a ragged right edge, spacing isn't re-justified, and a tie or slur crossing a line break is cut.</li>
     <li>Harmony generation is a rough draft.</li>
   </ul>
@@ -594,8 +586,7 @@
   <h2 id="trouble">23. Troubleshooting</h2>
   <div class="tbl-wrap"><table>
     <tr><th>Symptom</th><th>Cause and remedy</th></tr>
-    <tr><td>No sound</td><td>Wait a moment after the first Play while the sound loads (the piano, or a stave's other sound). Check the stave's <b>Play</b> box, <b>Play chords</b>, the Hear buttons, your device volume, and that the browser tab isn't muted. Some browsers need a click on the page before audio can start.</td></tr>
-    <tr><td>&ldquo;Could not load the &hellip; sound &mdash; playing it on piano&rdquo;</td><td>That instrument's file (<code>harmonizer-bank-choir-aah.json</code>, <code>-organ</code>, <code>-strings</code> or <code>-flute</code>) isn't next to the app, or didn't download. Its staves play on the piano meanwhile. Check the files are uploaded alongside <code>harmonizer-piano-samples.json</code>.</td></tr>
+    <tr><td>No sound</td><td>Wait a moment after the first Play while the piano samples load. Check the stave's <b>Play</b> box, <b>Play chords</b>, the Hear buttons, your device volume, and that the browser tab isn't muted. Some browsers need a click on the page before audio can start.</td></tr>
     <tr><td>Samples fail to load when running locally</td><td>Browsers block a page opened by double-clicking (<code>file://</code>) from reading its neighbouring sample file. Serve the folder instead, for example <code>python3 -m http.server</code>, and open it via <code>http://localhost</code>.</td></tr>
     <tr><td>&ldquo;Generate parts&rdquo; is missing</td><td>It needs at least two staves and at least one chord. Set <b>Staves</b> above 1, add chords, and open the Staves section.</td></tr>
     <tr><td>Harmony staves went blank</td><td>Changing the melody, chords, or a stave's Part or Clef clears harmony that would now be stale. Press <b>Generate parts</b> again.</td></tr>
@@ -611,12 +602,6 @@
   </table></div>
 
   <h2 id="new">24. What's new</h2>
-  <h3>3.0</h3>
-  <ul>
-    <li><b>Instruments:</b> besides the piano, a stave can play <b>Choir Aahs</b>, <b>Organ</b>, <b>Strings</b> or <b>Flute</b>. The stave's Instrument field picks the sound, and an imported file's choir parts sound like a choir. Voice parts that a MIDI file played on some other sound (flute, brass) come in as Piano.</li>
-    <li><b>Sound</b> in the play window: <b>Per stave</b>, <b>Piano</b> or <b>Choir</b>, to hear a whole arrangement sung or played at the press of a key (<kbd>V</kbd>). Save .wav and rehearsal tracks use it too.</li>
-    <li>Each sound is its own file, loaded only when something plays it, so nobody downloads sounds they don't use. The piano sounds exactly as before.</li>
-  </ul>
   <h3>2.43</h3>
   <ul>
     <li><b>Cleaner added notes:</b> notes the voices add of their own now obey every check Settings can mark &mdash; no parallel fifths from them in any style (with <b>More</b> added notes in Close, parallels in the examples fell from 51 to 20), and no contrary or hidden fifths and octaves, overlaps, cross-relations or augmented seconds. They're spelled from their line (E, F&sharp;, G rising).</li>
@@ -822,7 +807,7 @@
     <li><b>1.7</b> &mdash; independent rhythm per stave, and imports that keep each voice's rhythm.</li>
     <li><b>1.6</b> &mdash; black-on-white score, engraved clefs and accidentals, and this guide.</li>
   </ul>
-  <p style="color:var(--text-faint);font-size:.85rem;margin-top:var(--sp-6);">Clefs and accidentals use the Bravura font's glyph outlines (SMuFL, &copy; Steinberg Media Technologies, SIL Open Font License 1.1). Piano samples: Salamander Grand Piano by Alexander Holm, CC BY 3.0. Choir, organ, strings and flute samples: GeneralUser GS by S. Christian Collins (<a href="https://www.schristiancollins.com">schristiancollins.com</a>).</p>
+  <p style="color:var(--text-faint);font-size:.85rem;margin-top:var(--sp-6);">Clefs and accidentals use the Bravura font's glyph outlines (SMuFL, &copy; Steinberg Media Technologies, SIL Open Font License 1.1). Piano samples: Salamander Grand Piano by Alexander Holm, CC BY 3.0.</p>
 
 </article>
 </main>

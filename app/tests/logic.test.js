@@ -1825,5 +1825,35 @@ section('Added notes, joins, sequences (v2.43)');
   check('...a suspension is written as the note it holds over (B, not Cb), so the tie reads', run4[1].letter === 'B' && run4[1].accidental === 0 && run4[1].octave === 4);
 })();
 
+// v3.0: instruments. The Instrument field picks a stave's sound (bankIdForLabel); the Sound
+// setting can override it; an imported VOICE part on a non-choir patch comes in as Piano (DFF's
+// call: MIDI files put voices on any old sound -- Christus factus est is four flutes). The audio
+// itself is tested in a real browser by sound.test.js.
+section('Instruments and the Sound setting (v3.0)');
+(function(){
+  if (!H.bankIdForLabel){ check('3.0 sound hooks exposed', false); return; }
+  check('Piano / Choir Aahs / Organ / Strings / Flute name their own sounds',
+    ['Piano', 'Choir Aahs', 'Organ', 'Strings', 'Flute'].map(H.bankIdForLabel).join(',') === 'piano,choir-aah,organ,strings,flute');
+  check('look-alikes are not voices: Tenor Sax -> flute, Double Bass -> strings, Electric Bass -> piano, Bass Trombone -> organ',
+    ['Tenor Sax', 'Double Bass', 'Electric Bass', 'Bass Trombone'].map(H.bankIdForLabel).join(',') === 'flute,strings,piano,organ');
+  check('an unknown name plays piano', H.bankIdForLabel('Theremin') === 'piano' && H.bankIdForLabel('') === 'piano');
+  const part = (name, inst, sound) => ({ name: name, baseName: name, info: { name: name, abbr: '', instrument: inst, sound: sound || '' } });
+  check('import: a Soprano the file put on Flute comes in as Piano', H.importInstrumentFor(part('Soprano', 'Flute')) === 'Piano');
+  check('import: a Tenor on Brass comes in as Piano', H.importInstrumentFor(part('Tenor', 'Brass')) === 'Piano');
+  check('import: a Soprano on Choir Aahs keeps Choir Aahs', H.importInstrumentFor(part('Soprano', 'Choir Aahs', 'voice.aah')) === 'Choir Aahs');
+  check('import: a Violin part keeps Violin (it is an instrument, not a voice)', H.importInstrumentFor(part('Violin', 'Violin')) === 'Violin');
+  check('import: an Organ part keeps Church Organ', H.importInstrumentFor(part('Organ', 'Church Organ')) === 'Church Organ');
+  check('import: no instrument in the file -> Piano', H.importInstrumentFor(part('Alto', '')) === 'Piano');
+  const prevMode = H.getSoundMode();
+  H.setSoundMode('choir');
+  check('Sound = Choir puts a Piano-labelled stave on the choir', H.bankIdForPart({ instrument: 'Piano' }) === 'choir-aah');
+  H.setSoundMode('piano');
+  check('Sound = Piano puts an Organ-labelled stave on the piano', H.bankIdForPart({ instrument: 'Organ' }) === 'piano');
+  H.setSoundMode('staves');
+  check('Sound = Per stave follows the Instrument field', H.bankIdForPart({ instrument: 'Strings' }) === 'strings');
+  H.setSoundMode(prevMode);
+  check('MusicXML/MIDI program falls back to the sound\'s program (Viola -> 49)', H.gmProgramFor('Viola') === 49 && H.gmProgramFor('Trumpet') === 57);
+})();
+
 console.log('\n' + count + ' checks, ' + fails + ' failure(s).');
 process.exitCode = fails ? 1 : 0;

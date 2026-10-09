@@ -20,10 +20,12 @@ function run(script){
 
 const logicOk = run('logic.test.js');
 const e2eOk = run('e2e.test.js'); // prints SKIP and exits 0 on its own if playwright isn't installed
+const soundOk = run('sound.test.js'); // v3.0: the instrument sounds (also skips without playwright)
 
 console.log('\n' + '='.repeat(70));
 console.log(logicOk ? 'logic.test.js: PASS' : 'logic.test.js: FAIL');
 console.log(e2eOk ? 'e2e.test.js:   PASS (or skipped)' : 'e2e.test.js:   FAIL');
+console.log(soundOk ? 'sound.test.js: PASS (or skipped)' : 'sound.test.js: FAIL');
 console.log('='.repeat(70));
 
-process.exitCode = (logicOk && e2eOk) ? 0 : 1;
+process.exitCode = (logicOk && e2eOk && soundOk) ? 0 : 1;

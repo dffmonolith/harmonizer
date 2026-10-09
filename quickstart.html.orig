@@ -57,7 +57,7 @@
 <main>
 <article class="guide">
 
-  <span class="eyebrow">Harmonizer &middot; Quickstart &middot; v3.0</span>
+  <span class="eyebrow">Harmonizer &middot; Quickstart &middot; v2.43</span>
   <h1>Harmonizer Quickstart</h1>
   <p class="lede">Harmonizer helps you sketch, test and teach vocal arrangements. This page gets you productive fast with the two ways most people work &mdash; writing a song from scratch, or starting from a MusicXML or MIDI file you already have &mdash; and then handing your singers rehearsal tracks. For every detail, see the <a href="guide.html">full user guide</a>.</p>
   <p><a href="app/harmonizer.html" target="dff-app-harmonizer">Launch Harmonizer &rarr;</a> &nbsp;&middot;&nbsp; <a href="guide.html">User guide</a> &nbsp;&middot;&nbsp; <a href="index.html">About the project</a></p>
@@ -79,7 +79,7 @@
     <li><b>Everything autosaves</b> in your browser. There is no save button for that &mdash; but do keep a backup: <b>&#9881; Settings &rarr; Export library</b> saves every song in one file. If saving ever fails, an amber warning appears at the bottom of the screen.</li>
     <li><b>The tools fold away.</b> <b>Note entry</b>, <b>Chords</b> and <b>Staves</b> are strips above the score; click one to open it. The panels for the selected note, lyrics and text slide out from the icon rail on the right.</li>
     <li><b>One stave holds the melody</b> (the top one, unless you move it with the <b>Melody</b> button). The others are blank and waiting for <b>Generate parts</b>, filled by a previous Generate parts run, or ticked <b>Own rhythm</b> and edited freely like the melody &mdash; that last kind is yours alone; Generate parts never touches it.</li>
-    <li><b>It plays on piano, or on a choir.</b> Press <kbd>Space</kbd> or <b>Play</b> (on the bar just above the score) and a large play window opens showing the score. Its <b>Sound</b> switch puts everything on <b>Piano</b> or <b>Choir</b>, or lets each stave play its own <b>Instrument</b> (Piano, Choir Aahs, Organ, Strings or Flute). <kbd>V</kbd> flips between them.</li>
+    <li><b>It always sounds like a grand piano</b>, never a choir. Press <kbd>Space</kbd> or <b>Play</b> (on the bar just above the score) and a large play window opens showing the score.</li>
     <li><b>Chords sit in the lane above the top stave.</b> They drive Generate parts, and can also be worked out from the notes you already have.</li>
     <li><b>Undo is there</b> (<kbd>Ctrl</kbd>+<kbd>Z</kbd>), and <b>Copy</b> beside the Song menu makes a duplicate to experiment on.</li>
     <li><b>Want to look around first?</b> <b>Examples &#9662;</b> in the header opens a choral piece to explore &mdash; and on a first visit Harmonizer offers them straight away.</li>
@@ -172,7 +172,7 @@
     <li>Press <b>Import</b>. The status line reports what came across &mdash; including any key and tempo changes &mdash; and anything simplified.</li>
     <li>Click <b>Import report</b> in the status bar to compare what the file held (notes, lyrics, dynamics, slurs, fermatas&hellip;) with what's now in the song, and to see anything Harmonizer doesn't model (trills, tremolos and so on). If anything came up short, the report opens by itself.</li>
   </ol>
-  <div class="note tip"><p><b>The file's instruments come with it.</b> Each stave keeps the instrument name the file gave it, and plays that sound where Harmonizer has it (choir, organ, strings or flute; anything else plays piano). Voice parts that the file put on some other sound, such as flute, come in as Piano. To hear the voices sung, press <b>Choir</b> under <b>Sound</b> in the play window.</p></div>
+  <div class="note tip"><p><b>Whatever instrument the file uses, it plays as piano.</b> The file's instrument names are kept as labels on each stave (and written back out on export), but Harmonizer's own sound is always grand piano.</p></div>
 
   <figure class="shot"><img src="docs/screenshots/harmonizer-5-import.png" alt="The import dialog for Barber&rsquo;s The Coolin, listing Soprano, Alto upper and lower, Tenor, Bass upper and lower, with the lower lines marked as divisi on their upper staves." width="1440" height="960" loading="lazy"><figcaption>Opening Barber&rsquo;s <i>The Coolin</i> from a MIDI file. The second alto and bass lines come in as divisi, so the song opens on four staves:</figcaption></figure>
   <figure class="shot"><img src="docs/screenshots/harmonizer-1-coolin.png" alt="The Coolin on four staves; where the altos divide, two noteheads share one stem." width="1440" height="960" loading="lazy"><figcaption>&hellip; with the altos&rsquo; two notes on one stem only where the part divides.</figcaption></figure>
@@ -225,7 +225,7 @@
 
   <h2 id="tips">Handy extras</h2>
   <ul>
-    <li><kbd>Space</kbd> plays, pauses and resumes: pause, then press it again to carry on from the same spot &mdash; or click a note in the play window first to resume from there. <b>Stop</b> starts over. In the play window, <kbd>&larr;</kbd> <kbd>&rarr;</kbd> page, <kbd>Home</kbd> / <kbd>End</kbd> jump, <kbd>L</kbd> loops, <kbd>V</kbd> changes the sound (Per stave, Piano, Choir), <kbd>[</kbd> <kbd>]</kbd> change the speed, and <kbd>Esc</kbd> closes.</li>
+    <li><kbd>Space</kbd> plays, pauses and resumes: pause, then press it again to carry on from the same spot &mdash; or click a note in the play window first to resume from there. <b>Stop</b> starts over. In the play window, <kbd>&larr;</kbd> <kbd>&rarr;</kbd> page, <kbd>Home</kbd> / <kbd>End</kbd> jump, <kbd>L</kbd> loops, <kbd>[</kbd> <kbd>]</kbd> change the speed, and <kbd>Esc</kbd> closes.</li>
     <li><b>Many staves?</b> If some are scrolled out of view, a small badge at the top or bottom of the score names them. Click it to scroll.</li>
     <li><b>Settings</b> (the gear) switches the score between black-on-white and dark, turns barlines on or off, holds the library backup, and controls two checks: <b>Range warnings</b> (notes outside a voice's comfortable range turn orange &mdash; on by default) and <b>Mark partwriting problems</b> (dashed lines labelled 5 / 8 for parallels, c5 / c8 contrary, h5 / h8 hidden, ov overlap, x cross-relation, +2 augmented second; tick which to look for). <b>Mark generated notes</b> puts a dotted cyan line with a star over the notes Generate parts wrote, on staves that also have yours.</li>
     <li><b>Multi-select:</b> <kbd>Shift</kbd>-click for a range, <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>-click to add or remove one note.</li>
