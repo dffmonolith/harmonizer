@@ -56,7 +56,7 @@
 <main>
 <article class="guide">
 
-  <span class="eyebrow">Harmonizer &middot; v2.38</span>
+  <span class="eyebrow">Harmonizer &middot; v2.42</span>
   <h1>Harmonizer User Guide</h1>
   <p class="lede">Harmonizer is a workbench for roughing out vocal arrangements: enter a melody, put chords under it, generate a draft harmony in the style you want, listen to it on a real piano sound, and edit until it works. It also makes rehearsal tracks for your singers and moves music in and out as MusicXML and MIDI. This guide covers everything it does.</p>
   <p><a href="app/harmonizer.html" target="dff-app-harmonizer">Launch Harmonizer &rarr;</a> &nbsp;&middot;&nbsp; <a href="quickstart.html">Quickstart</a> &nbsp;&middot;&nbsp; <a href="index.html">About the project</a></p>
@@ -106,29 +106,30 @@
   <h2 id="screen">2. The screen at a glance</h2>
   <p>From top to bottom and left to right:</p>
   <ul>
-    <li><b>Header</b>, in two panels &mdash; <b>Current song</b> (the Song menu with Copy and Delete, title and composer, then key, transpose, number of staves, time signature and tempo) and <b>Commands</b>, grouped as <b>Playback</b> (Play, Stop), <b>Edit</b> (Undo, Redo), <b>App</b> (Settings, Help) and <b>Songs &amp; files</b> (New, Open, Examples, Save, Print). On a wide screen the two panels sit side by side; on a narrower one the Commands panel moves underneath.</li>
+    <li><b>Navbar</b> across the top, on a deep-purple band &mdash; <b>Harmonizer</b>, then the commands: <b>New</b>, <b>Open&hellip;</b>, <b>Examples &#9662;</b>, <b>Save &#9662;</b>, <b>Print / PDF</b>, <b>&#9881; Settings</b> and <b>? Help</b>.</li>
+    <li><b>Song line</b> just beneath it, styled like the tool strips below it (with a rose edge) but always open &mdash; the Song menu with Copy and Delete, then composer, key, transpose, number of staves, time signature and tempo. On a narrow window it wraps onto a second line.</li>
     <li><b>Three collapsible tool sections</b>, closed by default so the staves get the room: <b>Note entry</b> (durations and note buttons, and the <b>Marks</b> row for expressive marks and repeats), <b>Chords</b> (the chord palette, Suggest chords, Chords from voices, Clear chords, Play chords) and <b>Staves</b> (<b>Generate parts</b>, <b>Refine parts</b>, the style menu and the Added notes menu, then one line of controls per stave, including Combine and Split divisi). Click a strip to open or close it (hovering over one says which); the strip itself shows a short summary (the current duration, how many chords, how many staves).</li>
-    <li><b>The song's title and composer</b>, just above the score (the play window shows them too), so you always know which song you're in.</li>
+    <li><b>The score bar</b>, just above the score &mdash; <b>&#9658; Play</b>, <b>Undo</b> and <b>Redo</b>, then the song's <b>title</b> (click it to edit) and composer (the play window shows them too), so you always know which song you're in.</li>
     <li><b>The score</b> &mdash; a row of measure numbers (the <b>measure ruler</b>: click a number to select that measure on every stave; see <a href="#sections">Melody sections</a>), the chord lane, then one stave per vocal part.</li>
-    <li><b>Icon rail</b> (far right) &mdash; <b>Selected</b> (the note and chord inspectors, and the list of key, tempo, time, rehearsal and repeat marks), <b>Lyrics</b>, <b>Text</b> (melody text), <b>Chords</b> (chord text) and <b>About</b>. Click an icon to slide its panel out over the score; click it again, or the &times;, to put it away.</li>
+    <li><b>Icon rail</b> (far right, in the same purple as the navbar) &mdash; <b>Selected</b> (the note and chord inspectors, and the list of key, tempo, time, rehearsal and repeat marks), <b>Lyrics</b>, <b>Text</b> (melody text), <b>Chords</b> (chord text) and <b>About</b>. Click an icon to slide its panel out over the score; click it again, or the &times;, to put it away.</li>
     <li><b>Status bar</b> (bottom) &mdash; the most recent message, an &ldquo;Autosaved&rdquo; indicator (or an amber warning if saving failed; see <a href="#save">Saving</a>), and a note count.</li>
   </ul>
 
   <figure class="shot"><img src="docs/screenshots/harmonizer-2-generate.png" alt="Harmonizer with Old Hundredth open: the header, the Staves section open with Generate parts, and four staves with a chord lane above and lyrics under the melody." width="1440" height="960" loading="lazy"><figcaption>The screen with the Staves section open: Generate parts and its style menu, one line of controls per stave, and the score below with the chord lane on top.</figcaption></figure>
 
   <h2 id="header">3. The header controls</h2>
-  <p>The <b>Current song</b> panel holds everything that describes the song you are in; the <b>Commands</b> panel holds the buttons, in captioned groups. The table follows the same order.</p>
+  <p>The navbar holds the file and app commands; the line under it holds the song's settings; Play, Undo, Redo and the song's title sit on the bar just above the score. The table covers all three.</p>
   <div class="tbl-wrap"><table>
     <tr><th>Control</th><th>What it does</th></tr>
     <tr><td>Song</td><td>Switches between the songs stored in this browser. <b>Copy</b> duplicates the current song; the trash button deletes it (after a confirmation). See <a href="#save">Saving, songs, backup and export</a>.</td></tr>
-    <tr><td>Title, Composer / arranger</td><td>Metadata, written into MusicXML and MIDI exports and used to name exported files.</td></tr>
+    <tr><td>Title (above the score), Composer</td><td>Metadata, written into MusicXML and MIDI exports and used to name exported files.</td></tr>
     <tr><td>Key</td><td>The <i>opening</i> key signature (major and minor keys, up to seven sharps or flats). A note with no explicit accidental takes the key signature's default. Changing this menu relabels the key without moving notes; to move the music, use Transpose to. For a key change part-way through, see <a href="#changes">Key, tempo and time changes</a>.</td></tr>
-    <tr><td>Transpose to</td><td>Moves the whole song to another key of the same mode. See <a href="#save">Transposing</a>.</td></tr>
+    <tr><td>Transpose</td><td>Moves the whole song to another key of the same mode. See <a href="#save">Transposing</a>.</td></tr>
     <tr><td>Staves</td><td>How many staves to show, 1&ndash;8. 4 = SATB, 3 = SAB; 5&ndash;8 add Baritone and second Soprano, Alto and Tenor parts.</td></tr>
     <tr><td>Time</td><td>The opening time signature. Numerator 1&ndash;32, denominator 2, 4, 8 or 16. Barlines follow from it.</td></tr>
     <tr><td>Tempo</td><td>The opening tempo, in beats per minute (20&ndash;300).</td></tr>
-    <tr><td>Play / Stop</td><td>Start and stop playback. <kbd>Space</kbd> does the same.</td></tr>
-    <tr><td>Undo / Redo</td><td>Step back and forward through your edits. See <a href="#undo">Undo and redo</a>.</td></tr>
+    <tr><td>&#9658; Play</td><td>On the bar above the score. Opens the play window and starts playing; <kbd>Space</kbd> does the same. Pause, Stop, Loop and the rest are in the play window (see <a href="#play">Playback</a>).</td></tr>
+    <tr><td>Undo / Redo</td><td>On the bar above the score. Step back and forward through your edits. See <a href="#undo">Undo and redo</a>.</td></tr>
     <tr><td>&#9881; (Settings)</td><td>Black on white, Barlines, Measure numbers, Show locked notes, Mark generated notes, Range warnings, Mark partwriting problems, Refine after Generate parts, and the song library backup. See <a href="#score">Settings</a>.</td></tr>
     <tr><td>? Help</td><td>Opens the built-in quick-start, which links to the Quickstart and this guide.</td></tr>
     <tr><td>New</td><td>Starts a fresh song without losing the current one.</td></tr>
@@ -192,7 +193,7 @@
   <p>A sharp, flat or natural is drawn next to a note whenever it differs from what the key signature in force at that note implies &mdash; on every such note, even if an earlier note in the same measure already had it. So in D major an F&sharp; shows nothing, while an F natural shows a &natural; sign.</p>
 
   <h2 id="undo">6. Undo and redo</h2>
-  <p><b>Undo</b> / <b>Redo</b> in the header, or <kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> also works; <kbd>Cmd</kbd> on a Mac). Undo covers note and chord edits, Generate parts, Suggest chords, Transpose, key/tempo/time changes, and text edits such as the title or a lyric &mdash; each typing session undoes as one step, not one per keystroke. Up to 100 steps are kept. Switching to another song, or starting a New one, starts that song's undo history fresh.</p>
+  <p><b>Undo</b> / <b>Redo</b> on the bar above the score, or <kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> also works; <kbd>Cmd</kbd> on a Mac). Undo covers note and chord edits, Generate parts, Suggest chords, Transpose, key/tempo/time changes, and text edits such as the title or a lyric &mdash; each typing session undoes as one step, not one per keystroke. Up to 100 steps are kept. Switching to another song, or starting a New one, starts that song's undo history fresh.</p>
 
   <h2 id="text">7. Typing melodies as text</h2>
   <p>The <b>Melody text</b> box in the <b>Text</b> panel is a compact shorthand that is often faster than clicking. Type or paste, then press <b>Apply text &rarr; melody</b>. <b>Regenerate text from melody</b> writes the current melody back out as text, handy for copying or for bulk edits.</p>
@@ -526,7 +527,7 @@
   <h3>Copying a song</h3>
   <p>Press <b>Copy</b> beside the Song menu to duplicate the current song as &ldquo;&hellip; (copy)&rdquo; and switch to it. Try a different key, chords, style or arrangement there; the original stays untouched.</p>
   <h3>Transposing a song</h3>
-  <p><b>Transpose to</b>, beside Key, lists only keys of the same mode: other majors for a major song, other minors for a minor one. Each entry shows the shortest move, for example &uarr;5 or &darr;2 semitones. Choosing one moves every note on every stave, every chord and every key change, and changes the key. Spellings follow the new key (a raised leading tone stays a sharp). To undo, press Undo or transpose back. Changing the plain <b>Key</b> menu, by contrast, only relabels the key.</p>
+  <p><b>Transpose</b>, beside Key, lists only keys of the same mode: other majors for a major song, other minors for a minor one. Each entry shows the shortest move, for example &uarr;5 or &darr;2 semitones. Choosing one moves every note on every stave, every chord and every key change, and changes the key. Spellings follow the new key (a raised leading tone stays a sharp). To undo, press Undo or transpose back. Changing the plain <b>Key</b> menu, by contrast, only relabels the key.</p>
   <h3 id="backup">Backing up every song</h3>
   <p><b>Settings &rarr; Song library backup</b> shows how many songs are stored in this browser and roughly how much of its storage they use. <b>Export library</b> downloads every song as one file, <code>harmonizer-library-YYYY-MM-DD.json</code>. <b>Import library&hellip;</b> (or opening that file with <b>Open&hellip;</b>) adds its songs back &mdash; it never overwrites: songs you already have are skipped, and a song that has changed since the backup comes in as a separate copy. This is also how to move all your songs to another computer or browser.</p>
   <h3>Files</h3>
@@ -601,6 +602,24 @@
   </table></div>
 
   <h2 id="new">24. What's new</h2>
+  <h3>2.42</h3>
+  <ul>
+    <li>The header bands are easier to tell apart: the navbar sits on a deep-purple band with lilac commands and a violet rule beneath it; the song line is styled like the Note entry, Chords and Staves strips, with its own rose edge; and the icon rail on the right shares the navbar's purple, with a violet rule along its edge.</li>
+    <li>The Song, Note entry, Chords and Staves strips start a shade brighter.</li>
+  </ul>
+  <h3>2.41</h3>
+  <ul>
+    <li>Tighter song line: a shorter Composer field, the Transpose to menu relabelled <b>Transpose</b>, and a narrower Tempo box.</li>
+  </ul>
+  <h3>2.40</h3>
+  <ul>
+    <li>The song title is no longer repeated in the navbar. The title above the score is now the one you edit (click it), on a lighter plate so it stands out, with the composer beside it in cyan.</li>
+  </ul>
+  <h3>2.39</h3>
+  <ul>
+    <li><b>Tidier header:</b> one navbar across the top &mdash; Harmonizer, then New, Open, Examples, Save, Print, Settings and Help &mdash; with the rest of the song's settings (song, composer, key, transpose, staves, time, tempo) on a single line beneath it.</li>
+    <li><b>Play, Undo and Redo</b> moved to a bar just above the score, beside the title. The header's Stop button is gone: Play opens the play window, which has its own Stop.</li>
+  </ul>
   <h3>2.38</h3>
   <ul>
     <li><b>More partwriting checks:</b> Settings &rsaquo; <b>Mark partwriting problems</b> (was Mark parallel fifths &amp; octaves) now also marks fifths and octaves by contrary motion, hidden fifths and octaves in the outer voices, voice overlaps, cross-relations and augmented seconds, each with its own label, and you tick which to look for. See <a href="#score">Settings</a>.</li>
@@ -627,14 +646,14 @@
     <li><b>The measure ruler:</b> a row of measure numbers above the chord lane. Click, Shift-click or drag along it to select whole measures on every stave.</li>
     <li><b>Rewrite:</b> write chosen staves again in the selected measures only, keeping everything else &mdash; for example keep the soprano and bass and rewrite the inner parts. <b>Lock</b> / <b>Unlock</b> act on the same measures and staves. See <a href="#rewrite">Rewriting some measures</a>.</li>
     <li>&ldquo;Generated&rdquo; is now marked on each note rather than on the whole stave, so a stave can hold the tune in one passage and generated harmony in another. Generated notes in the melody stave (where the tune is elsewhere) lock when you edit them, like any generated note.</li>
-    <li>The <a href="docs/harmonizer-partwriting-guide-2.35.pdf">Partwriting Guide</a> has a new section on melody sections, chords-only passages and rewriting.</li>
+    <li>The <a href="docs/harmonizer-partwriting-guide.pdf">Partwriting Guide</a> has a new section on melody sections, chords-only passages and rewriting.</li>
   </ul>
   <h3>2.34</h3>
   <ul>
     <li><b>Repeated music keeps its parts:</b> a passage that comes back &mdash; exactly, with small differences, or as a sequence a step (or any interval) higher &mdash; gets the parts it had the first time, added notes included, instead of being voiced afresh. A <b>Repeated music</b> menu beside the style menu chooses keep alike (the default), vary lightly, or write fresh. See <a href="#generate">Repeated music</a>.</li>
     <li>The Refine report lists each repeat found, by measures; untick one to let it go its own way, or link two passages yourself, then <b>Apply</b>.</li>
     <li><b>Refine parts</b> follows repeats too: edit a note the first time through, Refine parts, and the repeat takes the change.</li>
-    <li>The <a href="docs/harmonizer-partwriting-guide-2.34.pdf">Partwriting Guide</a> has a new section on repeated music.</li>
+    <li>The <a href="docs/harmonizer-partwriting-guide.pdf">Partwriting Guide</a> has a new section on repeated music.</li>
   </ul>
   <h3>2.33</h3>
   <ul>
@@ -643,7 +662,7 @@
     <li><b>Refine parts</b> reads parts with added notes, chooses the added notes again, keeps a locked note's whole beat as it is, and keeps the words on a part.</li>
     <li>The Refine report counts each voice's added notes.</li>
     <li><b>Fixed:</b> reloading the page (or Open, or Copy) dropped every lock and the tag marking a stave as generated, so Generate parts afterwards refused to rewrite its own staves.</li>
-    <li>The <a href="docs/harmonizer-partwriting-guide-2.33.pdf">Partwriting Guide</a> is updated for 2.32 and 2.33.</li>
+    <li>The <a href="docs/harmonizer-partwriting-guide.pdf">Partwriting Guide</a> is updated for 2.32 and 2.33.</li>
   </ul>
   <h3>2.32</h3>
   <ul>
@@ -784,7 +803,6 @@
 
 </article>
 </main>
-
 
 <!-- Pager: floating buttons for moving up and down the page by section (top, previous, next, end). -->
 <nav class="doc-pager" id="docPager" data-headings=".guide h2" aria-label="Move through this page">

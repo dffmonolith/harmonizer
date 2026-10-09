@@ -566,9 +566,10 @@ function serveDir(dir){
   await page.waitForTimeout(100);
   const saveItems = await page.$$eval('#saveMenu button', els => els.map(e => e.id).join(','));
   check('Save is one menu with .json, .musicxml, .mid, .wav and Rehearsal tracks', saveItems === 'saveJsonBtn,saveMusicXmlBtn,saveMidiBtn,saveWavBtn,rehearsalBtn' && !(await page.$eval('#saveMenu', el => el.hidden)));
-  // v2.21: header is two panels -- the song's own settings, and the command groups
-  check('the header has a Current song panel holding the song settings', await page.$$eval('.song-panel', els => els.length === 1 && ['songSelect','titleInput','composerInput','keySelect','transposeSelect','staveCountSelect','timeSigNum','tempoInput'].every(id => els[0].querySelector('#' + id))));
-  check('the Commands panel groups Playback, Edit, App and Songs & files', await page.$$eval('.cmd-panel .cmd-grp .cmd-cap', els => els.map(e => e.textContent.trim().toLowerCase()).join('|')) === 'playback|edit|app|songs & files');
+  // v2.39: one navbar (title + file/app commands), one song-settings line, Play/Undo/Redo above the score
+  check('the navbar holds the New / Open / Save / Print / Settings / Help commands (and not the song title)', await page.$$eval('.app-nav', els => els.length === 1 && !els[0].querySelector('#titleInput') && ['newSongBtn','loadJsonBtn','saveMenuBtn','printBtn','settingsBtn','helpBtn'].every(id => els[0].querySelector('#' + id))));
+  check('the song settings sit on one line below the navbar', await page.$$eval('.song-line', els => els.length === 1 && ['songSelect','composerInput','keySelect','transposeSelect','staveCountSelect','timeSigNum','tempoInput'].every(id => els[0].querySelector('#' + id))) && await page.$eval('.song-line', el => el.getBoundingClientRect().height < 50));
+  check('Play, Undo and Redo sit on the bar just above the score, and there is no Stop button', await page.evaluate(() => { const bar = document.getElementById('scoreBar'); return !!bar && ['playBtn','undoBtn','redoBtn','titleInput'].every(id => bar.contains(document.getElementById(id))) && !document.getElementById('stopBtn') && bar.compareDocumentPosition(document.getElementById('staffScroll')) & Node.DOCUMENT_POSITION_FOLLOWING && document.getElementById('toolAccordion').compareDocumentPosition(bar) & Node.DOCUMENT_POSITION_FOLLOWING; }));
   check('no Rehearsal tracks button left loose in the header', await page.$$eval('.app-header button', els => !els.some(b => /Rehearsal/.test(b.textContent) && !b.closest('.menu'))));
   await page.keyboard.press('Escape');
   await page.waitForTimeout(100);
@@ -586,7 +587,7 @@ function serveDir(dir){
     await closeReport();
     check('choosing an example opens it as a new song', /Imported/.test(await page.$eval('#statusText', el => el.textContent)) && (await page.$$eval('#staffSvg .note-group', els => els.length)) > 20);
     // v2.16: the example's menu title ("Composer — Title") names the song above the score
-    const stTitle = await page.$eval('#scoreTitleText', el => el.textContent), stComp = await page.$eval('#scoreComposerText', el => el.textContent);
+    const stTitle = await page.$eval('#titleInput', el => el.value), stComp = await page.$eval('#scoreComposerText', el => el.textContent);
     check('the song title and composer show above the score', stTitle.length > 0 && stComp.length > 0 && !/\.mid/i.test(stTitle));
     await page.click('#playBtn');
     await page.waitForTimeout(400);
@@ -834,7 +835,7 @@ function serveDir(dir){
     await page.click('#importReportOkBtn');
     await page.waitForTimeout(150);
     check('the Import report button stays in the status bar, flagged', await page.$eval('#importReportBtn', el => !el.hidden && el.classList.contains('fid-warn')));
-    check('"Untitled score" falls back to the file name', (await page.$eval('#scoreTitleText', el => el.textContent)) === 'fidelity-test');
+    check('"Untitled score" falls back to the file name', (await page.$eval('#titleInput', el => el.value)) === 'fidelity-test');
     check('a section word becomes a named rehearsal mark', (await page.$$eval('#staffSvg .rehearsal-text', els => els.map(e => e.textContent))).join('|') === 'Verse 1');
     check('a clarinet-in-B-flat part comes in at concert pitch (written D5 E5 sounds C5 D5)', /C5q\S*\s+D5h/.test(await page.$eval('#melodyText', el => el.value)));
     await page.click('#importReportBtn');

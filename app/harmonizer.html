@@ -429,12 +429,18 @@
   .acc-strip:hover .acc-title{ color:#ffffff; }
   .acc-item.open .acc-strip{ box-shadow:inset 4px 0 0 var(--acc), inset 0 -1px 0 color-mix(in srgb, var(--acc) 45%, transparent); }
   /* v2.16: song title + composer above the score (editing pane) and in the play window */
-  .score-title{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; padding:10px 18px 0 18px; min-height:0; }
-  .score-title .st-title{ font-size:16px; font-weight:700; color:var(--text); }
-  .score-title .st-title.untitled{ color:var(--text-dim); font-weight:500; font-style:italic; }
-  .score-title .st-composer{ font-size:13px; color:var(--text-dim); }
+  .score-title{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; min-width:0; }
+  /* v2.40: the song title is the one editable heading above the score -- a lighter "plate" so it stands out */
+  .score-title .st-title{ font-size:18px; font-weight:700; color:#fff; letter-spacing:0.01em;
+    background:linear-gradient(180deg, color-mix(in srgb, var(--violet) 30%, var(--bg-panel-2)), color-mix(in srgb, var(--violet) 18%, var(--bg-panel-2)));
+    border:1px solid color-mix(in srgb, var(--violet) 55%, var(--line)); border-radius:8px; padding:4px 12px;
+    box-shadow:0 1px 0 rgba(255,255,255,.08) inset; max-width:100%; cursor:text; field-sizing:content; min-width:12ch; }
+  .score-title .st-title::placeholder{ color:color-mix(in srgb, #fff 55%, var(--violet)); font-style:italic; font-weight:500; }
+  .score-title .st-title:hover{ border-color:var(--violet); }
+  .score-title .st-title:focus{ outline:2px solid var(--violet); outline-offset:1px; }
+  .score-title .st-composer{ font-size:14px; font-weight:600; color:var(--cyan); }
   .play-bar .play-composer{ font-size:12px; color:var(--text-dim); font-weight:400; margin-left:8px; }
-  @media print { .score-title{ display:none; } }
+  @media print { .score-title, .score-bar{ display:none; } }
   .acc-dot{ width:8px; height:8px; border-radius:2px; flex:0 0 auto; }
   .acc-dot.notes{ background:var(--violet-dim); }
   .acc-dot.chords{ background:var(--amber); }
@@ -517,65 +523,35 @@
     #printScore .print-sys{ display:block; height:auto; break-inside:avoid; page-break-inside:avoid; margin:0 0 5mm 0; }
   }
 
-  /* ===== v2.21: header as two panels -- "Current song" (identity + opening musical settings)
-     and "Commands" (captioned button groups). Side by side when there's room, stacked when not. */
-  .app-header{ align-items:stretch; gap:12px; padding:8px 12px; }
-  .brand-block{ display:flex; flex-direction:column; justify-content:center; gap:2px; padding:0 4px; }
-  .brand-block .version-tag{ align-self:flex-start; margin:0; }
-  .hdr-panel{ position:relative; border-radius:10px; padding:16px 12px 8px 12px; min-width:0; }
-  .hdr-cap, .cmd-cap{ font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; white-space:nowrap; }
-  .hdr-cap{ position:absolute; top:-1px; left:10px; padding:2px 9px 3px 7px; border-radius:0 0 7px 7px; display:flex; align-items:center; gap:5px; }
-  .hdr-cap-dot{ width:6px; height:6px; border-radius:50%; background:currentColor; }
-  .hdr-row{ display:flex; flex-wrap:wrap; align-items:flex-end; gap:8px 12px; }
-  .hdr-row + .hdr-row{ margin-top:6px; padding-top:6px; border-top:1px dashed color-mix(in srgb, var(--text-dim) 30%, transparent); }
-  .hdr-row .field.grow{ flex:1 1 170px; }
-  .hdr-row .field.grow input{ width:100%; }
-  .hdr-row .title-input{ min-width:0; }
-  .hdr-row .row{ margin:0; }
+  /* ===== v2.39: one navbar (brand, song title, file + app commands), one line of song settings,
+     and Play / Undo / Redo on a bar just above the score. */
+  .app-header{ display:block; padding:0; gap:0; }
+  .app-nav{ display:flex; align-items:center; flex-wrap:wrap; gap:6px 14px; padding:7px 12px; }
+  .brand-block{ display:flex; align-items:baseline; gap:6px; }
+  .brand-block .version-tag{ margin:0; align-self:baseline; }
+  .nav-cmds{ display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-left:auto; }
+  .nav-grp{ display:flex; align-items:center; gap:2px; }
+  .nav-grp + .nav-grp{ border-left:1px solid var(--line); padding-left:6px; }
+  .app-nav .nav-cmds button{ background:transparent; border-color:transparent; padding:5px 9px; white-space:nowrap; color:var(--text); }
+  .app-nav .nav-cmds button:hover, .app-nav .nav-cmds button[aria-expanded="true"]{ background:var(--bg-panel-2); border-color:var(--line); }
+  .app-nav .nav-cmds .menu > button{ border:0; padding:7px 10px; }
+  .app-nav .nav-cmds .menu > button:hover, .app-nav .nav-cmds .menu > button:focus-visible{ background:var(--bg-panel-2); }
 
-  /* the song: a recessed "document" card with a soft paper-ish tint and a violet edge */
-  .song-panel{
-    flex:1 1 560px;
-    background:color-mix(in srgb, var(--violet) 7%, var(--bg));
-    border:1px solid color-mix(in srgb, var(--violet) 45%, var(--line));
-    box-shadow:inset 0 1px 6px rgba(0,0,0,.35);
-  }
-  .song-panel .hdr-cap{ background:color-mix(in srgb, var(--violet) 55%, var(--bg)); color:#f3eeff; }
-  .song-panel input, .song-panel select{ background:var(--bg-panel); }
-  .song-panel button.song-act{ padding:5px 8px; }
+  .song-line{ display:flex; align-items:center; flex-wrap:wrap; gap:6px 13px; padding:6px 14px 7px 14px;
+    border-top:1px solid var(--line); background:color-mix(in srgb, var(--violet) 6%, var(--bg)); }
+  .sl-f{ display:flex; align-items:center; gap:4px; }
+  .sl-f > label{ font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-dim); }
+  .sl-f select, .sl-f input{ background:var(--bg-panel); padding:3px 5px; }
+  .sl-f input[type="number"]{ padding-right:2px; }
+  .sl-grow{ flex:0 1 165px; min-width:110px; }
+  .sl-grow input{ flex:1 1 auto; width:100%; min-width:80px; }
+  .sl-unit{ color:var(--text-dim); font-size:12px; }
+  .song-line button.song-act{ padding:3px 7px; }
 
-  /* the commands: a raised tray of captioned groups, buttons made chunkier so they read as buttons */
-  .cmd-panel{
-    flex:0 1 auto;
-    display:grid; grid-template-columns:repeat(3, auto); gap:8px; align-content:start;
-    padding:8px;
-    background:var(--bg-panel);
-    border:1px solid var(--line);
-  }
-  .cmd-grp{ border-radius:8px; padding:4px 7px 7px 7px; border:1px solid transparent; }
-  .cmd-grp .cmd-cap{ margin:0 0 4px 2px; }
-  .cmd-btns{ display:flex; flex-wrap:wrap; gap:5px; align-items:center; }
-  .cmd-file{ grid-column:1 / -1; }
-  .cmd-play{ background:color-mix(in srgb, var(--violet) 12%, transparent); border-color:color-mix(in srgb, var(--violet) 35%, transparent); }
-  .cmd-play .cmd-cap{ color:#c3adff; }
-  .cmd-edit{ background:color-mix(in srgb, var(--amber) 9%, transparent); border-color:color-mix(in srgb, var(--amber) 30%, transparent); }
-  .cmd-edit .cmd-cap{ color:var(--amber); }
-  .cmd-app{ background:color-mix(in srgb, var(--text-dim) 8%, transparent); border-color:color-mix(in srgb, var(--text-dim) 25%, transparent); }
-  .cmd-app .cmd-cap{ color:var(--text-dim); }
-  .cmd-file{ background:color-mix(in srgb, var(--cyan) 9%, transparent); border-color:color-mix(in srgb, var(--cyan) 30%, transparent); }
-  .cmd-file .cmd-cap{ color:var(--cyan); }
-  .cmd-panel button{
-    padding:6px 12px; font-weight:600; white-space:nowrap;
-    background:linear-gradient(180deg, #3a3446, #2a2533);
-    border:1px solid #4d4659; border-bottom-color:#1b1822;
-    box-shadow:0 1px 0 rgba(255,255,255,.07) inset, 0 2px 3px rgba(0,0,0,.35);
-  }
-  .cmd-panel button:hover{ border-color:var(--violet); background:linear-gradient(180deg, #463e55, #312a3c); }
-  .cmd-panel button:disabled{ box-shadow:none; }
-  .cmd-panel button.primary{ background:linear-gradient(180deg, var(--violet), var(--violet-dim)); border-color:var(--violet-dim); color:#fff; }
-  .cmd-panel button.accent{ background:linear-gradient(180deg, #37b3b8, #1d6467); border-color:var(--cyan-dim); color:#f2ffff; }
-  .cmd-panel .menu > button{ background:none; border:0; box-shadow:none; padding:7px 10px; }
-  .cmd-panel .menu > button:hover, .cmd-panel .menu > button:focus-visible{ background:var(--bg-panel-2); }
+  .score-bar{ display:flex; align-items:center; flex-wrap:wrap; gap:8px 16px; padding:10px 18px 0 18px; }
+  .sb-cmds{ display:flex; align-items:center; gap:5px; }
+  .sb-cmds button{ padding:5px 12px; font-weight:600; }
+  .sb-sep{ width:1px; height:20px; background:var(--line); margin:0 4px; }
   .btn-ico{ width:14px; height:14px; vertical-align:-2px; margin-right:2px; }
   .parts-gen-row .grp{ border-right:none !important; padding:0 !important; }
   /* v2.23: the Marks row */
@@ -600,18 +576,6 @@
   .play-section{ display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--text-dim); }
   .play-section select{ max-width:170px; }
   .menu-sep{ height:1px; background:var(--line); margin:4px 6px; }
-  @media (max-width: 1180px){
-    .cmd-panel{ flex:1 1 100%; grid-template-columns:repeat(4, auto); justify-content:start; }
-    .cmd-file{ grid-column:auto; }
-  }
-  @media (max-width: 980px){
-    .cmd-panel{ grid-template-columns:repeat(3, auto); }
-    .cmd-file{ grid-column:1 / -1; }
-  }
-  @media (max-width: 560px){
-    .cmd-panel{ grid-template-columns:1fr 1fr; }
-  }
-
   /* ===== v2.21: Staves section -- one stave per line, columns aligned like a table */
   .palette-bar.parts-bar{ display:block; max-height:70vh; overflow:auto; padding:8px 12px 10px 9px; }
   .parts-gen-row{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 12px; padding:0 4px 8px 4px; margin-bottom:6px; border-bottom:1px solid color-mix(in srgb, var(--cyan) 30%, var(--line)); }
@@ -629,107 +593,51 @@
   .parts-table .pc-div{ padding-right:8px; border-radius:0 4px 4px 0; }
   .parts-table .gen-tag{ font-size:9px; font-weight:600; letter-spacing:0.04em; color:var(--cyan); border:1px solid var(--cyan-dim); border-radius:8px; padding:0 5px; text-transform:lowercase; }
   .parts-table label{ display:flex; align-items:center; gap:3px; font-size:11.5px; white-space:nowrap; }
+
+  /* ===== v2.42: tell the three header bands apart.
+     Navbar: deep-purple band, lilac commands, a violet rule beneath it.
+     Song line: dressed like the Note entry / Chords / Staves strips (its own rose accent bar and tint),
+     it just never collapses. Right rail: same deep purple as the navbar, violet rule on its left edge,
+     lilac labels -- so the "frame" (navbar + rail) reads as one thing and the work area as another. */
+  :root{ --nav-bg:#251a3d; --nav-bg-2:#2e2049; --lilac:#c9b6ff; --song-acc:#f07fb4; }
+  .app-header{ border-bottom:none; }
+  .app-nav{ background:linear-gradient(180deg, var(--nav-bg-2), var(--nav-bg));
+    border-bottom:2px solid color-mix(in srgb, var(--violet) 70%, var(--nav-bg)); }
+  .app-nav .nav-cmds button, .app-nav .nav-cmds button.accent{ color:var(--lilac); }
+  .app-nav .nav-cmds .menu > button{ color:var(--text); }
+  .app-nav .nav-cmds button:hover, .app-nav .nav-cmds button[aria-expanded="true"]{
+    color:#fff; background:color-mix(in srgb, var(--violet) 22%, var(--nav-bg)); border-color:color-mix(in srgb, var(--violet) 45%, var(--nav-bg)); }
+  .nav-grp + .nav-grp{ border-left-color:color-mix(in srgb, var(--violet) 40%, var(--nav-bg)); }
+  .song-line{ --acc:var(--song-acc); border-top:none;
+    background:linear-gradient(90deg, color-mix(in srgb, var(--acc) 30%, var(--bg-panel)), color-mix(in srgb, var(--acc) 7%, var(--bg-panel)) 60%);
+    box-shadow:inset 4px 0 0 var(--acc);
+    border-bottom:1px solid color-mix(in srgb, var(--acc) 35%, var(--bg)); }
+  .song-line .sl-f > label[for="songSelect"]{ font-size:11px; font-weight:600; letter-spacing:.06em; color:color-mix(in srgb, var(--acc) 55%, #ffffff); }
+  .side-col{ background:linear-gradient(180deg, var(--nav-bg-2), var(--nav-bg));
+    border-left:2px solid color-mix(in srgb, var(--violet) 70%, var(--nav-bg)); }
+  .side-rail button{ color:var(--lilac); }
+  .side-rail button:hover{ background:color-mix(in srgb, var(--violet) 22%, var(--nav-bg)); color:#fff; }
+  .side-rail button.active{ background:color-mix(in srgb, var(--violet) 30%, var(--nav-bg)); color:#fff; box-shadow:inset 3px 0 0 var(--cyan); }
+  .side-slideout{ right:44px; }
+  @media (max-width: 900px){ .side-col{ border-left:none; border-top:2px solid color-mix(in srgb, var(--violet) 70%, var(--nav-bg)); } }
+  /* v2.42: the four strips start a shade brighter at the left */
+  .acc-strip{ background:linear-gradient(90deg, color-mix(in srgb, var(--acc) 32%, var(--bg-panel)), color-mix(in srgb, var(--acc) 8%, var(--bg-panel)) 60%); }
+  .acc-strip:hover{ background:linear-gradient(90deg, color-mix(in srgb, var(--acc) 44%, var(--bg-panel)), color-mix(in srgb, var(--acc) 14%, var(--bg-panel)) 60%); }
 </style>
 </head>
 <body>
 
   <header class="app-header">
-    <div class="brand-block">
-      <div class="brand">Harmonizer</div>
-      <span id="versionTag" class="version-tag"></span>
-    </div>
-
-    <!-- v2.21: the header is two panels. "Current song" holds everything that describes THIS song
-         (which one it is, its title/composer, and its opening key/time/tempo/staves); "Commands"
-         holds the buttons, in captioned groups. Wide screens show them side by side; narrower ones
-         stack them. -->
-    <section class="hdr-panel song-panel" aria-label="Current song">
-      <div class="hdr-cap"><span class="hdr-cap-dot"></span>Current song</div>
-      <div class="hdr-row">
-        <div class="field">
-          <label for="songSelect">Song</label>
-          <div class="row tight">
-            <select id="songSelect" style="max-width:190px;" title="Switch between your saved songs"></select>
-            <button id="copySongBtn" class="ghost song-act" title="Make a copy of this song to try variations, leaving the original untouched">&#10064; Copy</button>
-            <button id="deleteSongBtn" class="ghost song-act" title="Delete this song from your saved list">&#128465;</button>
-          </div>
-        </div>
-        <div class="field grow">
-          <label for="titleInput">Title</label>
-          <input type="text" id="titleInput" class="title-input" placeholder="Untitled Song">
-        </div>
-        <div class="field grow">
-          <label for="composerInput">Composer / arranger</label>
-          <input type="text" id="composerInput" placeholder="">
-        </div>
+    <!-- v2.39: one navbar -- app name, the song's title, then the file / app commands. Playback
+         and Undo/Redo moved down to the bar just above the score; the rest of the song's own
+         settings sit on the single line below. -->
+    <nav class="app-nav" aria-label="Commands">
+      <div class="brand-block">
+        <div class="brand">Harmonizer</div>
+        <span id="versionTag" class="version-tag"></span>
       </div>
-      <div class="hdr-row">
-        <div class="field">
-          <label for="keySelect">Key</label>
-          <select id="keySelect"></select>
-        </div>
-        <div class="field">
-          <label for="transposeSelect">Transpose to</label>
-          <select id="transposeSelect" title="Move the whole song (every stave and chord) to another key of the same mode"></select>
-        </div>
-        <div class="field">
-          <label for="staveCountSelect">Staves</label>
-          <select id="staveCountSelect" title="How many vocal parts to show as separate staves">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3 (SAB)</option>
-            <option value="4">4 (SATB)</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Time</label>
-          <div class="row tight">
-            <input type="number" id="timeSigNum" min="1" max="32" value="4" style="width:48px;">
-            <span>/</span>
-            <select id="timeSigDen">
-              <option value="2">2</option>
-              <option value="4" selected>4</option>
-              <option value="8">8</option>
-              <option value="16">16</option>
-            </select>
-          </div>
-        </div>
-        <div class="field">
-          <label for="tempoInput">Tempo</label>
-          <div class="row tight"><input type="number" id="tempoInput" min="20" max="300" value="96" style="width:60px;"> <span style="color:var(--text-dim);">BPM</span></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="hdr-panel cmd-panel" aria-label="Commands">
-      <div class="cmd-grp cmd-play">
-        <div class="cmd-cap">Playback</div>
-        <div class="cmd-btns">
-          <button id="playBtn" class="primary" title="Play (Space)">&#9658; Play</button>
-          <button id="stopBtn" title="Stop">&#9632; Stop</button>
-        </div>
-      </div>
-      <div class="cmd-grp cmd-edit">
-        <div class="cmd-cap">Edit</div>
-        <div class="cmd-btns">
-          <button id="undoBtn" title="Undo (Ctrl+Z)" disabled>&#8630; Undo</button>
-          <button id="redoBtn" title="Redo (Ctrl+Y / Ctrl+Shift+Z)" disabled>&#8631; Redo</button>
-        </div>
-      </div>
-      <div class="cmd-grp cmd-app">
-        <div class="cmd-cap">App</div>
-        <div class="cmd-btns">
-          <button id="settingsBtn" title="Settings">&#9881; Settings</button>
-          <button id="helpBtn" title="Quick-start guide">? Help</button>
-        </div>
-      </div>
-      <div class="cmd-grp cmd-file">
-        <div class="cmd-cap">Songs &amp; files</div>
-        <div class="cmd-btns">
+      <div class="nav-cmds">
+        <div class="nav-grp nav-file" aria-label="Songs &amp; files">
           <button id="newSongBtn" title="Start a fresh song (the current one stays in the Song list)"><svg class="btn-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg> New</button>
           <button id="loadJsonBtn" title="Open a saved .json song, or import a MusicXML (.musicxml, .xml, .mxl) or MIDI (.mid) file as a new song"><svg class="btn-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 4.5v8h12l1.5-6H4l-1.5 6M1.5 4.5V3h4l1.5 1.5h6v2" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" fill="none"/></svg> Open&#8230;</button>
           <input type="file" id="loadJsonInput" accept=".json,.musicxml,.xml,.mxl,.mid,.midi,.kar,audio/midi,audio/x-midi,application/json,application/xml,text/xml,application/vnd.recordare.musicxml,application/vnd.recordare.musicxml+xml" style="display:none;">
@@ -750,6 +658,59 @@
           </div>
           <button id="printBtn" title="Print the score, or save it as a PDF from your browser's print dialog"><svg class="btn-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6V2h8v4M4 11.5H2.5v-5.5h11v5.5H12M4 9.5h8V14H4z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" fill="none"/></svg> Print / PDF</button>
         </div>
+        <div class="nav-grp nav-app">
+          <button id="settingsBtn" title="Settings">&#9881; Settings</button>
+          <button id="helpBtn" title="Quick-start guide">? Help</button>
+        </div>
+      </div>
+    </nav>
+
+    <section class="song-line song-panel" aria-label="Current song">
+      <div class="sl-f">
+        <label for="songSelect">Song</label>
+        <select id="songSelect" style="max-width:190px;" title="Switch between your saved songs"></select>
+        <button id="copySongBtn" class="ghost song-act" title="Make a copy of this song to try variations, leaving the original untouched">&#10064; Copy</button>
+        <button id="deleteSongBtn" class="ghost song-act" title="Delete this song from your saved list">&#128465;</button>
+      </div>
+      <div class="sl-f sl-grow">
+        <label for="composerInput">Composer</label>
+        <input type="text" id="composerInput" placeholder="" title="Composer / arranger">
+      </div>
+      <div class="sl-f">
+        <label for="keySelect">Key</label>
+        <select id="keySelect"></select>
+      </div>
+      <div class="sl-f">
+        <label for="transposeSelect">Transpose</label>
+        <select id="transposeSelect" title="Move the whole song (every stave and chord) to another key of the same mode"></select>
+      </div>
+      <div class="sl-f">
+        <label for="staveCountSelect">Staves</label>
+        <select id="staveCountSelect" title="How many vocal parts to show as separate staves">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3 (SAB)</option>
+          <option value="4">4 (SATB)</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+        </select>
+      </div>
+      <div class="sl-f">
+        <label for="timeSigNum">Time</label>
+        <input type="number" id="timeSigNum" min="1" max="32" value="4" style="width:42px;">
+        <span>/</span>
+        <select id="timeSigDen">
+          <option value="2">2</option>
+          <option value="4" selected>4</option>
+          <option value="8">8</option>
+          <option value="16">16</option>
+        </select>
+      </div>
+      <div class="sl-f">
+        <label for="tempoInput">Tempo</label>
+        <input type="number" id="tempoInput" min="20" max="300" value="96" style="width:48px;"> <span class="sl-unit">BPM</span>
       </div>
     </section>
   </header>
@@ -960,7 +921,17 @@
         </div></div>
       </div>
       </div>
-      <div class="score-title" id="scoreTitle"><span class="st-title" id="scoreTitleText"></span><span class="st-composer" id="scoreComposerText"></span></div>
+      <!-- v2.39: playback and undo/redo live right above the score. No Stop button: Play opens the
+           play window, which has its own transport. -->
+      <div class="score-bar" id="scoreBar">
+        <div class="sb-cmds">
+          <button id="playBtn" class="primary" title="Play (Space)">&#9658; Play</button>
+          <span class="sb-sep"></span>
+          <button id="undoBtn" title="Undo (Ctrl+Z)" disabled>&#8630; Undo</button>
+          <button id="redoBtn" title="Redo (Ctrl+Y / Ctrl+Shift+Z)" disabled>&#8631; Redo</button>
+        </div>
+        <div class="score-title" id="scoreTitle"><input type="text" id="titleInput" class="st-title" placeholder="Untitled Song" title="Song title &mdash; click to edit" aria-label="Song title" size="14"><span class="st-composer" id="scoreComposerText"></span></div>
+      </div>
       <div id="staffHome" hidden></div>
       <div class="staff-scroll" id="staffScroll">
         <div class="staff-scroll-inner">
@@ -1156,7 +1127,7 @@
       <p><b>Repeat &#9662;</b> in the Marks row works on the measures holding the selected notes: <b>Repeat these measures</b>, start/end repeats, 1st/2nd/3rd endings, D.C., D.S., al Fine / al Coda, Segno, Fine, To Coda and Coda. Play follows them (the play window's <b>Repeats</b> switch plays straight through instead); Loop plays its passage as written. Change how many times a repeat plays in Selected &rsaquo; <i>Key, tempo, time &amp; rehearsal marks</i>.</p>
 
       <h3>Undo &amp; redo</h3>
-      <p><b>Undo</b> / <b>Redo</b> in the header, or <kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> also works) &mdash; covers note and chord edits, Generate parts, Suggest chords, Transpose, and text-field edits like the title or a lyric (each typing session undoes as one step, not one per keystroke). Switching to a different song in the <b>Song</b> dropdown, or starting a <b>New</b> one, starts that song's undo history fresh rather than carrying over from whatever you were editing before.</p>
+      <p><b>Undo</b> / <b>Redo</b> on the bar above the score, or <kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> also works) &mdash; covers note and chord edits, Generate parts, Suggest chords, Transpose, and text-field edits like the title or a lyric (each typing session undoes as one step, not one per keystroke). Switching to a different song in the <b>Song</b> dropdown, or starting a <b>New</b> one, starts that song's undo history fresh rather than carrying over from whatever you were editing before.</p>
 
       <h3>Selecting more than one note</h3>
       <p>Shift-click extends a contiguous range of notes on the same stave from the last note you clicked. Ctrl-click (Cmd-click on a Mac) adds or removes a single note anywhere &mdash; on any stave &mdash; without disturbing the rest of the selection. With more than one note selected, the inspector panel switches to a small set of bulk operations: <kbd>Ctrl</kbd>+<kbd>&uarr;</kbd>/<kbd>&darr;</kbd> bumps every selected note (that has a pitch) up or down a full octave, and &mdash; when exactly two notes on different staves are selected &mdash; <kbd>Ctrl</kbd>+<kbd>X</kbd> swaps their pitches. Plain <kbd>&uarr;</kbd>/<kbd>&darr;</kbd> nudging also applies to the whole selection at once, not just a single note.</p>
@@ -1338,7 +1309,15 @@
 'use strict';
 (function(){
 
-  var APP_VERSION = '2.38';
+  var APP_VERSION = '2.42';
+  // v2.42: header bands told apart -- deep-purple navbar with lilac commands, song line styled like the
+  //   accordion strips (rose accent), right icon rail in the navbar's purple with a violet rule.
+  // v2.41: tighter song line -- shorter Composer field, "Transpose" label, narrower Tempo box.
+  // v2.40: the navbar no longer repeats the song title; the title above the score is now the
+  // (only) editable title, on a lighter plate so it stands out, with the composer in cyan.
+  // v2.39: tidier header -- one navbar (Harmonizer, the song title, New / Open / Examples / Save /
+  // Print, Settings / Help), the rest of the song's settings on one line beneath it, and Play +
+  // Undo/Redo on a bar just above the score. The Stop button is gone (the play window has its own).
   // v2.31: partwriting fixes from the Sep 2026 guide review -- doubling costs only on real doubles
   // (chords stop dropping their third), the bass keeps room for the voices above it and stays under
   // the melody, spacing/low-interval checks against the bass, first inversion cheaper than 6/4
@@ -13875,7 +13854,6 @@
     clearPlayhead();
     document.querySelectorAll('#staffSvg .note-group.playing').forEach(function(g){ g.classList.remove('playing'); });
     document.getElementById('playBtn').disabled = false;
-    document.getElementById('stopBtn').disabled = true;
     setStatus('Stopped.');
     syncPlayModal();
   }
@@ -14277,7 +14255,6 @@
       state.playback.instant = false;
       state.playback.raf = requestAnimationFrame(playheadTick);
       document.getElementById('playBtn').disabled = true;
-      document.getElementById('stopBtn').disabled = false;
       setStatus('Playing…');
       syncPlayModal();
     }).catch(function(){ /* ensureAudio already reported this via setStatus */ });
@@ -14894,8 +14871,6 @@
       else if (ev.key === 'ArrowLeft' && !state.playback){ playModalPage(-1); ev.preventDefault(); }
       else if (ev.key === 'Delete' || ev.key === 'Backspace' || ev.key.indexOf('Arrow') === 0) ev.preventDefault();
     }, true);
-    document.getElementById('stopBtn').addEventListener('click', fullStop);
-    document.getElementById('stopBtn').disabled = true;
 
     document.getElementById('newSongBtn').addEventListener('click', function(){
       // No confirm needed -- this adds a new song to your list rather than replacing the one
@@ -15559,8 +15534,8 @@
   /* ---- v2.16: song title + composer shown above the score and in the play window ---------- */
   function syncSongTitles(){
     var t = (song.title || '').trim(), c = (song.composer || '').trim();
-    var tt = document.getElementById('scoreTitleText'), ct = document.getElementById('scoreComposerText');
-    if (tt){ tt.textContent = t || 'Untitled Song'; tt.classList.toggle('untitled', !t); }
+    var tt = document.getElementById('titleInput'), ct = document.getElementById('scoreComposerText');
+    if (tt){ if (document.activeElement !== tt && tt.value !== (song.title || '')) tt.value = song.title || ''; tt.size = Math.max(14, Math.min(60, (song.title || '').length + 2)); }
     if (ct) ct.textContent = c;
     var pt = document.getElementById('playModalTitle');
     if (pt){
