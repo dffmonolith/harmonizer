@@ -583,7 +583,10 @@ function serveDir(dir){
     check('the Examples menu lists the files in data/', exItems.length >= 1);
     await exItems[0].click();
     await page.waitForTimeout(900);
-    if (!(await page.$eval('#importOverlay', el => el.hidden))){ await page.click('#importOkBtn'); await page.waitForTimeout(600); }
+    if (!(await page.$eval('#importOverlay', el => el.hidden))){
+      check('v2.43: the import dialog for a MIDI example is titled "Import MIDI file"', (await page.$eval('#importTitle', el => el.textContent)) === 'Import MIDI file');
+      await page.click('#importOkBtn'); await page.waitForTimeout(600);
+    }
     await closeReport();
     check('choosing an example opens it as a new song', /Imported/.test(await page.$eval('#statusText', el => el.textContent)) && (await page.$$eval('#staffSvg .note-group', els => els.length)) > 20);
     // v2.16: the example's menu title ("Composer — Title") names the song above the score

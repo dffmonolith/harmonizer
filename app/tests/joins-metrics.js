@@ -64,6 +64,8 @@ examples.forEach(file => {
       const tones = info ? info.tones : null;
       if (tones && tones.length >= 3){ const pcs = others.concat([bp]).map(v => ((v % 12) + 12) % 12); if (pcs.includes(tones[1])) third++; }
       else third++;
+      // v2.43: where the bass tune sings a note outside the chord, is the root above it?
+      if (tones && !tones.includes(((bp % 12) + 12) % 12)){ tot.nct = (tot.nct || 0) + 1; if (others.some(v => ((v % 12) + 12) % 12 === ((info.rootPc % 12) + 12) % 12)) tot.nctRoot = (tot.nctRoot || 0) + 1; }
     }
   }
   const pB = pars(a, b);
@@ -110,6 +112,6 @@ examples.forEach(file => {
   console.log(file.padEnd(34) + ' bass tune mm. ' + H.measureAtBeatNum(a) + '–' + H.measureAtBeatNum(b - 1e-3) + ': below ' + below + '/' + n + ', crowded ' + crowd + ', third ' + third + '/' + n + ', parallels ' + pB +
     ' | joins: leaps ' + leap + ' st (' + big + ' over a 5th), parallels ' + pj + ', crossed ' + cross);
 });
-console.log('\nbass tune: another stave below it ' + Math.round(100 * tot.below / tot.n) + '%, crowded ' + Math.round(100 * tot.crowd / tot.n) + '%, third present ' + Math.round(100 * tot.third / tot.n) + '%, parallels ' + tot.parB +
+console.log('\nbass tune: another stave below it ' + Math.round(100 * tot.below / tot.n) + '%, crowded ' + Math.round(100 * tot.crowd / tot.n) + '%, third present ' + Math.round(100 * tot.third / tot.n) + '%, parallels ' + tot.parB + '; bass notes outside the chord ' + (tot.nct || 0) + ', root above ' + (tot.nctRoot || 0) +
   '\njoins (' + tot.joins + '): leaps ' + tot.leap + ' semitones, ' + tot.big + ' over a fifth, parallels ' + tot.parJ + ', crossings ' + tot.cross + '; time ' + tot.ms + 'ms' +
   '\nchords-only ending: parallels ' + tot.parC + ', top line moves ' + tot.topLeap + ' semitones (' + tot.topBig + ' leaps over a third), the other voices ' + tot.inner + ' semitones');

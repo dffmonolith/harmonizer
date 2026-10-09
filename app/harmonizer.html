@@ -1061,7 +1061,7 @@
   <div class="modal-overlay" id="importOverlay" hidden>
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="importTitle">
       <button class="modal-close" id="importCloseBtn" title="Cancel" aria-label="Cancel">&times;</button>
-      <h2 id="importTitle">Import MusicXML</h2>
+      <h2 id="importTitle">Import</h2>
       <p id="importIntro"></p>
       <table class="import-table" id="importTable"></table>
       <p id="importNote" style="color:var(--text-dim);font-size:12px;margin:4px 0 0 0;"></p>
@@ -1309,7 +1309,14 @@
 'use strict';
 (function(){
 
-  var APP_VERSION = '2.42';
+  var APP_VERSION = '2.43';
+  // v2.43: the import dialog says "Import MIDI file" or "Import MusicXML"; added notes are checked
+  //   against every 2.38 fault (no parallel fifths from them in any style, contrary and hidden
+  //   fifths/octaves, overlaps, cross-relations, augmented seconds) and spelled from their line;
+  //   with the tune in the bass on a note outside the chord the voices above carry the root;
+  //   the joins between melody sections try several orders of rewriting and keep the best, with
+  //   five top lines tried for a chords-only passage; diatonic sequences (C Dm Em) are found and
+  //   their parts copied by scale steps.
   // v2.42: header bands told apart -- deep-purple navbar with lilac commands, song line styled like the
   //   accordion strips (rose accent), right icon rail in the navbar's purple with a violet rule.
   // v2.41: tighter song line -- shorter Composer field, "Transpose" label, narrower Tempo box.
@@ -5985,6 +5992,9 @@
   function askWhichParts(score, cands){
     return new Promise(function(resolve){
       var overlay = document.getElementById('importOverlay');
+      // v2.43: the title says what kind of file it is (it said MusicXML for MIDI files too)
+      var tEl = document.getElementById('importTitle');
+      if (tEl) tEl.textContent = (score.srcGlobal && score.srcGlobal.kind === 'midi') ? 'Import MIDI file' : 'Import MusicXML';
       var table = document.getElementById('importTable');
       var note = document.getElementById('importNote');
       table.innerHTML = '';
@@ -7840,6 +7850,19 @@
       });
       states.sort(function(a,b){ return a.cost - b.cost; });
     }
+    // v2.43: the tune in the bass on a note outside the chord (a passing or neighbour note): the
+    // chord still needs a root somewhere, so the voices above carry it -- preferably the lowest of
+    // them, where it sounds most like the chord's foundation
+    if (ev && ev.bassIsMelody && chordInfo.tones.indexOf(bassRolePc) < 0){
+      var rPc = ((chordInfo.rootPc % 12) + 12) % 12, weight = (ev.dur >= 1 - 1e-6 ? 8 : 4);
+      states.forEach(function(st){
+        var lowId = null, lowP = Infinity, hasRoot = meloRolePc === rPc && mPart.id !== bassPart.id;
+        for (var id3 in st.assign){ var q = st.assign[id3]; if (((q % 12) + 12) % 12 === rPc) hasRoot = true; if (q < lowP){ lowP = q; lowId = id3; } }
+        if (!hasRoot) st.cost += weight;
+        else if (lowId != null && ((lowP % 12) + 12) % 12 !== rPc) st.cost += weight * 0.25;
+      });
+      states.sort(function(a,b){ return a.cost - b.cost; });
+    }
     return states;
   }
 
@@ -8048,6 +8071,24 @@
     return (t > 0 ? 'up ' : 'down ') + (INTERVAL_WORDS[Math.abs(t)] || Math.abs(t) + ' semitones');
   }
 
+  // v2.43: diatonic sequences -- scale steps in a key. degreeIn(pc, scale) is [degree 0-6, raised]
+  // (a pitch class a half step above a scale note -- a raised leading tone, a secondary
+  // leading tone -- counts as that degree, raised); -1 for anything else
+  var DIA_WORDS = { 1: 'a step', 2: 'a third', 3: 'a fourth', 4: 'a fifth', 5: 'a sixth', 6: 'a seventh' };
+  function scalePcsOf(tonicPc, minor){ var st = minor ? [0, 2, 3, 5, 7, 8, 10] : [0, 2, 4, 5, 7, 9, 11]; return st.map(function(x){ return (((tonicPc + x) % 12) + 12) % 12; }); }
+  function degreeIn(pc, sc){ var i = sc.indexOf(pc); if (i >= 0) return [i, 0]; i = sc.indexOf((pc + 11) % 12); return i >= 0 ? [i, 1] : null; }
+  // a pitch moved k scale steps in the scale (an alteration kept as it was)
+  function diaShift(p, k, sc){
+    var pc = ((p % 12) + 12) % 12, dg = degreeIn(pc, sc);
+    if (!dg) return p + Math.round(k * 12 / 7);
+    function off(x){ return ((sc[x] - sc[0]) % 12 + 12) % 12; }
+    var t = dg[0] + k, j = ((t % 7) + 7) % 7, octs = Math.floor(t / 7);
+    return (p - dg[1]) - off(dg[0]) + off(j) + 12 * octs + dg[1];
+  }
+  function evScale(ev){ return ev._sc || (ev._sc = scalePcsOf(ev.tonicPc, !!ev.keyMinor)); }
+  // where a repeat's note comes from: m.t semitones, or m.dia scale steps in the event's key
+  function repShift(m, p, ev){ return m.dia ? diaShift(p, m.dia, evScale(ev)) : p + m.t; }
+
   function findRepeats(ctx){
     var events = ctx.events, N = events.length;
     var out = { map: new Array(N), occs: [], mode: currentRecurModeId(), count: 0 };
@@ -8072,6 +8113,7 @@
     }
     // the chord on the grid, and the place in the bar (a pickup counts from the end of a full bar)
     var root = new Int8Array(G), qual = new Array(G), metric = new Int32Array(G), metricIds = {};
+    var keyG = new Int32Array(G), keyIds = {}, keyScales = {};   // v2.43
     var chords = song.chords.slice().sort(function(a, b){ return a.beat - b.beat; }), ci = 0;
     var ml = measureList(total), mi = 0;
     for (g = 0; g < G; g++){
@@ -8080,6 +8122,10 @@
       var ch = chords[ci];
       root[g] = ch ? ((pitchClass(ch.root.letter, ch.root.accidental) % 12) + 12) % 12 : -1;
       qual[g] = ch ? ch.quality : '';
+      // v2.43: the key's scale there, for diatonic sequences
+      var kid = keyAt(b), kt = keyTonicInfo(kid);
+      if (!keyIds[kid]){ keyIds[kid] = Object.keys(keyIds).length + 1; keyScales[keyIds[kid]] = scalePcsOf(kt.tonicPc, kt.minor); }
+      keyG[g] = keyIds[kid];
       while (mi + 1 < ml.length && ml[mi + 1].start <= b + 1e-6) mi++;
       var m = ml[mi] || { start: 0, meter: song.timeSig, len: 4 };
       var full = m.meter.beats * 4 / m.meter.unit, off = b - m.start;
@@ -8094,7 +8140,7 @@
 
     // 1) every diagonal (distance d between the two statements): stretches that agree
     var runs = [];
-    function flush(i0, cls, t){
+    function flush(i0, cls, t, dia){
       if (t == null || cls.length < minPts) return;
       var s = 0;
       while (s < cls.length){
@@ -8108,7 +8154,7 @@
         if (len >= minPts){
           var soft = 0, onsHard = 0;
           for (var k = a; k <= z2; k++){ if (cls[k] === 1) soft++; else if (ons[i0 + k]) onsHard++; }
-          if (soft <= len * 0.25 && onsHard >= 3) runs.push({ i: i0 + a, d: curD, len: len, soft: soft, t: t });
+          if (soft <= len * 0.25 && onsHard >= 3) runs.push({ i: i0 + a, d: curD, len: len, soft: soft, t: dia ? 0 : t, dia: dia || 0 });
         }
         s = (softRun >= 3) ? e + 1 : e;
       }
@@ -8144,6 +8190,48 @@
       flush(i0, cls, tRun);
     }
 
+    // 1b) v2.43: diatonic sequences -- the chords' roots all a scale step (or third...) apart in the
+    // key, whatever their quality (C Dm Em, not C D E), and the melody moved by the same number of
+    // scale steps. Only where the key is the same at both statements.
+    var rDeg = new Int8Array(G), mDeg = new Array(G);
+    for (g = 0; g < G; g++){
+      var scg = keyScales[keyG[g]];
+      var dr = root[g] >= 0 ? degreeIn(root[g], scg) : null;
+      rDeg[g] = dr && !dr[1] ? dr[0] : -1;
+      if (mel[g] == null) mDeg[g] = null;
+      else { var dm = degreeIn(((mel[g] % 12) + 12) % 12, scg); mDeg[g] = dm ? dm[0] + 7 * Math.floor((mel[g] - dm[1] - scg[0]) / 12) : NaN; }
+    }
+    for (d = minPts; d < G - minPts + 1; d++){
+      curD = d;
+      var i1 = -1, cls1 = [], kRun = null, sRun = null;
+      for (i = 0; i + d < G; i++){
+        var j1 = i + d, c1 = 0;
+        for (var att = 0; att < 2; att++){
+          c1 = 0;
+          if (metric[i] !== metric[j1] || keyG[i] !== keyG[j1] || rDeg[i] < 0 || rDeg[j1] < 0) break;
+          var kk = ((rDeg[j1] - rDeg[i]) % 7 + 7) % 7;
+          if (!kk) break;   // the same root: an exact repeat, found above
+          if (kRun == null) kRun = kk;
+          else if (kk !== kRun){
+            if (att === 0){ flush(i1, cls1, sRun, sRun); i1 = -1; cls1 = []; kRun = null; sRun = null; continue; }
+            break;
+          }
+          if (mDeg[i] == null && mDeg[j1] == null) c1 = 2;
+          else if (mDeg[i] == null || mDeg[j1] == null || isNaN(mDeg[i]) || isNaN(mDeg[j1])) c1 = 1;
+          else {
+            var sd = mDeg[j1] - mDeg[i];
+            if (sRun == null && (((sd - kRun) % 7) + 7) % 7 === 0 && Math.abs(sd) <= 4 && sd !== 0) sRun = sd;
+            c1 = (sRun != null && sd === sRun && ons[i] === ons[j1]) ? 2 : 1;
+          }
+          break;
+        }
+        if (!c1){ flush(i1, cls1, sRun, sRun); i1 = -1; cls1 = []; kRun = null; sRun = null; continue; }
+        if (i1 < 0) i1 = i;
+        cls1.push(c1);
+      }
+      flush(i1, cls1, sRun, sRun);
+    }
+
     // 2) take the longest first; each takes the grid points no longer match has claimed
     var claim = new Int32Array(G); for (g = 0; g < G; g++) claim[g] = -1;
     var OFF = -2;
@@ -8151,8 +8239,8 @@
     (song.recurOff || []).forEach(function(o){
       for (var g2 = Math.max(0, gOf(o.from)); g2 < Math.min(G, gOf(o.to)); g2++) claim[g2] = OFF;
     });
-    function addOcc(a, len, d, t, soft, manual){
-      var occ = { idx: out.occs.length, src: (a - d) * step, dst: a * step, beats: len * step, dpts: d, t: t, soft: soft, manual: !!manual, off: false };
+    function addOcc(a, len, d, t, soft, manual, dia){
+      var occ = { idx: out.occs.length, src: (a - d) * step, dst: a * step, beats: len * step, dpts: d, t: t, dia: dia || 0, soft: soft, manual: !!manual, off: false };
       out.occs.push(occ);
       for (var g3 = a; g3 < a + len; g3++) claim[g3] = occ.idx;
       return occ;
@@ -8181,7 +8269,7 @@
         s0 = e0;
       }
     });
-    runs.sort(function(x, y){ return (y.len - x.len) || (x.i - y.i) || (x.d - y.d); });
+    runs.sort(function(x, y){ return (y.len - x.len) || ((x.dia ? 1 : 0) - (y.dia ? 1 : 0)) || (x.i - y.i) || (x.d - y.d); });
     runs.forEach(function(run){
       var a = run.i + run.d, end = a + run.len, s = a;
       while (s < end){
@@ -8192,9 +8280,9 @@
           if (touchesOff){
             // switched off in the report: remember it (to offer it again) but leave it free
             var dup = out.occs.some(function(o){ return o.off && o.dst < e * step && o.dst + o.beats > s * step; });
-            if (!dup) out.occs.push({ idx: out.occs.length, src: (s - run.d) * step, dst: s * step, beats: (e - s) * step, dpts: run.d, t: run.t, soft: run.soft, manual: false, off: true });
+            if (!dup) out.occs.push({ idx: out.occs.length, src: (s - run.d) * step, dst: s * step, beats: (e - s) * step, dpts: run.d, t: run.t, dia: run.dia, soft: run.soft, manual: false, off: true });
           } else {
-            addOcc(s, e - s, run.d, run.t, run.soft ? 1 : 0, false);
+            addOcc(s, e - s, run.d, run.t, run.soft ? 1 : 0, false, run.dia);
           }
         }
         s = e;
@@ -8202,11 +8290,15 @@
     });
 
     // 3) each grid point back to its first statement (following chains), then events
-    var rootG = new Int32Array(G), rootT = new Int32Array(G);
+    var rootG = new Int32Array(G), rootT = new Int32Array(G), rootDia = new Int8Array(G);
     for (g = 0; g < G; g++){
       var oc = claim[g] >= 0 ? out.occs[claim[g]] : null;
       if (!oc){ rootG[g] = g; rootT[g] = 0; continue; }
       var sg = g - oc.dpts;
+      // v2.43: a diatonic sequence points straight at its model (steps in the key don't add up
+      // across a chain the way semitones do)
+      if (oc.dia){ rootG[g] = sg; rootT[g] = 0; rootDia[g] = oc.dia; continue; }
+      if (rootDia[sg]){ rootG[g] = sg; rootT[g] = oc.t; continue; }
       rootG[g] = rootG[sg]; rootT[g] = rootT[sg] + oc.t;
     }
     var starts = events.map(function(ev){ return ev.beat; });
@@ -8219,12 +8311,21 @@
     events.forEach(function(ev, e){
       var g5 = Math.floor(ev.beat / step + 1e-6);
       if (g5 >= G || claim[g5] < 0) return;
-      var D = (g5 - rootG[g5]) * step, T = rootT[g5];
+      var D = (g5 - rootG[g5]) * step, T = rootT[g5], K = rootDia[g5];
       var s = eventAt(ev.beat - D);
       if (s < 0 || s >= e) return;
-      if (out.map[s]){ T += out.map[s].t; s = out.map[s].s; }
+      if (!K && out.map[s] && !out.map[s].dia){ T += out.map[s].t; s = out.map[s].s; }
       var es = events[s];
-      if (!!es.tuplet !== !!ev.tuplet || es.chord.quality !== ev.chord.quality) return;
+      if (!!es.tuplet !== !!ev.tuplet) return;
+      if (K){
+        // v2.43: the roots K scale steps apart in this event's key
+        var sc5 = evScale(ev), dg1 = degreeIn(((ev.chordInfo.rootPc % 12) + 12) % 12, sc5), dg0 = degreeIn(((es.chordInfo.rootPc % 12) + 12) % 12, sc5);
+        if (!dg1 || !dg0 || dg1[1] || dg0[1] || (((dg1[0] - dg0[0] - K) % 7) + 7) % 7 !== 0) return;
+        out.map[e] = { s: s, t: 0, dia: K, occ: claim[g5] };
+        out.count++;
+        return;
+      }
+      if (es.chord.quality !== ev.chord.quality) return;
       if ((((ev.chordInfo.rootPc - es.chordInfo.rootPc - T) % 12) + 12) % 12 !== 0) return;
       out.map[e] = { s: s, t: T, occ: claim[g5] };
       out.count++;
@@ -8287,7 +8388,7 @@
           var ok = true;
           for (var e = gr.a; e <= gr.b && ok; e++){
             if (isFixed(e, id)) continue;
-            var q = P[rep.map[e].s][id] + rep.map[e].t + sh, r = rangeOf[id];
+            var q = repShift(rep.map[e], P[rep.map[e].s][id], events[e]) + sh, r = rangeOf[id];
             if (q < r[0] || q > r[1]) ok = false;
           }
           if (ok) best = sh;
@@ -8295,7 +8396,7 @@
         if (best == null) return;
         for (var e = gr.a; e <= gr.b; e++){
           if (isFixed(e, id)) continue;
-          var m = rep.map[e], q = P[m.s][id] + m.t + best;
+          var m = rep.map[e], q = repShift(m, P[m.s][id], events[e]) + best;
           // a non-chord tone (a suspension) comes along only with the notes either side of it
           if (events[e].chordInfo.tones.indexOf(pcOf(q)) < 0){
             var okNb = e > gr.a && e < gr.b && rep.map[e-1].s === m.s - 1 && rep.map[e+1].s === m.s + 1 && !isFixed(e-1, id) && !isFixed(e+1, id);
@@ -8303,7 +8404,7 @@
           }
           saved[k(e, id)] = P[e][id];
           P[e][id] = q;
-          copied[k(e, id)] = { e: e, id: id, s: m.s, off: m.t + best };
+          copied[k(e, id)] = { e: e, id: id, s: m.s, off: q - P[m.s][id] };
         }
         // every non-chord tone left in and around the copy must still be a suspension: held
         // over from the note before and falling a step after -- if not, this voice isn't copied here
@@ -8372,7 +8473,8 @@
   function recurOccText(o){
     function mm(a, b){ var m1 = measureAtBeat(a).number, m2 = measureAtBeat(b - 1e-3).number; return m1 === m2 ? 'm. ' + m1 : 'mm. ' + m1 + '–' + m2; }
     var txt = mm(o.dst, o.dst + o.beats) + ' like ' + mm(o.src, o.src + o.beats);
-    if (o.t) txt += ' (' + transpositionWords(o.t) + ')';
+    if (o.dia) txt += ' (a sequence, ' + (o.dia > 0 ? 'up ' : 'down ') + (DIA_WORDS[Math.abs(o.dia)] || Math.abs(o.dia) + ' steps') + ' in the key)';
+    else if (o.t) txt += ' (' + transpositionWords(o.t) + ')';
     if (o.soft) txt += ', with small differences';
     return txt;
   }
@@ -8819,7 +8921,7 @@
       voices: ids.map(function(id){ return { id: id, label: labelOf[id] }; }),
       statsBefore: lineStats(events, P0, ids), statsAfter: lineStats(events, res.P, ids),
       items: items, notes: notes, costBefore: res.before.total, costAfter: res.after.total, deco: deco || null, refinedPass: res.refinedPass !== false,
-      repeats: rep ? { mode: rep.mode, occs: rep.occs.filter(function(o){ return o.off || o.events; }).map(function(o){ return { src: o.src, dst: o.dst, beats: o.beats, t: o.t, soft: o.soft, manual: o.manual, off: o.off, text: recurOccText(o) }; }),
+      repeats: rep ? { mode: rep.mode, occs: rep.occs.filter(function(o){ return o.off || o.events; }).map(function(o){ return { src: o.src, dst: o.dst, beats: o.beats, t: o.t, dia: o.dia || 0, soft: o.soft, manual: o.manual, off: o.off, text: recurOccText(o) }; }),
         pairs: rs ? rs.pairs.length : 0, alike: rs ? rs.alike : 0, decoCopied: deco && deco.copied || 0 } : null };
   }
   function decoCell(c){
@@ -9113,8 +9215,8 @@
     if (rep && rep.map) rep.map.forEach(function(m, e){
       if (!m) return;
       ids0.forEach(function(id){
-        var d = P[e][id] - P[m.s][id];
-        if ((((d - m.t) % 12) + 12) % 12 === 0 && Math.abs(d - m.t) <= 12) linkOff[e + '|' + id] = { e: e, s: m.s, id: id, off: d };
+        var d = P[e][id] - P[m.s][id], mt = repShift(m, P[m.s][id], events[e]) - P[m.s][id];
+        if ((((d - mt) % 12) + 12) % 12 === 0 && Math.abs(d - mt) <= 12) linkOff[e + '|' + id] = { e: e, s: m.s, id: id, off: d, m: m, oct: d - mt };
       });
     });
     var upIds = ctx.upperPartIds.slice(), bassId = ctx.bassPart.id, ids = upIds.concat([bassId]);
@@ -9206,11 +9308,60 @@
     }
     function splitAt(e, id){ var c = chosen[key(e, id)]; return c ? c.sp : null; }
     var allIds = ids.concat(['__m']);
+    // v2.43: an added note never brings in parallel fifths, whatever the style (the skeleton may
+    // allow a few in Close harmony; decoration shouldn't add more)
     function isPar(x1, x2, y1, y2){
       if (x1 === x2 || y1 === y2 || Math.sign(x2 - x1) !== Math.sign(y2 - y1)) return false;
+      if (x1 === y1 && x2 === y2) return false;
       var i1 = ((Math.abs(x1 - y1)) % 12), i2 = ((Math.abs(x2 - y2)) % 12);
       if (i1 !== i2) return false;
-      return i2 === 0 || (i2 === 7 && strict);
+      return i2 === 0 || i2 === 7;
+    }
+    // v2.43: the 2.38 checks, for a move made by an added note (x1 -> x2 in voice id) against another
+    // voice o moving y1 -> y2 at the same moment (y1 === y2 when it holds)
+    function topIdAt(e, part){ var best = null, bp = -Infinity; allIds.forEach(function(o){ var q = soundAt(o, e, part); if (q > bp){ bp = q; best = o; } }); return best; }
+    function letterAt(pitch, beat){ var sp = spellGen(pitch, beat); return LETTER_INDEX[sp.letter] + 7 * (sp.octave + 1); }
+    function moveFaults(id, x1, x2, o, y1, y2, e, outer){
+      if (isPar(x1, x2, y1, y2)) return true;
+      var mx = x2 - x1, my = y2 - y1;
+      // fifths/octaves by contrary motion
+      if (mx && my && (mx > 0) !== (my > 0)){
+        var d0 = x1 - y1, d1 = x2 - y2;
+        if (d0 && d1 && (d0 > 0) === (d1 > 0)){
+          var c0 = Math.abs(d0) % 12, c1 = Math.abs(d1) % 12;
+          if (c0 === c1 && (c0 === 0 || c0 === 7)) return true;
+        }
+      }
+      // hidden fifths/octaves between the outer voices, the top one leaping
+      if (outer && mx && my && (mx > 0) === (my > 0)){
+        var topM = x2 > y2 ? mx : my, iv1 = Math.abs(x2 - y2) % 12, iv0 = Math.abs(x1 - y1) % 12;
+        if (Math.abs(topM) > 2 && (iv1 === 0 || iv1 === 7) && iv0 !== iv1) return true;
+      }
+      // overlaps: either voice moving past the note the other has just left
+      var above = x1 > y1 || (x1 === y1 && x2 > y2);
+      if (above){
+        if (mx && x2 < y1) return true;
+        if (my && y2 > x1) return true;
+      } else {
+        if (mx && x2 > y1) return true;
+        if (my && y2 < x1) return true;
+      }
+      return false;
+    }
+    function lineFaults(id, a, p, b, e, beatA, beatP, beatB){
+      // an augmented second within the voice, by spelling
+      function aug2(x, y, bx, by){ return Math.abs(y - x) === 3 && Math.abs(letterAt(y, by) - letterAt(x, bx)) === 1; }
+      if (aug2(a, p, beatA, beatP)) return true;
+      if (b != null && aug2(p, b, beatP, beatB)) return true;
+      return false;
+    }
+    // a cross-relation: the added note and another voice's note just before or after it are the
+    // same letter with different accidentals (F against F#), and nobody makes the step itself
+    function xrelWith(p, beatP, q, beatQ){
+      var d = Math.abs(p - q) % 12;
+      if (d !== 1 && d !== 11) return false;
+      var sp = spellGen(p, beatP), sq = spellGen(q, beatQ);
+      return sp.letter === sq.letter && sp.accidental !== sq.accidental;
     }
     function orderOK(e, part, id, p){
       var ok = true;
@@ -9240,10 +9391,14 @@
           return false;                                           // the resolution sung elsewhere against it
         }
         if (events[e].chordInfo.roles[res] === 'third' && bassPc === res) return false;
-        // at the split the voice falls to its note: no parallels with anyone else moving then
+        // at the split the voice falls to its note: no parallels (or the other 2.38 faults) with
+        // anyone else moving then
+        var topS = topIdAt(e, 1), bS = events[e].beat + c.sp;
         for (var k2 = 0; k2 < allIds.length; k2++){
-          var o2 = allIds[k2]; if (o2 === id || splitAt(e, o2) !== c.sp) continue;
-          if (isPar(p, P[e][id], soundAt(o2, e, 0), soundAt(o2, e, 1))) return false;
+          var o2 = allIds[k2]; if (o2 === id) continue;
+          var y1s = splitAt(e, o2) === c.sp ? soundAt(o2, e, 0) : soundAt(o2, e, 1), y2s = soundAt(o2, e, 1);
+          var outerS = (id === bassId && o2 === topS) || (o2 === bassId && id === topS);
+          if (moveFaults(id, p, P[e][id], o2, y1s, y2s, e, outerS)) return false;
         }
         return true;
       }
@@ -9251,13 +9406,22 @@
       if (nx && nx.kind === 'sus') return false;                  // the next event holds this voice's note over
       if (!orderOK(e, 1, id, p)) return false;
       var b = P[e+1][id];
+      var bA = events[e].beat, bP = events[e].beat + c.sp, bB = events[e+1].beat;
+      if (lineFaults(id, P[e][id], p, b, e, bA, bP, bB)) return false;   // v2.43
+      var top1 = topIdAt(e, 1), top2 = topIdAt(e + 1, 0);
       for (var j = 0; j < allIds.length; j++){
         var o3 = allIds[j]; if (o3 === id) continue;
         var from = soundAt(o3, e, 1), to = o3 === '__m' ? events[e+1].melodySounding : soundAt(o3, e + 1, 0);
-        if (isPar(p, b, from, to)) return false;                  // added note -> next note
-        if (splitAt(e, o3) === c.sp && isPar(P[e][id], p, soundAt(o3, e, 0), from)) return false;   // moving together at the split
+        var at0 = soundAt(o3, e, 0), together = splitAt(e, o3) === c.sp;
+        // added note -> next note (v2.43: every 2.38 check, not just parallels)
+        if (moveFaults(id, p, b, o3, from, to, e, (id === bassId && o3 === top2) || (o3 === bassId && id === top2))) return false;
+        // into the added note at the split, with whoever moves then
+        if (moveFaults(id, P[e][id], p, o3, together ? at0 : from, from, e, (id === bassId && o3 === top1) || (o3 === bassId && id === top1))) return false;
         var q = soundAt(o3, e, 1), iv2 = Math.abs(q - p) % 12;
-        if (splitAt(e, o3) === c.sp && (iv2 === 1 || iv2 === 11 || iv2 === 2 || iv2 === 10)) return false;   // two added notes clashing
+        if (together && (iv2 === 1 || iv2 === 11 || iv2 === 2 || iv2 === 10)) return false;   // two added notes clashing
+        // cross-relations with the note another voice leaves at the split, or takes after the added note
+        if (together && at0 !== from && xrelWith(p, bP, at0, bA)) return false;
+        if (to !== from && xrelWith(p, bP, to, bB)) return false;
       }
       return true;
     }
@@ -9308,13 +9472,13 @@
         if (!src || isFixed(e, id)) return;
         var ev = events[e];
         if (ev.tuplet || ev.splitAt == null || Math.abs(ev.dur - events[s0].dur) > 1e-6 || Math.abs(ev.splitAt - src.sp) > 1e-6) return;
-        var c = { id: id, e: e, kind: src.kind, pitch: src.pitch + pr.off, sp: ev.splitAt, score: 0 };
+        var c = { id: id, e: e, kind: src.kind, pitch: pr.m.dia ? repShift(pr.m, src.pitch, ev) + pr.oct : src.pitch + pr.off, sp: ev.splitAt, score: 0 };
         if (c.kind === 'sus'){
           if (e === 0 || P[e-1][id] !== c.pitch || !ev.chordChanged || events[e-1].restAfter > 1e-6) return;
         } else {
           if (!contiguous(e) || ev.phraseEnd) return;
           var nx = linkOff[(e + 1) + '|' + id];
-          if (!nx || nx.s !== s0 + 1 || nx.off !== pr.off) return;   // the note it leads to must be the same too
+          if (!nx || nx.s !== s0 + 1 || (pr.m.dia ? nx.oct !== pr.oct : nx.off !== pr.off)) return;   // the note it leads to must be the same too
         }
         if (!check(c)) return;
         chosen[key(e, id)] = c;
@@ -9433,12 +9597,43 @@
         });
       });
     }
+    respellOrnaments(notes);   // v2.43
     for (var k = 0; k < notes.length - 1; k++){
       var a = notes[k], b = notes[k+1];
       if (a.type === 'note' && b.type === 'note' && samePitch(a, b) && !b._strike) a.tied = true;
     }
     notes.forEach(function(x){ delete x._strike; });
     return notes;
+  }
+  // v2.43: an added note is spelled from the line it's part of, not just the key: a passing note
+  // takes the letter between its neighbours (F, F#, G rising -- not F, Gb, G), a neighbour the letter
+  // next to its main note, and a suspension the spelling of the note it holds over. Runs of the
+  // same pitch (one note split into tied pieces) count as one note.
+  function respellOrnaments(notes){
+    function midiOf(n){ return midiNumber(n.letter, n.accidental, n.octave); }
+    function setSpelling(n, letter, acc){ var m = midiOf(n); n.letter = letter; n.accidental = acc; n.octave = Math.floor((m - acc) / 12) - 1; }
+    function runEnd(i){ var m = midiOf(notes[i]); while (i + 1 < notes.length && notes[i+1].type === 'note' && !notes[i+1].orn && midiOf(notes[i+1]) === m) i++; return i; }
+    function prevNote(i){ var m = midiOf(notes[i]); for (var j = i - 1; j >= 0; j--){ if (notes[j].type !== 'note') return null; if (midiOf(notes[j]) !== m) return notes[j]; } return null; }
+    function letterIdx(n){ return LETTER_INDEX[n.letter] + 7 * (n.octave + 1); }
+    for (var i = 0; i < notes.length; i++){
+      var n = notes[i];
+      if (n.type !== 'note' || !n.orn) continue;
+      var end = runEnd(i), run = notes.slice(i, end + 1);
+      var m = midiOf(n), pc = ((m % 12) + 12) % 12;
+      var pv = prevNote(i), nx = (end + 1 < notes.length && notes[end+1].type === 'note') ? notes[end+1] : null;
+      var want = null;
+      if (n.orn === 'sus'){
+        // held over from the note before: write it the same way so the tie reads as one note
+        for (var j = i - 1; j >= 0 && notes[j].type === 'note'; j--){ if (midiOf(notes[j]) === m){ want = { letter: notes[j].letter, accidental: notes[j].accidental }; break; } else break; }
+      } else if (pv && (n.orn === 'pass' || n.orn === 'nbr')){
+        var pm = midiOf(pv), step = m > pm ? 1 : -1;
+        if (n.orn === 'nbr' && nx){ var nm = midiOf(nx); if (nm === pm) step = m > pm ? 1 : -1; }
+        var sp = letterSpelling(pc, LETTER_INDEX[pv.letter] + step);
+        if (sp && Math.abs(sp.accidental) <= 1) want = sp;
+      }
+      if (want) run.forEach(function(x){ setSpelling(x, want.letter, want.accidental); });
+      i = end;
+    }
   }
 
   // Where a strong or long melody note doesn't fit the written chord at all, try alternate
@@ -10112,8 +10307,12 @@
           if (m.beat < w.b - 1e-6 && m.beat + m.dur > w.b + 1e-6) w.b = Math.min(hi0, m.beat + m.dur);
         });
       });
-      win.forEach(function(w){
-        if (w.b - w.a < 1e-6) return;
+      // v2.43: the two sides are planned together: the measure before and the measure after are
+      // written again in several orders (before then after, after then before, and before-after-
+      // before so each side answers the other's new notes), and the order whose join scores best
+      // is kept -- if it's no worse than what was there
+      function rewrite(w){
+        if (w.b - w.a < 1e-6) return false;
         var tune = w.sp.partId, staves = {}, any = false;
         song.parts.forEach(function(p){
           if (p.id === tune) return;
@@ -10121,16 +10320,27 @@
           if (tune == null && p.id === topStaveId()) on = scope ? !!scope.staves[p.id] : !hasHandNotesIn(p.id, w.a, w.b);
           if (on){ staves[p.id] = true; any = true; }
         });
-        if (!any) return;
-        out.tried++;
-        var before = seamScore(sLo, sHi), snap = snapshotNotes();
+        if (!any) return false;
         var r = runSection({ key: 'join', tuneId: tune, segs: [{ a: w.a, b: w.b, fill: w.sp.fill || 'chord' }] }, 'generate',
-          { scope: { a: w.a, b: w.b, staves: staves }, done: [], total: total, topLines: 3 });
-        if (r.error || r.skipped || r.missing){ restoreNotes(snap); return; }
-        var after = seamScore(sLo, sHi);
-        if (after > before + 1e-9){ restoreNotes(snap); return; }
-        out.kept++;
+          { scope: { a: w.a, b: w.b, staves: staves }, done: [], total: total, topLines: 5 });
+        return !(r.error || r.skipped || r.missing);
+      }
+      var usable = win.filter(function(w){ return w.b - w.a > 1e-6; });
+      if (!usable.length) continue;
+      out.tried += usable.length;
+      var before = seamScore(sLo, sHi), snap0 = snapshotNotes(), best = null;
+      var orders = usable.length === 2 ? [[0], [1], [0, 1], [1, 0], [0, 1, 0]] : [[0]];
+      orders.forEach(function(ord){
+        restoreNotes(snap0);
+        var did = {};
+        ord.forEach(function(k){ if (rewrite(usable[k])) did[k] = true; });
+        var n = Object.keys(did).length;
+        if (!n) return;
+        var sc = seamScore(sLo, sHi);
+        if (!best || sc < best.sc - 1e-9) best = { sc: sc, snap: snapshotNotes(), n: n };
       });
+      if (best && best.sc <= before + 1e-9){ restoreNotes(best.snap); out.kept += best.n; }
+      else restoreNotes(snap0);
     }
     return out;
   }
@@ -15673,6 +15883,7 @@
       addRecurLink: addRecurLink, setRecurOccOn: setRecurOccOn, recurOccText: recurOccText, measureStartByNumber: measureStartByNumber,
       decoSplitPoint: decoSplitPoint, HARMONY_MOTIONS: HARMONY_MOTIONS, setRefineAfterGenerate: function(v){ state.refineAfterGenerate = v; },
       secondOrderMotion: secondOrderMotion, getStatus: function(){ return document.getElementById('statusText').textContent; },
+      diaShift: diaShift, scalePcsOf: scalePcsOf, respellOrnaments: respellOrnaments, repShift: repShift,   // v2.43
       parseExampleIndex: parseExampleIndex, exampleTitle: exampleTitle, isBlankSong: isBlankSong, libraryIsEmpty: libraryIsEmpty   // v2.15
     };
   }

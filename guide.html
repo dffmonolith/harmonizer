@@ -56,7 +56,7 @@
 <main>
 <article class="guide">
 
-  <span class="eyebrow">Harmonizer &middot; v2.42</span>
+  <span class="eyebrow">Harmonizer &middot; v2.43</span>
   <h1>Harmonizer User Guide</h1>
   <p class="lede">Harmonizer is a workbench for roughing out vocal arrangements: enter a melody, put chords under it, generate a draft harmony in the style you want, listen to it on a real piano sound, and edit until it works. It also makes rehearsal tracks for your singers and moves music in and out as MusicXML and MIDI. This guide covers everything it does.</p>
   <p><a href="app/harmonizer.html" target="dff-app-harmonizer">Launch Harmonizer &rarr;</a> &nbsp;&middot;&nbsp; <a href="quickstart.html">Quickstart</a> &nbsp;&middot;&nbsp; <a href="index.html">About the project</a></p>
@@ -115,7 +115,7 @@
     <li><b>Status bar</b> (bottom) &mdash; the most recent message, an &ldquo;Autosaved&rdquo; indicator (or an amber warning if saving failed; see <a href="#save">Saving</a>), and a note count.</li>
   </ul>
 
-  <figure class="shot"><img src="docs/screenshots/harmonizer-2-generate.png" alt="Harmonizer with Old Hundredth open: the header, the Staves section open with Generate parts, and four staves with a chord lane above and lyrics under the melody." width="1440" height="960" loading="lazy"><figcaption>The screen with the Staves section open: Generate parts and its style menu, one line of controls per stave, and the score below with the chord lane on top.</figcaption></figure>
+  <figure class="shot"><img src="docs/screenshots/harmonizer-2-generate.png" alt="Bruckner&rsquo;s Christus factus est with the Staves section open: Generate parts set to Traditional (hymn), chord suggestions, one line of controls per stave, and the score below with the chord lane on top." width="1440" height="960" loading="lazy"><figcaption>The screen with the Staves section open: Generate parts and its menus, one line of controls per stave, and the score below with the chord lane on top. Here Bruckner&rsquo;s <i>Christus factus est</i> came in as its soprano line alone, with chords from Suggest chords and the other three parts generated in the Traditional style.</figcaption></figure>
 
   <h2 id="header">3. The header controls</h2>
   <p>The navbar holds the file and app commands; the line under it holds the song's settings; Play, Undo, Redo and the song's title sit on the bar just above the score. The table covers all three.</p>
@@ -312,7 +312,7 @@
     <li><b>Suspension</b> &mdash; a voice that would step down into a new chord holds its note over instead, clashing for a moment, then falls into place (4&ndash;3, 9&ndash;8, 7&ndash;6). Several in a row make a chain. Traditional style writes these only at cadences.</li>
     <li><b>Chord-tone skip</b> &mdash; a leap of a fourth or more is broken by a note of the chord on the way, landing by step where it can.</li>
   </ul>
-  <p>An added note takes the second half of the note it splits (a suspension takes the first half) and is never shorter than an eighth; in 6/8 a dotted half splits into two dotted quarters. <b>Some</b> adds them under melody notes a half note or longer (a quarter or longer in Traditional style); <b>More</b> about twice as many, under quarter notes too. They're spread between the voices so each gets a turn, and they obey the same rules as everything else: no parallel octaves (or fifths, in Traditional and Open), no crossing or doubling another voice at that moment, no suspension against its own resolution. Because they fall where the melody holds, they're sung as short melismas on the melody's syllable when you copy the words to the other staves. The status line and the Refine report count them.</p>
+  <p>An added note takes the second half of the note it splits (a suspension takes the first half) and is never shorter than an eighth; in 6/8 a dotted half splits into two dotted quarters. <b>Some</b> adds them under melody notes a half note or longer (a quarter or longer in Traditional style); <b>More</b> about twice as many, under quarter notes too. They're spread between the voices so each gets a turn, and they obey the same rules as everything else, more strictly: no parallel fifths or octaves in any style, none of the faults Settings can mark (fifths or octaves by contrary motion, hidden fifths and octaves, overlaps, cross-relations, augmented seconds), no crossing or doubling another voice at that moment, no suspension against its own resolution. Each is spelled from its line: a passing note rising from E to G is F&sharp;, not G&flat;. Because they fall where the melody holds, they're sung as short melismas on the melody's syllable when you copy the words to the other staves. The status line and the Refine report count them.</p>
   <h3>Repeated music</h3>
   <p>When music comes back &mdash; a second verse, a refrain, a motif stated twice, a phrase repeated a step higher over chords moved the same way &mdash; Generate parts gives it the parts it had the first time, rather than voicing it afresh for no musical reason. The <b>Repeated music</b> menu beside the style menu (saved with the song) sets how:</p>
   <ul>
@@ -320,7 +320,7 @@
     <li><b>Repeats: vary lightly</b> &mdash; the repeat starts from the first statement's parts but may change where that helps the line, and gets added notes of its own.</li>
     <li><b>Repeats: write fresh</b> &mdash; every passage is voiced on its own, as before 2.34.</li>
   </ul>
-  <p><b>What counts as a repeat.</b> About a bar or more (at least three beats) of the same melody over the same chords, in the same place in the bar. A sequence counts too: the melody and the chords all moved by the same interval (the parts are moved by that interval, and by an octave where a voice would leave its range). Small differences are forgiven: a changed note, or a quarter split into two eighths for the words of a later verse, as long as the chords agree and no more than a beat differs at a time. A different pickup or ending simply isn't part of the match. A <i>diatonic</i> sequence (C&nbsp;F&nbsp;G, then Dm&nbsp;G&nbsp;Am) changes chord qualities, so it isn't found; link it yourself if you want it. Written repeat signs don't need any of this: music between them is written once and played twice.</p>
+  <p><b>What counts as a repeat.</b> About a bar or more (at least three beats) of the same melody over the same chords, in the same place in the bar. A sequence counts too: the melody and the chords all moved by the same interval (the parts are moved by that interval, and by an octave where a voice would leave its range). Small differences are forgiven: a changed note, or a quarter split into two eighths for the words of a later verse, as long as the chords agree and no more than a beat differs at a time. A different pickup or ending simply isn't part of the match. A <i>diatonic</i> sequence counts as well (from 2.43): the chords and the tune moved by the same number of steps in the key, so the chord qualities change on the way (C&nbsp;F&nbsp;G, then Dm&nbsp;G&nbsp;Am). Its parts are moved by scale steps, so a third stays a third whether it's major or minor; the Refine report lists it as &ldquo;a sequence, up a step in the key&rdquo;. A sequence that changes key part-way isn't found; link it yourself if you want it. Written repeat signs don't need any of this: music between them is written once and played twice.</p>
   <p><b>The report.</b> The Refine report has a <b>Repeated music</b> section listing each repeat found (&ldquo;mm.&nbsp;9&ndash;16 like mm.&nbsp;1&ndash;8&rdquo;, &ldquo;mm.&nbsp;3&ndash;4 like mm.&nbsp;1&ndash;2 (up a whole step)&rdquo;) and how many of the repeats' notes are as the first time. Untick one to let it go its own way; to link two passages it didn't find, type the measures of the repeat and the measure where the first statement starts, and press <b>Link</b>. Press <b>Apply</b> to regenerate with the change. Both are saved with the song.</p>
   <p><b>Editing the first time through.</b> <b>Refine parts</b> follows repeats too, so change a note the first time through (it locks), press Refine parts, and the repeat takes the change. A note you've locked <i>in</i> a repeat stays as you wrote it there.</p>
   <h3 id="sections">Melody sections</h3>
@@ -393,7 +393,7 @@
     <li><b>Everywhere else.</b> Loop, practice speed, <b>Save .wav</b> and rehearsal tracks all follow the marks. <b>Save .musicxml</b> writes them all; <b>Save .mid</b> writes dynamics and accents as note velocities, staccato as shorter notes, and rit./accel. and fermatas as tempo changes (MIDI has no way to store a breath).</li>
   </ul>
 
-  <figure class="shot"><img src="docs/screenshots/harmonizer-3-marks.png" alt="Old Hundredth with fermatas on every stave at the line ends, rehearsal letters A and B, a crescendo hairpin into forte, and the Marks row above the score." width="1440" height="960" loading="lazy"><figcaption>The Marks row above the score, and some of what it writes: fermatas on every voice (with All voices ticked), rehearsal letters, and a crescendo into <i>f</i>.</figcaption></figure>
+  <figure class="shot"><img src="docs/screenshots/harmonizer-3-marks.png" alt="Christus factus est with fermatas on every stave at a phrase end, rehearsal letters A and B, a crescendo hairpin into forte, and the Marks row above the score." width="1440" height="960" loading="lazy"><figcaption>The Marks row above the score, and some of what it writes: a fermata on every voice (with All voices ticked), rehearsal letters, and a crescendo into <i>f</i>.</figcaption></figure>
 
   <h2 id="repeats">14. Repeats, endings, D.C. and D.S.</h2>
   <p>The <b>Repeat &#9662;</b> menu in the Marks row works on whole measures &mdash; from the measure holding the first selected note to the one holding the last:</p>
@@ -602,6 +602,14 @@
   </table></div>
 
   <h2 id="new">24. What's new</h2>
+  <h3>2.43</h3>
+  <ul>
+    <li><b>Cleaner added notes:</b> notes the voices add of their own now obey every check Settings can mark &mdash; no parallel fifths from them in any style (with <b>More</b> added notes in Close, parallels in the examples fell from 51 to 20), and no contrary or hidden fifths and octaves, overlaps, cross-relations or augmented seconds. They're spelled from their line (E, F&sharp;, G rising).</li>
+    <li><b>Diatonic sequences</b> (C Dm Em, a step up in the key each time) are recognised as repeated music and get matching parts, moved by scale steps.</li>
+    <li><b>Melody sections:</b> the joins between sections are written again in several orders and the best kept; with the tune in the bass on a passing note, the voices above keep the chord's root.</li>
+    <li>The import dialog says <b>Import MIDI file</b> or <b>Import MusicXML</b>, whichever it is.</li>
+    <li>The <a href="docs/harmonizer-partwriting-guide.pdf">Partwriting Guide</a> is updated for all of this.</li>
+  </ul>
   <h3>2.42</h3>
   <ul>
     <li>The header bands are easier to tell apart: the navbar sits on a deep-purple band with lilac commands and a violet rule beneath it; the song line is styled like the Note entry, Chords and Staves strips, with its own rose edge; and the icon rail on the right shares the navbar's purple, with a violet rule along its edge.</li>

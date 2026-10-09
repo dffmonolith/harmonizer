@@ -1783,5 +1783,47 @@ section('Partwriting checks, spelling, generated-note marks (v2.38)');
   st.genMarks = 'mixed'; H.render();
 })();
 
+section('Added notes, joins, sequences (v2.43)');
+(function(){
+  const C = H.scalePcsOf(0, false), G = H.scalePcsOf(7, false), Am = H.scalePcsOf(9, true);
+  check('diaShift: C4 up a step in C is D4, E4 up a step is F4, B4 up a step is C5', H.diaShift(60, 1, C) === 62 && H.diaShift(64, 1, C) === 65 && H.diaShift(71, 1, C) === 72);
+  check('...down: C5 down a step is B4, C4 down a third is A3', H.diaShift(72, -1, C) === 71 && H.diaShift(60, -2, C) === 57);
+  check('...in G, F#4 up a step is G4; in A minor a raised G# stays raised (G#4 up a step is A#4)', H.diaShift(66, 1, G) === 67 && H.diaShift(68, 1, Am) === 70);
+
+  // a diatonic sequence: the same figure on C, then D (Dm), then E (Em)
+  const fig = (a, b, c) => [note(a[0], 0, a[1]), note(b[0], 0, b[1]), note(c[0], 0, c[1]), note(a[0], 0, a[1])];
+  const mel = [].concat(fig(['C',5],['D',5],['E',5]), fig(['D',5],['E',5],['F',5]), fig(['E',5],['F',5],['G',5]), [note('C', 0, 5, 'w')]);
+  H.setSong(fourPartSong({ notes: mel, chords: [chord('C', 'maj', 0), chord('D', 'min', 4), chord('E', 'min', 8), chord('C', 'maj', 12)], recurMode: 'same', harmonyStyle: 'hymn', harmonyMotion: 'none' }));
+  H.render();
+  const rep = H.findRepeats(H.prepareHarmonyContext());
+  const seq = rep.occs.filter(o => o.dia && !o.off);
+  check('findRepeats finds a diatonic sequence (C, Dm, Em: not the same chord qualities) a step up in the key', seq.length >= 1 && seq.every(o => o.dia === 1));
+  check('...and its report text says so', seq.length && /a sequence, up a step in the key/.test(H.recurOccText(seq[0])));
+  H.generatePartsFromMelodyAndChords();
+  const g = H.getSong();
+  // the alto in m. 2 against m. 1 moved a step up in C
+  const sounding = (id, beat) => { let t = 0; for (const n of g.parts.find(p => p.id === id).notes){ const d = H.noteBeats(n); if (beat >= t - 1e-6 && beat < t + d - 1e-6) return n.type === 'note' ? H.soundingSemitoneOfNote(n, g.parts.find(p => p.id === id).clef) : null; t += d; } return null; };
+  let same = 0, tot = 0;
+  ['A', 'T', 'B'].forEach(id => { for (let b = 0; b < 4; b++){ const x = sounding(id, b), y = sounding(id, b + 4); if (x == null || y == null) continue; tot++; if (((y - H.diaShift(x, 1, C)) % 12 + 12) % 12 === 0) same++; } });
+  check('...Generate parts writes the second statement as the first moved up a step in the key (' + same + '/' + tot + ')', tot > 0 && same / tot >= 0.75);
+
+  // added notes spelled from their line
+  const run = [note('E', 0, 4, 'q'), Object.assign(note('G', -1, 4, 'q'), { orn: 'pass' }), note('G', 0, 4, 'q')];
+  H.respellOrnaments(run);
+  check('a passing note from E up to G is spelled F# (not Gb): E, F#, G', run[1].letter === 'F' && run[1].accidental === 1 && run[1].octave === 4);
+  const run2 = [note('F', 1, 4, 'q'), Object.assign(note('A', -1, 4, 'q'), { orn: 'pass' }), note('A', 0, 4, 'q')];
+  H.respellOrnaments(run2);
+  check('...F#, G#, A (not F#, Ab, A)', run2[1].letter === 'G' && run2[1].accidental === 1);
+  const run2b = [note('A', 0, 4, 'q'), Object.assign(note('G', 0, 4, 'q'), { orn: 'pass' }), note('F', 0, 4, 'q')];
+  H.respellOrnaments(run2b);
+  check('...and a plain one is left as it is (A, G, F)', run2b[1].letter === 'G' && run2b[1].accidental === 0);
+  const run3 = [note('E', 0, 4, 'h'), Object.assign(note('E', 1, 4, 'q'), { orn: 'nbr' }), note('E', 0, 4, 'q')];
+  H.respellOrnaments(run3);
+  check('...an upper neighbour of E a half step up is F, not E#', run3[1].letter === 'F' && run3[1].accidental === 0);
+  const run4 = [note('B', 0, 4, 'h'), Object.assign(note('C', -1, 5, 'q'), { orn: 'sus' }), note('A', 0, 4, 'q')];
+  H.respellOrnaments(run4);
+  check('...a suspension is written as the note it holds over (B, not Cb), so the tie reads', run4[1].letter === 'B' && run4[1].accidental === 0 && run4[1].octave === 4);
+})();
+
 console.log('\n' + count + ' checks, ' + fails + ' failure(s).');
 process.exitCode = fails ? 1 : 0;
